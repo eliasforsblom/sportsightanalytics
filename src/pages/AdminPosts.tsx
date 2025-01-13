@@ -56,7 +56,7 @@ const AdminPosts = () => {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || user.email !== "admin@example.com") {
+      if (!user || user.email !== "forsblomelias@gmail.com") {
         navigate("/");
       } else {
         setIsAdmin(true);

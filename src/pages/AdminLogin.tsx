@@ -10,6 +10,15 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email === "forsblomelias@gmail.com") {
+        navigate("/admin/posts");
+      }
+    };
+    
+    checkSession();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN") {
