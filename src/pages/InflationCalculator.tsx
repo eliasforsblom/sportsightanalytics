@@ -53,12 +53,12 @@ const InflationCalculator = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-primary mb-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary mb-4">
           Football Inflation Calculator
         </h1>
         
-        <div className="mb-8 prose">
-          <p>
+        <div className="mb-8 prose max-w-none">
+          <p className="text-sm md:text-base">
             This calculator helps you understand how historical football transfer fees compare to today's market.
             By accounting for football market inflation, it converts past transfer amounts into their equivalent
             value in today's (2025) market. This gives you a better perspective on how significant certain
@@ -66,10 +66,10 @@ const InflationCalculator = () => {
           </p>
         </div>
 
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-          <form onSubmit={handleCalculate} className="space-y-6">
+        <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-4 md:p-6">
+          <form onSubmit={handleCalculate} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Transfer Amount (€)</Label>
+              <Label htmlFor="amount" className="text-sm md:text-base">Transfer Amount (€)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -77,18 +77,23 @@ const InflationCalculator = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
+                className="text-base md:text-lg p-2 md:p-3"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="year">Transfer Year</Label>
+              <Label htmlFor="year" className="text-sm md:text-base">Transfer Year</Label>
               <Select value={year} onValueChange={setYear} required>
-                <SelectTrigger id="year">
+                <SelectTrigger id="year" className="text-base md:text-lg p-2 md:p-3">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
                   {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()} className="hover:bg-gray-100">
+                    <SelectItem 
+                      key={y} 
+                      value={y.toString()} 
+                      className="hover:bg-gray-100 text-base md:text-lg p-2 md:p-3"
+                    >
                       {y}
                     </SelectItem>
                   ))}
@@ -96,15 +101,18 @@ const InflationCalculator = () => {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button 
+              type="submit" 
+              className="w-full text-base md:text-lg py-2 md:py-3"
+            >
               Calculate
             </Button>
           </form>
 
           {result !== null && (
             <div className="mt-6 p-4 bg-accent rounded-md">
-              <p className="text-sm text-gray-600">Inflation Adjusted Value:</p>
-              <p className="text-xl font-bold">
+              <p className="text-xs md:text-sm text-gray-600">Inflation Adjusted Value:</p>
+              <p className="text-lg md:text-xl font-bold">
                 {new Intl.NumberFormat('de-DE', {
                   style: 'currency',
                   currency: 'EUR',
