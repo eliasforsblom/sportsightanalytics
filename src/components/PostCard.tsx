@@ -24,9 +24,18 @@ export const PostCard = ({ id, title, excerpt, date, category, imageUrl }: PostC
         </div>
         <CardHeader className="p-4 md:p-6 pb-0">
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <Badge variant="secondary" className="text-xs md:text-sm">
-              {category}
-            </Badge>
+            <Link 
+              to={`/research?category=${encodeURIComponent(category)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-block"
+            >
+              <Badge 
+                variant="secondary" 
+                className="text-xs md:text-sm hover:bg-secondary/80"
+              >
+                {category}
+              </Badge>
+            </Link>
             <span className="text-xs md:text-sm text-gray-500">{date}</span>
           </div>
           <CardTitle className="text-lg md:text-xl hover:text-secondary transition-colors line-clamp-2">

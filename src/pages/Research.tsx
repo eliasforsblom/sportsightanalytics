@@ -1,21 +1,28 @@
 import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 const Research = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get('category');
 
   const { data: posts, isLoading } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts', categoryFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('posts')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (categoryFilter) {
+        query = query.eq('category', categoryFilter);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     }
@@ -60,13 +67,30 @@ const Research = () => {
     return <div>Loading...</div>;
   }
 
-  // Otherwise, show the list of all posts
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">All Research</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">
+            {categoryFilter ? `${categoryFilter} Research` : 'All Research'}
+          </h1>
+          {categoryFilter && (
+            <Badge 
+              variant="outline" 
+              className="cursor-pointer"
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('category');
+                window.history.pushState({}, '', url);
+                window.location.reload();
+              }}
+            >
+              Clear Filter
+            </Badge>
+          )}
+        </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts?.map((post) => (
             <PostCard 
