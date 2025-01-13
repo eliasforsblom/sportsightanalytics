@@ -74,29 +74,54 @@ const AdminPosts = () => {
   };
 
   const onSubmit = async (data: PostFormData) => {
-    const operation = isEditing ? 
-      supabase.from("posts").update(data).eq("id", isEditing) :
-      supabase.from("posts").insert([data]);
+    try {
+      if (isEditing) {
+        const { error } = await supabase
+          .from("posts")
+          .update({
+            title: data.title,
+            excerpt: data.excerpt,
+            content: data.content,
+            category: data.category,
+            image_url: data.image_url,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", isEditing);
 
-    const { error } = await operation;
+        if (error) throw error;
 
-    if (error) {
+        toast({
+          title: "Post updated successfully",
+        });
+      } else {
+        const { error } = await supabase
+          .from("posts")
+          .insert([{
+            title: data.title,
+            excerpt: data.excerpt,
+            content: data.content,
+            category: data.category,
+            image_url: data.image_url,
+          }]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Post created successfully",
+        });
+      }
+
+      form.reset();
+      setIsEditing(null);
+      setDialogOpen(false);
+      fetchPosts();
+    } catch (error: any) {
       toast({
-        title: "Error saving post",
+        title: `Error ${isEditing ? "updating" : "creating"} post`,
         description: error.message,
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: `Post ${isEditing ? "updated" : "created"} successfully`,
-    });
-
-    form.reset();
-    setIsEditing(null);
-    setDialogOpen(false);
-    fetchPosts();
   };
 
   const handleEdit = (post: any) => {
