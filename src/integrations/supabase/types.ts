@@ -9,7 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      season_data: {
+        Row: {
+          avgfee: number | null
+          cpi: number | null
+          rank: number | null
+          season: string | null
+        }
+        Insert: {
+          avgfee?: number | null
+          cpi?: number | null
+          rank?: number | null
+          season?: string | null
+        }
+        Update: {
+          avgfee?: number | null
+          cpi?: number | null
+          rank?: number | null
+          season?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
