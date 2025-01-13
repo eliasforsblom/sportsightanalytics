@@ -3,15 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { Pencil, Trash, Star, Upload } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { PostForm } from "@/components/admin/PostForm";
+import { PostList } from "@/components/admin/PostList";
 
-interface PostFormData {
+interface Post {
+  id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -23,22 +20,10 @@ interface PostFormData {
 const AdminPosts = () => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
-
-  const form = useForm<PostFormData>({
-    defaultValues: {
-      title: "",
-      excerpt: "",
-      content: "",
-      category: "",
-      image_url: "",
-      highlighted: false,
-    },
-  });
 
   const fetchPosts = async () => {
     const { data, error } = await supabase
@@ -77,45 +62,7 @@ const AdminPosts = () => {
     navigate("/");
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!event.target.files || event.target.files.length === 0) {
-        return;
-      }
-      setUploading(true);
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError, data } = await supabase.storage
-        .from('post-images')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('post-images')
-        .getPublicUrl(filePath);
-
-      form.setValue('image_url', publicUrl);
-      
-      toast({
-        title: "Image uploaded successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error uploading image",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const onSubmit = async (data: PostFormData) => {
+  const handleSubmit = async (data: Omit<Post, "id">) => {
     try {
       if (isEditing) {
         const { error } = await supabase
@@ -139,14 +86,7 @@ const AdminPosts = () => {
       } else {
         const { error } = await supabase
           .from("posts")
-          .insert([{
-            title: data.title,
-            excerpt: data.excerpt,
-            content: data.content,
-            category: data.category,
-            image_url: data.image_url,
-            highlighted: data.highlighted,
-          }]);
+          .insert([data]);
 
         if (error) throw error;
 
@@ -155,7 +95,6 @@ const AdminPosts = () => {
         });
       }
 
-      form.reset();
       setIsEditing(null);
       setDialogOpen(false);
       fetchPosts();
@@ -168,29 +107,8 @@ const AdminPosts = () => {
     }
   };
 
-  const handleEdit = (post: any) => {
+  const handleEdit = (post: Post) => {
     setIsEditing(post.id);
-    form.reset({
-      title: post.title,
-      excerpt: post.excerpt,
-      content: post.content,
-      category: post.category,
-      image_url: post.image_url,
-      highlighted: post.highlighted,
-    });
-    setDialogOpen(true);
-  };
-
-  const handleCreateNew = () => {
-    setIsEditing(null);
-    form.reset({
-      title: "",
-      excerpt: "",
-      content: "",
-      category: "",
-      image_url: "",
-      highlighted: false,
-    });
     setDialogOpen(true);
   };
 
@@ -235,6 +153,11 @@ const AdminPosts = () => {
     fetchPosts();
   };
 
+  const handleCreateNew = () => {
+    setIsEditing(null);
+    setDialogOpen(true);
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -249,117 +172,16 @@ const AdminPosts = () => {
               <DialogTrigger asChild>
                 <Button onClick={handleCreateNew}>Create New Post</Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[800px]">
                 <DialogHeader>
                   <DialogTitle>{isEditing ? "Edit Post" : "Create New Post"}</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Title</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="excerpt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Excerpt</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="content"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Content (HTML)</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} className="min-h-[200px]" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="image_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Image</FormLabel>
-                          <div className="space-y-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              disabled={uploading}
-                            />
-                            {field.value && (
-                              <div className="mt-2">
-                                <img 
-                                  src={field.value} 
-                                  alt="Preview" 
-                                  className="max-w-[200px] rounded-md"
-                                />
-                              </div>
-                            )}
-                            <Input 
-                              type="hidden" 
-                              {...field}
-                            />
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="highlighted"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Highlight Post</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" disabled={uploading}>
-                      {uploading ? "Uploading..." : isEditing ? "Update" : "Create"} Post
-                    </Button>
-                  </form>
-                </Form>
+                <PostForm
+                  initialData={posts.find(post => post.id === isEditing)}
+                  onSubmit={handleSubmit}
+                  isEditing={!!isEditing}
+                  onClose={() => setDialogOpen(false)}
+                />
               </DialogContent>
             </Dialog>
             <Button onClick={handleSignOut} variant="outline">
@@ -368,52 +190,12 @@ const AdminPosts = () => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          {posts.map((post) => (
-            <div key={post.id} className="bg-white p-4 rounded-lg shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex gap-4">
-                  {post.image_url && (
-                    <img 
-                      src={post.image_url} 
-                      alt={post.title}
-                      className="w-24 h-24 object-cover rounded"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold">{post.title}</h2>
-                    <p className="text-gray-600">{post.category}</p>
-                    <p className="mt-2">{post.excerpt}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => toggleHighlight(post.id, post.highlighted)}
-                    className={post.highlighted ? "text-yellow-500" : ""}
-                  >
-                    <Star className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEdit(post)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDelete(post.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <PostList
+          posts={posts}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onToggleHighlight={toggleHighlight}
+        />
       </div>
     </div>
   );
