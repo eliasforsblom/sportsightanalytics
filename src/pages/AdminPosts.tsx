@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash, Star } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface PostFormData {
   title: string;
@@ -16,6 +17,7 @@ interface PostFormData {
   content: string;
   category: string;
   image_url: string;
+  highlighted: boolean;
 }
 
 const AdminPosts = () => {
@@ -33,6 +35,7 @@ const AdminPosts = () => {
       content: "",
       category: "",
       image_url: "",
+      highlighted: false,
     },
   });
 
@@ -84,6 +87,7 @@ const AdminPosts = () => {
             content: data.content,
             category: data.category,
             image_url: data.image_url,
+            highlighted: data.highlighted,
             updated_at: new Date().toISOString(),
           })
           .eq("id", isEditing);
@@ -102,6 +106,7 @@ const AdminPosts = () => {
             content: data.content,
             category: data.category,
             image_url: data.image_url,
+            highlighted: data.highlighted,
           }]);
 
         if (error) throw error;
@@ -132,6 +137,7 @@ const AdminPosts = () => {
       content: post.content,
       category: post.category,
       image_url: post.image_url,
+      highlighted: post.highlighted,
     });
     setDialogOpen(true);
   };
@@ -144,6 +150,7 @@ const AdminPosts = () => {
       content: "",
       category: "",
       image_url: "",
+      highlighted: false,
     });
     setDialogOpen(true);
   };
@@ -162,6 +169,28 @@ const AdminPosts = () => {
 
     toast({
       title: "Post deleted successfully",
+    });
+
+    fetchPosts();
+  };
+
+  const toggleHighlight = async (id: string, currentHighlighted: boolean) => {
+    const { error } = await supabase
+      .from("posts")
+      .update({ highlighted: !currentHighlighted })
+      .eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Error updating highlight status",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: `Post ${!currentHighlighted ? "highlighted" : "unhighlighted"} successfully`,
     });
 
     fetchPosts();
@@ -252,6 +281,23 @@ const AdminPosts = () => {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="highlighted"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Highlight Post</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                     <Button type="submit">{isEditing ? "Update" : "Create"} Post</Button>
                   </form>
                 </Form>
@@ -273,6 +319,14 @@ const AdminPosts = () => {
                   <p className="mt-2">{post.excerpt}</p>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => toggleHighlight(post.id, post.highlighted)}
+                    className={post.highlighted ? "text-yellow-500" : ""}
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="icon"

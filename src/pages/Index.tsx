@@ -17,13 +17,28 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['posts'],
+  const { data: highlightedPosts = [], isLoading: isLoadingHighlighted } = useQuery({
+    queryKey: ['highlighted-posts'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
+        .eq('highlighted', true)
         .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: latestPosts = [], isLoading: isLoadingLatest } = useQuery({
+    queryKey: ['latest-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
       
       if (error) throw error;
       return data;
@@ -40,60 +55,55 @@ const Index = () => {
     });
   }, [api]);
 
-  if (isLoading) {
+  if (isLoadingHighlighted || isLoadingLatest) {
     return <div>Loading...</div>;
   }
-
-  const latestPosts = posts || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-4 md:py-8">
-        <Carousel 
-          className="w-full relative" 
-          opts={{
-            align: "start",
-            loop: true
-          }}
-          setApi={setApi}
-        >
-          <CarouselContent>
-            {latestPosts.slice(0, 3).map((post, index) => (
-              <CarouselItem key={post.id}>
-                <FeaturedPost 
-                  id={post.id}
-                  title={post.title}
-                  excerpt={post.excerpt}
-                  date={new Date(post.created_at || '').toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                  category={post.category}
-                  imageUrl={post.image_url}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4">
-            <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
-            <div className="flex gap-1 md:gap-2">
-              {latestPosts.slice(0, 3).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => api?.scrollTo(index)}
-                  className={`h-1.5 md:h-2 rounded-full transition-all ${
-                    currentSlide === index ? "bg-white w-3 md:w-4" : "bg-white/50 w-1.5 md:w-2"
-                  }`}
-                />
+      {highlightedPosts.length > 0 && (
+        <div className="container mx-auto px-4 py-4 md:py-8">
+          <Carousel 
+            className="w-full relative" 
+            opts={{
+              align: "start",
+              loop: true
+            }}
+            setApi={setApi}
+          >
+            <CarouselContent>
+              {highlightedPosts.map((post) => (
+                <CarouselItem key={post.id}>
+                  <FeaturedPost 
+                    id={post.id}
+                    title={post.title}
+                    excerpt={post.excerpt}
+                    category={post.category}
+                    imageUrl={post.image_url}
+                  />
+                </CarouselItem>
               ))}
+            </CarouselContent>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4">
+              <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
+              <div className="flex gap-1 md:gap-2">
+                {highlightedPosts.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => api?.scrollTo(index)}
+                    className={`h-1.5 md:h-2 rounded-full transition-all ${
+                      currentSlide === index ? "bg-white w-3 md:w-4" : "bg-white/50 w-1.5 md:w-2"
+                    }`}
+                  />
+                ))}
+              </div>
+              <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
             </div>
-            <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
-          </div>
-        </Carousel>
-      </div>
+          </Carousel>
+        </div>
+      )}
       
       <main className="container mx-auto px-4 py-8 md:py-12">
         <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8">Latest Research</h2>
