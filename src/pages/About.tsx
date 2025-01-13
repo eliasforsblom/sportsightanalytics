@@ -33,14 +33,6 @@ const About = () => {
               <Instagram className="w-4 h-4" />
               @SportSightanalytics
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Linkedin className="w-4 h-4" />
-              SportSight Analytics
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              contact@sportsight.ai
-            </Button>
           </div>
         </div>
       </main>
