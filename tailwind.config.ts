@@ -18,6 +18,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -65,6 +68,7 @@ export default {
           css: {
             maxWidth: 'none',
             color: 'inherit',
+            fontFamily: 'Inter, system-ui, sans-serif',
             a: {
               color: '#8E9196',
               '&:hover': {
