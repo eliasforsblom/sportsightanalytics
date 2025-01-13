@@ -34,11 +34,11 @@ const About = () => {
 
           <h2 className="text-2xl font-bold mb-4">Connect With Us</h2>
           <div className="flex gap-4">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => window.open('https://x.com/sportsight_', '_blank')}>
               <Twitter className="w-4 h-4" />
               @SportSight_
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => window.open('https://www.instagram.com/sportsightanalytics', '_blank')}>
               <Instagram className="w-4 h-4" />
               @SportSightanalytics
             </Button>
