@@ -15,6 +15,7 @@ interface Post {
   category: string;
   image_url: string;
   highlighted: boolean;
+  created_at: string;
 }
 
 const AdminPosts = () => {
@@ -74,6 +75,7 @@ const AdminPosts = () => {
             category: data.category,
             image_url: data.image_url,
             highlighted: data.highlighted,
+            created_at: data.created_at,
             updated_at: new Date().toISOString(),
           })
           .eq("id", isEditing);
@@ -86,7 +88,10 @@ const AdminPosts = () => {
       } else {
         const { error } = await supabase
           .from("posts")
-          .insert([data]);
+          .insert([{
+            ...data,
+            created_at: data.created_at,
+          }]);
 
         if (error) throw error;
 

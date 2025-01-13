@@ -8,6 +8,7 @@ interface Post {
   category: string;
   image_url: string;
   highlighted: boolean;
+  created_at: string;
 }
 
 interface PostListProps {
@@ -34,6 +35,7 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
               <div>
                 <h2 className="text-xl font-semibold">{post.title}</h2>
                 <p className="text-gray-600">{post.category}</p>
+                <p className="text-gray-500 text-sm">{new Date(post.created_at).toLocaleDateString()}</p>
                 <p className="mt-2">{post.excerpt}</p>
               </div>
             </div>
