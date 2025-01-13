@@ -15,6 +15,9 @@ export const Navbar = () => {
               <a href="/research" className="text-gray-600 hover:text-primary">
                 Research
               </a>
+              <a href="/inflation-calculator" className="text-gray-600 hover:text-primary">
+                Inflation Calculator
+              </a>
               <a href="/about" className="text-gray-600 hover:text-primary">
                 About
               </a>
