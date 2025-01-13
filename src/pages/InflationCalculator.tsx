@@ -33,7 +33,7 @@ const InflationCalculator = () => {
       return data;
     },
     staleTime: 0, // Consider data immediately stale
-    gcTime: 1000 * 60 * 5, // Cache for 5 minutes max (renamed from cacheTime)
+    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes max
     refetchOnMount: true, // Refetch when component mounts
     refetchOnWindowFocus: true // Refetch when window regains focus
   });
@@ -92,7 +92,7 @@ const InflationCalculator = () => {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Make sure to prevent default form submission
+    e.preventDefault();
     console.log('Form submitted with:', { amount, year });
 
     if (!amount || !year) {
