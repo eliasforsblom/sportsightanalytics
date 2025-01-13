@@ -8,7 +8,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { FeaturedPost } from "@/components/FeaturedPost";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
 
 const Index = () => {
@@ -43,6 +43,16 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
 
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    api.on("select", () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    });
+  }, [api]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -64,7 +74,7 @@ const Index = () => {
             ))}
           </CarouselContent>
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-            <CarouselPrevious className="relative left-0 translate-y-0 h-8 w-8" />
+            <CarouselPrevious className="relative left-0 translate-y-0 h-7 w-7 rounded" />
             <div className="flex gap-2">
               {latestPosts.map((_, index) => (
                 <button
@@ -76,7 +86,7 @@ const Index = () => {
                 />
               ))}
             </div>
-            <CarouselNext className="relative right-0 translate-y-0 h-8 w-8" />
+            <CarouselNext className="relative right-0 translate-y-0 h-7 w-7 rounded" />
           </div>
         </Carousel>
       </div>
