@@ -15,13 +15,14 @@ const InflationCalculator = () => {
   const { toast } = useToast();
 
   const { data: seasonData, error: seasonDataError } = useQuery({
-    queryKey: ['season-data'],
+    queryKey: ['season-data', Date.now()], // Add timestamp to force fresh data
     queryFn: async () => {
       console.log('Fetching season data...');
       const { data, error } = await supabase
         .from('season_data')
         .select('*')
-        .order('season', { ascending: true });
+        .order('season', { ascending: true })
+        .throwOnError();
       
       if (error) {
         console.error('Error fetching season data:', error);
@@ -30,7 +31,11 @@ const InflationCalculator = () => {
       
       console.log('Season data fetched:', data);
       return data;
-    }
+    },
+    staleTime: 0, // Consider data immediately stale
+    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes max
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true // Refetch when window regains focus
   });
 
   if (seasonDataError) {
