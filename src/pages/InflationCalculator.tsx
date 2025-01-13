@@ -92,7 +92,7 @@ const InflationCalculator = () => {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault(); // Make sure to prevent default form submission
     console.log('Form submitted with:', { amount, year });
 
     if (!amount || !year) {
