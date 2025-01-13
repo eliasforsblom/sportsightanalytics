@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface FeaturedPostProps {
   title: string;
@@ -22,9 +23,11 @@ export const FeaturedPost = ({ title, excerpt, imageUrl, category }: FeaturedPos
         </Badge>
         <h1 className="text-4xl font-bold mb-4 max-w-2xl">{title}</h1>
         <p className="text-lg mb-6 max-w-2xl text-gray-200">{excerpt}</p>
-        <Button className="w-fit" variant="secondary">
-          Read Analysis
-        </Button>
+        <Link to="/research">
+          <Button className="w-fit" variant="secondary">
+            Read Analysis
+          </Button>
+        </Link>
       </div>
     </div>
   );
