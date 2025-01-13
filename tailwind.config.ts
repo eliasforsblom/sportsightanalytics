@@ -25,20 +25,20 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#1a365d",
+          DEFAULT: "#0EA5E9",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#2F855A",
+          DEFAULT: "#33C3F0",
           foreground: "#ffffff",
         },
         accent: {
           DEFAULT: "#E2E8F0",
-          foreground: "#1a365d",
+          foreground: "#0EA5E9",
         },
         card: {
           DEFAULT: "#ffffff",
-          foreground: "#1a365d",
+          foreground: "#0EA5E9",
         },
       },
       borderRadius: {
@@ -66,9 +66,9 @@ export default {
             maxWidth: 'none',
             color: 'inherit',
             a: {
-              color: '#2F855A',
+              color: '#0EA5E9',
               '&:hover': {
-                color: '#1a4731',
+                color: '#0284C7',
               },
             },
             strong: {

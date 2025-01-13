@@ -7,6 +7,7 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
+    { href: "/", label: "Home" },
     { href: "/research", label: "Research" },
     { href: "/inflation-calculator", label: "Inflation Calculator" },
     { href: "/about", label: "About" },
