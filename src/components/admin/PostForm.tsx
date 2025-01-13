@@ -16,6 +16,7 @@ interface PostFormData {
   category: string;
   image_url: string;
   highlighted: boolean;
+  created_at: string;
 }
 
 interface PostFormProps {
@@ -37,6 +38,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
       category: "",
       image_url: "",
       highlighted: false,
+      created_at: new Date().toISOString().split('T')[0], // Default to today's date
     },
   });
 
@@ -132,6 +134,19 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
               <FormLabel>Category</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="created_at"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Publication Date</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
