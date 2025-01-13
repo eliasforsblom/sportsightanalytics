@@ -23,6 +23,7 @@ const AdminPosts = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<PostFormData>({
@@ -94,6 +95,7 @@ const AdminPosts = () => {
 
     form.reset();
     setIsEditing(null);
+    setDialogOpen(false);
     fetchPosts();
   };
 
@@ -106,6 +108,19 @@ const AdminPosts = () => {
       category: post.category,
       image_url: post.image_url,
     });
+    setDialogOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setIsEditing(null);
+    form.reset({
+      title: "",
+      excerpt: "",
+      content: "",
+      category: "",
+      image_url: "",
+    });
+    setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -137,9 +152,9 @@ const AdminPosts = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Manage Posts</h1>
           <div className="flex gap-4">
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button>Create New Post</Button>
+                <Button onClick={handleCreateNew}>Create New Post</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
