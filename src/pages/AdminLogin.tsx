@@ -14,7 +14,7 @@ const AdminLogin = () => {
       async (event, session) => {
         if (event === "SIGNED_IN") {
           const email = session?.user?.email;
-          if (email === "admin@example.com") {
+          if (email === "forsblomelias@gmail.com") {
             navigate("/admin/posts");
           } else {
             await supabase.auth.signOut();
