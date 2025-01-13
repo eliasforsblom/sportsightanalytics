@@ -6,24 +6,41 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const InflationCalculator = () => {
   const [amount, setAmount] = useState<string>("");
   const [year, setYear] = useState<string>("");
   const [result, setResult] = useState<number | null>(null);
+  const { toast } = useToast();
 
-  const { data: seasonData } = useQuery({
+  const { data: seasonData, error: seasonDataError } = useQuery({
     queryKey: ['season-data'],
     queryFn: async () => {
+      console.log('Fetching season data...');
       const { data, error } = await supabase
         .from('season_data')
         .select('*')
         .order('season', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching season data:', error);
+        throw error;
+      }
+      
+      console.log('Season data fetched:', data);
       return data;
     }
   });
+
+  if (seasonDataError) {
+    console.error('Season data error:', seasonDataError);
+    toast({
+      title: "Error loading data",
+      description: "There was a problem loading the calculator data. Please try again later.",
+      variant: "destructive",
+    });
+  }
 
   const currentYear = 2025;
   const years = Array.from(
@@ -32,20 +49,41 @@ const InflationCalculator = () => {
   );
 
   const calculateInflatedValue = (originalAmount: number, originalYear: string) => {
-    if (!seasonData) return null;
+    if (!seasonData) {
+      console.log('No season data available');
+      return null;
+    }
 
     const originalYearData = seasonData.find(d => d.season === originalYear);
     const currentYearData = seasonData.find(d => d.season === '2025');
 
-    if (!originalYearData || !currentYearData) return null;
+    console.log('Original year data:', originalYearData);
+    console.log('Current year data:', currentYearData);
+
+    if (!originalYearData || !currentYearData) {
+      console.log('Missing year data for calculation');
+      return null;
+    }
 
     const inflationFactor = currentYearData.cpi / originalYearData.cpi;
+    console.log('Inflation factor:', inflationFactor);
     return originalAmount * inflationFactor;
   };
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Calculating with amount:', amount, 'and year:', year);
     const inflatedValue = calculateInflatedValue(parseFloat(amount), year);
+    
+    if (inflatedValue === null) {
+      toast({
+        title: "Calculation Error",
+        description: "Unable to calculate the inflation adjusted value. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setResult(inflatedValue);
   };
 
@@ -104,6 +142,7 @@ const InflationCalculator = () => {
             <Button 
               type="submit" 
               className="w-full text-base md:text-lg py-2 md:py-3"
+              disabled={!seasonData}
             >
               Calculate
             </Button>
