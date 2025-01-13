@@ -12,7 +12,6 @@ import { useState, useEffect } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
 
 const Index = () => {
-  // Temporary mock data - these are the three latest posts
   const latestPosts = [
     {
       id: "press-resistance",
