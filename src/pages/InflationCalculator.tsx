@@ -15,14 +15,13 @@ const InflationCalculator = () => {
   const { toast } = useToast();
 
   const { data: seasonData, error: seasonDataError } = useQuery({
-    queryKey: ['season-data', Date.now()], // Add timestamp to force fresh data
+    queryKey: ['season-data'],
     queryFn: async () => {
       console.log('Fetching season data...');
       const { data, error } = await supabase
         .from('season_data')
         .select('*')
-        .order('season', { ascending: true })
-        .throwOnError();
+        .order('season', { ascending: true });
       
       if (error) {
         console.error('Error fetching season data:', error);
@@ -31,11 +30,7 @@ const InflationCalculator = () => {
       
       console.log('Season data fetched:', data);
       return data;
-    },
-    staleTime: 0, // Consider data immediately stale
-    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes max
-    refetchOnMount: true, // Refetch when component mounts
-    refetchOnWindowFocus: true // Refetch when window regains focus
+    }
   });
 
   if (seasonDataError) {
@@ -165,7 +160,7 @@ const InflationCalculator = () => {
             
             <div className="space-y-2">
               <Label htmlFor="year" className="text-sm md:text-base">Transfer Year</Label>
-              <Select value={year} onValueChange={setYear} required>
+              <Select value={year} onValueChange={setYear}>
                 <SelectTrigger id="year" className="text-base md:text-lg p-2 md:p-3">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
@@ -186,7 +181,6 @@ const InflationCalculator = () => {
             <Button 
               type="submit" 
               className="w-full text-base md:text-lg py-2 md:py-3"
-              disabled={!seasonData}
             >
               Calculate
             </Button>
