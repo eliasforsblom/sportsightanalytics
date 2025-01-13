@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Research from "./pages/Research";
 import About from "./pages/About";
+import InflationCalculator from "./pages/InflationCalculator";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/research/:id" element={<Research />} />
           <Route path="/research" element={<Research />} />
           <Route path="/about" element={<About />} />
+          <Route path="/inflation-calculator" element={<InflationCalculator />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
