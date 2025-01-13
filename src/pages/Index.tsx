@@ -64,7 +64,7 @@ const Index = () => {
       <Navbar />
       
       {highlightedPosts.length > 0 && (
-        <div className="container mx-auto px-4 py-4 md:py-8">
+        <div className="w-full px-4 py-4 md:py-8">
           <Carousel 
             className="w-full relative" 
             opts={{
@@ -86,7 +86,7 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
               <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
               <div className="flex gap-1 md:gap-2">
                 {highlightedPosts.map((_, index) => (
@@ -105,7 +105,7 @@ const Index = () => {
         </div>
       )}
       
-      <main className="container mx-auto px-4 py-8 md:py-12">
+      <main className="w-full px-4 py-8 md:py-12">
         <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8">Latest Research</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {latestPosts.map((post) => (
