@@ -177,7 +177,7 @@ const AdminPosts = () => {
               <DialogTrigger asChild>
                 <Button onClick={handleCreateNew}>Create New Post</Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px]">
+              <DialogContent className="sm:max-w-[800px] h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{isEditing ? "Edit Post" : "Create New Post"}</DialogTitle>
                 </DialogHeader>
