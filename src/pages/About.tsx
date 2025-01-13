@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Twitter, Linkedin, Mail, Instagram } from "lucide-react";
+import { Twitter, Instagram } from "lucide-react";
 
 const About = () => {
   return (
