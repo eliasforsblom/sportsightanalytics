@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { Pencil, Trash, Star } from "lucide-react";
+import { Pencil, Trash, Star, Upload } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface PostFormData {
@@ -26,6 +26,7 @@ const AdminPosts = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<PostFormData>({
@@ -74,6 +75,44 @@ const AdminPosts = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+      setUploading(true);
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('post-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(filePath);
+
+      form.setValue('image_url', publicUrl);
+      
+      toast({
+        title: "Image uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading image",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const onSubmit = async (data: PostFormData) => {
@@ -273,10 +312,28 @@ const AdminPosts = () => {
                       name="image_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Image URL</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
+                          <FormLabel>Image</FormLabel>
+                          <div className="space-y-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={uploading}
+                            />
+                            {field.value && (
+                              <div className="mt-2">
+                                <img 
+                                  src={field.value} 
+                                  alt="Preview" 
+                                  className="max-w-[200px] rounded-md"
+                                />
+                              </div>
+                            )}
+                            <Input 
+                              type="hidden" 
+                              {...field}
+                            />
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -298,7 +355,9 @@ const AdminPosts = () => {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit">{isEditing ? "Update" : "Create"} Post</Button>
+                    <Button type="submit" disabled={uploading}>
+                      {uploading ? "Uploading..." : isEditing ? "Update" : "Create"} Post
+                    </Button>
                   </form>
                 </Form>
               </DialogContent>
@@ -313,10 +372,19 @@ const AdminPosts = () => {
           {posts.map((post) => (
             <div key={post.id} className="bg-white p-4 rounded-lg shadow">
               <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-xl font-semibold">{post.title}</h2>
-                  <p className="text-gray-600">{post.category}</p>
-                  <p className="mt-2">{post.excerpt}</p>
+                <div className="flex gap-4">
+                  {post.image_url && (
+                    <img 
+                      src={post.image_url} 
+                      alt={post.title}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold">{post.title}</h2>
+                    <p className="text-gray-600">{post.category}</p>
+                    <p className="mt-2">{post.excerpt}</p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button
