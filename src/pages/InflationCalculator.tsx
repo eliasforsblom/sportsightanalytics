@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const InflationCalculator = () => {
   const [amount, setAmount] = useState<string>("");
@@ -49,31 +49,70 @@ const InflationCalculator = () => {
   );
 
   const calculateInflatedValue = (originalAmount: number, originalYear: string) => {
-    if (!seasonData) {
-      console.log('No season data available');
+    try {
+      console.log('Starting calculation with:', { originalAmount, originalYear, seasonData });
+      
+      if (!seasonData || !Array.isArray(seasonData)) {
+        console.error('Season data is not available or not an array:', seasonData);
+        return null;
+      }
+
+      const originalYearData = seasonData.find(d => d.season === originalYear);
+      const currentYearData = seasonData.find(d => d.season === '2025');
+
+      console.log('Original year data:', originalYearData);
+      console.log('Current year data:', currentYearData);
+
+      if (!originalYearData || !currentYearData) {
+        console.error('Missing year data for calculation:', { originalYearData, currentYearData });
+        return null;
+      }
+
+      if (!originalYearData.cpi || !currentYearData.cpi) {
+        console.error('Missing CPI values:', { originalYearCPI: originalYearData.cpi, currentYearCPI: currentYearData.cpi });
+        return null;
+      }
+
+      const inflationFactor = currentYearData.cpi / originalYearData.cpi;
+      console.log('Inflation factor:', inflationFactor);
+      
+      const result = originalAmount * inflationFactor;
+      console.log('Calculated result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error in calculation:', error);
       return null;
     }
-
-    const originalYearData = seasonData.find(d => d.season === originalYear);
-    const currentYearData = seasonData.find(d => d.season === '2025');
-
-    console.log('Original year data:', originalYearData);
-    console.log('Current year data:', currentYearData);
-
-    if (!originalYearData || !currentYearData) {
-      console.log('Missing year data for calculation');
-      return null;
-    }
-
-    const inflationFactor = currentYearData.cpi / originalYearData.cpi;
-    console.log('Inflation factor:', inflationFactor);
-    return originalAmount * inflationFactor;
   };
 
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Calculating with amount:', amount, 'and year:', year);
-    const inflatedValue = calculateInflatedValue(parseFloat(amount), year);
+    console.log('Form submitted with:', { amount, year });
+
+    if (!amount || !year) {
+      console.log('Missing required fields:', { amount, year });
+      toast({
+        title: "Missing Information",
+        description: "Please enter both an amount and select a year.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
+      console.log('Invalid amount:', amount);
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid number for the amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('Calculating with amount:', parsedAmount, 'and year:', year);
+    const inflatedValue = calculateInflatedValue(parsedAmount, year);
     
     if (inflatedValue === null) {
       toast({
