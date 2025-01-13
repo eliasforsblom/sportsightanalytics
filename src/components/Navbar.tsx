@@ -13,10 +13,10 @@ export const Navbar = () => {
   ];
 
   return (
-    <nav className="border-b bg-white sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+    <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-10">
             <a href="/" className="flex items-center">
               <img 
                 src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png" 
@@ -24,12 +24,12 @@ export const Navbar = () => {
                 className="h-8 md:h-10 w-auto"
               />
             </a>
-            <div className="hidden md:flex space-x-6">
+            <div className="hidden md:flex space-x-8">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-gray-600 hover:text-primary transition-colors"
+                  className="text-gray-600 hover:text-primary font-medium transition-colors duration-200"
                 >
                   {link.label}
                 </a>
@@ -49,7 +49,7 @@ export const Navbar = () => {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="text-lg text-gray-600 hover:text-primary transition-colors"
+                    className="text-lg text-gray-600 hover:text-primary font-medium transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
