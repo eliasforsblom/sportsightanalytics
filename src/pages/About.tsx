@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Twitter, Linkedin, Mail } from "lucide-react";
+import { Twitter, Linkedin, Mail, Instagram } from "lucide-react";
 
 const About = () => {
   return (
@@ -27,7 +27,11 @@ const About = () => {
           <div className="flex gap-4">
             <Button variant="outline" className="flex items-center gap-2">
               <Twitter className="w-4 h-4" />
-              @SportSightAI
+              @SportSight_
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Instagram className="w-4 h-4" />
+              @SportSightanalytics
             </Button>
             <Button variant="outline" className="flex items-center gap-2">
               <Linkedin className="w-4 h-4" />
