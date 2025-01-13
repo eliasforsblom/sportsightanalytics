@@ -10,37 +10,25 @@ import {
 import { FeaturedPost } from "@/components/FeaturedPost";
 import { useState, useEffect } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const Index = () => {
-  const latestPosts = [
-    {
-      id: "press-resistance",
-      title: "The Evolution of Press Resistance in Modern Football",
-      excerpt: "An in-depth analysis of how top teams are adapting their build-up play to counter high-pressing tactics, with data from the top 5 European leagues.",
-      imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1936&auto=format&fit=crop",
-      category: "Tactical Analysis",
-      date: "Feb 20, 2024"
-    },
-    {
-      id: "player-recruitment",
-      title: "Data-Driven Player Recruitment",
-      excerpt: "How leading clubs are using advanced metrics to identify undervalued talent in the transfer market.",
-      imageUrl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=2066&auto=format&fit=crop",
-      category: "Recruitment",
-      date: "Feb 18, 2024"
-    },
-    {
-      id: "set-piece-efficiency",
-      title: "Set-Piece Efficiency Analysis",
-      excerpt: "Breaking down the most effective set-piece routines from the 2023/24 season with expected goals data.",
-      imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2033&auto=format&fit=crop",
-      category: "Performance Analysis",
-      date: "Feb 15, 2024"
-    }
-  ];
-
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
+
+  const { data: posts, isLoading } = useQuery({
+    queryKey: ['posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   useEffect(() => {
     if (!api) {
@@ -51,6 +39,12 @@ const Index = () => {
       setCurrentSlide(api.selectedScrollSnap());
     });
   }, [api]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const latestPosts = posts || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,16 +60,27 @@ const Index = () => {
           setApi={setApi}
         >
           <CarouselContent>
-            {latestPosts.map((post, index) => (
-              <CarouselItem key={index}>
-                <FeaturedPost {...post} />
+            {latestPosts.slice(0, 3).map((post, index) => (
+              <CarouselItem key={post.id}>
+                <FeaturedPost 
+                  id={post.id}
+                  title={post.title}
+                  excerpt={post.excerpt}
+                  date={new Date(post.created_at || '').toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                  category={post.category}
+                  imageUrl={post.image_url}
+                />
               </CarouselItem>
             ))}
           </CarouselContent>
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4">
             <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
             <div className="flex gap-1 md:gap-2">
-              {latestPosts.map((_, index) => (
+              {latestPosts.slice(0, 3).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => api?.scrollTo(index)}
@@ -93,15 +98,19 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8 md:py-12">
         <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8">Latest Research</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {latestPosts.map((post, index) => (
+          {latestPosts.map((post) => (
             <PostCard 
-              key={index}
+              key={post.id}
               id={post.id}
               title={post.title}
               excerpt={post.excerpt}
-              date={post.date}
+              date={new Date(post.created_at || '').toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
               category={post.category}
-              imageUrl={post.imageUrl}
+              imageUrl={post.image_url}
             />
           ))}
         </div>
