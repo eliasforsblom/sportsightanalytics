@@ -11,12 +11,6 @@ const About = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-8 text-primary">About SportSight Analytics</h1>
           
           <div className="prose prose-lg mb-12 prose-headings:text-primary prose-p:text-gray-600">
-            <p className="text-lg md:text-xl mb-6">
-              SportSight Analytics is a cutting-edge football analytics consultancy that combines 
-              data science with deep football knowledge to provide unique insights into the beautiful game. 
-              Our team of analysts and researchers work with clubs, scouts, and media organizations to 
-              uncover meaningful patterns and trends in football data.
-            </p>
             <p className="mb-6">
               We're a group of friends passionate about football and data, combining our love for the game with analytics to uncover deeper insights. Our hobby project focuses on conducting and sharing research that explores football from a fresh, data-driven perspective.
             </p>
