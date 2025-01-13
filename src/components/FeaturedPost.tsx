@@ -12,13 +12,13 @@ interface FeaturedPostProps {
 
 export const FeaturedPost = ({ id, title, excerpt, imageUrl, category }: FeaturedPostProps) => {
   return (
-    <div className="relative overflow-hidden rounded-lg bg-primary text-white h-[500px]">
+    <div className="relative overflow-hidden rounded-lg bg-primary text-white h-[500px] mx-auto">
       <img
         src={imageUrl}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover opacity-40"
       />
-      <div className="relative h-full container mx-auto px-4 flex flex-col justify-end pb-12">
+      <div className="relative h-full flex flex-col justify-end pb-12 px-8">
         <Badge className="mb-4 w-fit" variant="secondary">
           {category}
         </Badge>
