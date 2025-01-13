@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com'];
+
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
@@ -12,7 +14,7 @@ const AdminLogin = () => {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email === "forsblomelias@gmail.com") {
+      if (session?.user?.email && ADMIN_EMAILS.includes(session.user.email)) {
         navigate("/admin/posts");
       }
     };
@@ -23,7 +25,7 @@ const AdminLogin = () => {
       async (event, session) => {
         if (event === "SIGNED_IN") {
           const email = session?.user?.email;
-          if (email === "forsblomelias@gmail.com") {
+          if (email && ADMIN_EMAILS.includes(email)) {
             navigate("/admin/posts");
           } else {
             await supabase.auth.signOut();

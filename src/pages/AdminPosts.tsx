@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { PostForm } from "@/components/admin/PostForm";
 import { PostList } from "@/components/admin/PostList";
 
+const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com'];
+
 interface Post {
   id: string;
   title: string;
@@ -47,7 +49,7 @@ const AdminPosts = () => {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || user.email !== "forsblomelias@gmail.com") {
+      if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
         navigate("/");
       } else {
         setIsAdmin(true);
