@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useLocation } from "react-router-dom";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -12,6 +14,12 @@ export const Navbar = () => {
     { href: "/inflation-calculator", label: "Inflation Calculator" },
     { href: "/about", label: "About" },
   ];
+
+  const isActive = (path: string) => {
+    if (path === "/" && location.pathname === "/") return true;
+    if (path !== "/" && location.pathname.startsWith(path)) return true;
+    return false;
+  };
 
   return (
     <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
@@ -30,7 +38,11 @@ export const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-gray-600 hover:text-primary font-medium transition-colors duration-200"
+                  className={`font-medium transition-colors duration-200 ${
+                    isActive(link.href)
+                      ? "text-primary border-b-2 border-primary"
+                      : "text-gray-600 hover:text-primary"
+                  }`}
                 >
                   {link.label}
                 </a>
@@ -50,7 +62,11 @@ export const Navbar = () => {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="text-lg text-gray-600 hover:text-primary font-medium transition-colors"
+                    className={`text-lg font-medium transition-colors ${
+                      isActive(link.href)
+                        ? "text-primary"
+                        : "text-gray-600 hover:text-primary"
+                    }`}
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
