@@ -1,39 +1,40 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 interface FeaturedPostProps {
   id: string;
   title: string;
   excerpt: string;
-  imageUrl: string;
   category: string;
+  imageUrl: string;
 }
 
-export const FeaturedPost = ({ id, title, excerpt, imageUrl, category }: FeaturedPostProps) => {
+export const FeaturedPost = ({ id, title, excerpt, category, imageUrl }: FeaturedPostProps) => {
   return (
-    <div className="relative overflow-hidden rounded-xl bg-primary text-white h-[300px] md:h-[500px] mx-auto shadow-xl">
-      <img
-        src={imageUrl}
-        alt={title}
-        className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-700 hover:scale-105"
-      />
-      <div className="relative h-full flex flex-col justify-end pb-8 md:pb-12 px-6 md:px-10">
-        <Badge className="mb-4 md:mb-6 w-fit bg-white/90 text-primary hover:bg-white">
-          {category}
-        </Badge>
-        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-5 max-w-3xl line-clamp-2 md:line-clamp-none">
-          {title}
-        </h1>
-        <p className="text-base md:text-lg mb-5 md:mb-7 max-w-2xl text-gray-100 line-clamp-2 md:line-clamp-3">
-          {excerpt}
-        </p>
-        <Link to={`/research/${id}`}>
-          <Button className="w-fit text-sm md:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200" variant="secondary">
-            Read Analysis
-          </Button>
-        </Link>
+    <Link to={`/research/${id}`} className="block relative w-full h-[400px] md:h-[500px] lg:h-[600px] group">
+      <div className="absolute inset-0">
+        <img
+          src={imageUrl}
+          alt={title}
+          className="w-full h-full object-cover"
+        />
       </div>
-    </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 lg:p-8">
+          <Link
+            to={`/research?category=${category}`}
+            className="inline-block px-3 py-1 mb-3 text-sm bg-white/90 text-gray-800 rounded-full hover:bg-white transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {category}
+          </Link>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 group-hover:underline">
+            {title}
+          </h2>
+          <p className="text-white/90 text-sm md:text-base lg:text-lg line-clamp-2">
+            {excerpt}
+          </p>
+        </div>
+      </div>
+    </Link>
   );
 };
