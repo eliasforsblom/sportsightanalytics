@@ -9,9 +9,9 @@ export const Navbar = () => {
           <div className="flex items-center space-x-8">
             <a href="/" className="flex items-center">
               <img 
-                src="/lovable-uploads/bb20c6cb-8ddc-4941-b1a6-1fb692307c26.png" 
+                src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png" 
                 alt="SportSight Analytics" 
-                className="h-8"
+                className="h-10 w-auto"
               />
             </a>
             <div className="hidden md:flex space-x-6">
