@@ -21,6 +21,15 @@ const About = () => {
               We specialize in advanced metrics, tactical analysis, and player recruitment, 
               publishing our findings and methodologies to contribute to the wider football analytics community.
             </p>
+            <p>
+              We're a group of friends passionate about football and data, combining our love for the game with analytics to uncover deeper insights. Our hobby project focuses on conducting and sharing research that explores football from a fresh, data-driven perspective.
+            </p>
+            <p>
+              Whether it's analyzing player performance, transfer trends, or tactical patterns, we aim to make complex analytics accessible and engaging for fans, enthusiasts, and anyone curious about the beautiful game.
+            </p>
+            <p>
+              Follow us as we dive into the numbers and stories that shape football!
+            </p>
           </div>
 
           <h2 className="text-2xl font-bold mb-4">Connect With Us</h2>
