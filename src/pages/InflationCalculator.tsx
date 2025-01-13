@@ -86,7 +86,7 @@ const InflationCalculator = () => {
     }
   };
 
-  const handleCalculate = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Form submitted with:', { amount, year });
 
@@ -144,7 +144,7 @@ const InflationCalculator = () => {
         </div>
 
         <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-4 md:p-6">
-          <form onSubmit={handleCalculate} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount" className="text-sm md:text-base">Transfer Amount (€)</Label>
               <Input
