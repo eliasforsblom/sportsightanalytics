@@ -74,7 +74,7 @@ const Index = () => {
             ))}
           </CarouselContent>
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-            <CarouselPrevious className="relative left-0 translate-y-0 h-7 w-7 rounded" />
+            <CarouselPrevious className="relative left-0 translate-y-0 h-7 w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
             <div className="flex gap-2">
               {latestPosts.map((_, index) => (
                 <button
@@ -86,7 +86,7 @@ const Index = () => {
                 />
               ))}
             </div>
-            <CarouselNext className="relative right-0 translate-y-0 h-7 w-7 rounded" />
+            <CarouselNext className="relative right-0 translate-y-0 h-7 w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
           </div>
         </Carousel>
       </div>
