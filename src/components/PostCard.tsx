@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 interface PostCardProps {
+  id: string;
   title: string;
   excerpt: string;
   date: string;
@@ -10,9 +11,9 @@ interface PostCardProps {
   imageUrl: string;
 }
 
-export const PostCard = ({ title, excerpt, date, category, imageUrl }: PostCardProps) => {
+export const PostCard = ({ id, title, excerpt, date, category, imageUrl }: PostCardProps) => {
   return (
-    <Link to="/research" className="block">
+    <Link to={`/research/${id}`} className="block">
       <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
         <div className="aspect-video relative overflow-hidden">
           <img

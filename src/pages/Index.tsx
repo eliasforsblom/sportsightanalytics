@@ -5,6 +5,7 @@ import { PostCard } from "@/components/PostCard";
 const Index = () => {
   // Temporary mock data
   const featuredPost = {
+    id: "press-resistance",
     title: "The Evolution of Press Resistance in Modern Football",
     excerpt: "An in-depth analysis of how top teams are adapting their build-up play to counter high-pressing tactics, with data from the top 5 European leagues.",
     imageUrl: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1936&auto=format&fit=crop",
@@ -13,6 +14,7 @@ const Index = () => {
 
   const recentPosts = [
     {
+      id: "player-recruitment",
       title: "Data-Driven Player Recruitment",
       excerpt: "How leading clubs are using advanced metrics to identify undervalued talent in the transfer market.",
       date: "Feb 15, 2024",
@@ -20,6 +22,7 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=2066&auto=format&fit=crop"
     },
     {
+      id: "set-piece-efficiency",
       title: "Set-Piece Efficiency Analysis",
       excerpt: "Breaking down the most effective set-piece routines from the 2023/24 season with expected goals data.",
       date: "Feb 12, 2024",
@@ -27,6 +30,7 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2033&auto=format&fit=crop"
     },
     {
+      id: "goalkeeper-distribution",
       title: "Goalkeeper Distribution Patterns",
       excerpt: "Analysis of how modern goalkeepers are influencing play through their distribution choices.",
       date: "Feb 10, 2024",

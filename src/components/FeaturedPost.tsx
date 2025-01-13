@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 interface FeaturedPostProps {
+  id: string;
   title: string;
   excerpt: string;
   imageUrl: string;
   category: string;
 }
 
-export const FeaturedPost = ({ title, excerpt, imageUrl, category }: FeaturedPostProps) => {
+export const FeaturedPost = ({ id, title, excerpt, imageUrl, category }: FeaturedPostProps) => {
   return (
     <div className="relative overflow-hidden rounded-lg bg-primary text-white h-[500px]">
       <img
@@ -23,7 +24,7 @@ export const FeaturedPost = ({ title, excerpt, imageUrl, category }: FeaturedPos
         </Badge>
         <h1 className="text-4xl font-bold mb-4 max-w-2xl">{title}</h1>
         <p className="text-lg mb-6 max-w-2xl text-gray-200">{excerpt}</p>
-        <Link to="/research">
+        <Link to={`/research/${id}`}>
           <Button className="w-fit" variant="secondary">
             Read Analysis
           </Button>
