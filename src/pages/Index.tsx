@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { FeaturedPost } from "@/components/FeaturedPost";
 import { useState } from "react";
+import type { CarouselApi } from "@/components/ui/carousel";
 
 const Index = () => {
   // Temporary mock data - these are the three latest posts
@@ -40,6 +41,7 @@ const Index = () => {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,14 +49,12 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8">
         <Carousel 
-          className="w-full" 
+          className="w-full relative" 
           opts={{
             align: "start",
             loop: true
           }}
-          onSelect={(api) => {
-            setCurrentSlide(api.selectedScrollSnap());
-          }}
+          setApi={setApi}
         >
           <CarouselContent>
             {latestPosts.map((post, index) => (
@@ -63,17 +63,20 @@ const Index = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="left-4" />
-          <CarouselNext className="right-4" />
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-            {latestPosts.map((_, index) => (
-              <div
-                key={index}
-                className={`h-2 w-2 rounded-full transition-all ${
-                  currentSlide === index ? "bg-white w-4" : "bg-white/50"
-                }`}
-              />
-            ))}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+            <CarouselPrevious className="relative left-0 translate-y-0 h-8 w-8" />
+            <div className="flex gap-2">
+              {latestPosts.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => api?.scrollTo(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    currentSlide === index ? "bg-white w-4" : "bg-white/50 w-2"
+                  }`}
+                />
+              ))}
+            </div>
+            <CarouselNext className="relative right-0 translate-y-0 h-8 w-8" />
           </div>
         </Carousel>
       </div>
