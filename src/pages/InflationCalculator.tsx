@@ -33,7 +33,7 @@ const InflationCalculator = () => {
       return data;
     },
     staleTime: 0, // Consider data immediately stale
-    cacheTime: 1000 * 60 * 5, // Cache for 5 minutes max
+    gcTime: 1000 * 60 * 5, // Cache for 5 minutes max (renamed from cacheTime)
     refetchOnMount: true, // Refetch when component mounts
     refetchOnWindowFocus: true // Refetch when window regains focus
   });
