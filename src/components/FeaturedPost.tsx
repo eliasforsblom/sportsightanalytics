@@ -12,20 +12,24 @@ interface FeaturedPostProps {
 
 export const FeaturedPost = ({ id, title, excerpt, imageUrl, category }: FeaturedPostProps) => {
   return (
-    <div className="relative overflow-hidden rounded-lg bg-primary text-white h-[500px] mx-auto">
+    <div className="relative overflow-hidden rounded-lg bg-primary text-white h-[300px] md:h-[500px] mx-auto">
       <img
         src={imageUrl}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover opacity-40"
       />
-      <div className="relative h-full flex flex-col justify-end pb-12 px-8">
-        <Badge className="mb-4 w-fit" variant="secondary">
+      <div className="relative h-full flex flex-col justify-end pb-6 md:pb-12 px-4 md:px-8">
+        <Badge className="mb-3 md:mb-4 w-fit" variant="secondary">
           {category}
         </Badge>
-        <h1 className="text-4xl font-bold mb-4 max-w-2xl">{title}</h1>
-        <p className="text-lg mb-6 max-w-2xl text-gray-200">{excerpt}</p>
+        <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 max-w-2xl line-clamp-2 md:line-clamp-none">
+          {title}
+        </h1>
+        <p className="text-base md:text-lg mb-4 md:mb-6 max-w-2xl text-gray-200 line-clamp-2 md:line-clamp-3">
+          {excerpt}
+        </p>
         <Link to={`/research/${id}`}>
-          <Button className="w-fit" variant="secondary">
+          <Button className="w-fit text-sm md:text-base" variant="secondary">
             Read Analysis
           </Button>
         </Link>

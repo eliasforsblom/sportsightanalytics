@@ -57,7 +57,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 md:py-8">
         <Carousel 
           className="w-full relative" 
           opts={{
@@ -73,27 +73,27 @@ const Index = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4">
-            <CarouselPrevious className="relative left-0 translate-y-0 h-7 w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
-            <div className="flex gap-2">
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4">
+            <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
+            <div className="flex gap-1 md:gap-2">
               {latestPosts.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => api?.scrollTo(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    currentSlide === index ? "bg-white w-4" : "bg-white/50 w-2"
+                  className={`h-1.5 md:h-2 rounded-full transition-all ${
+                    currentSlide === index ? "bg-white w-3 md:w-4" : "bg-white/50 w-1.5 md:w-2"
                   }`}
                 />
               ))}
             </div>
-            <CarouselNext className="relative right-0 translate-y-0 h-7 w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
+            <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
           </div>
         </Carousel>
       </div>
       
-      <main className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-8">Latest Research</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <main className="container mx-auto px-4 py-8 md:py-12">
+        <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8">Latest Research</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {latestPosts.map((post, index) => (
             <PostCard 
               key={index}
