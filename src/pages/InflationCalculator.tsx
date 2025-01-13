@@ -27,7 +27,7 @@ const InflationCalculator = () => {
 
   const currentYear = 2025;
   const years = Array.from(
-    { length: currentYear - 1955 + 1 }, 
+    { length: currentYear - 2001 + 1 }, 
     (_, i) => currentYear - i
   );
 
@@ -86,9 +86,9 @@ const InflationCalculator = () => {
                 <SelectTrigger id="year">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
+                    <SelectItem key={y} value={y.toString()} className="hover:bg-gray-100">
                       {y}
                     </SelectItem>
                   ))}
