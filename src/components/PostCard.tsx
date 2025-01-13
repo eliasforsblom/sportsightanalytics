@@ -22,7 +22,7 @@ export const PostCard = ({ id, title, excerpt, date, category, imageUrl }: PostC
             className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <CardHeader className="p-4 md:p-6">
+        <CardHeader className="p-4 md:p-6 pb-2">
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
             <Badge variant="secondary" className="text-xs md:text-sm">
               {category}
@@ -33,7 +33,7 @@ export const PostCard = ({ id, title, excerpt, date, category, imageUrl }: PostC
             {title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 md:p-6 pt-0">
+        <CardContent className="p-4 md:p-6 pt-2">
           <p className="text-sm md:text-base text-gray-600 line-clamp-2 md:line-clamp-3">
             {excerpt}
           </p>
