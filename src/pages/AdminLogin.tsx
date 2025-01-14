@@ -1,5 +1,5 @@
-import { Auth } from "@supabase/auth-ui-react"
-import { ThemeSupa } from "@supabase/auth-ui-shared"
+import { Auth } from '@supabase/auth-ui-react'
+import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from "@/integrations/supabase/client"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -50,10 +50,16 @@ const AdminLogin = () => {
           supabaseClient={supabase}
           appearance={{
             theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: 'rgb(var(--primary))',
+                  brandAccent: 'rgb(var(--primary))',
+                }
+              }
+            },
             style: {
               button: {
-                background: 'rgb(var(--primary))',
-                color: 'white',
                 borderRadius: '0.375rem',
               },
               anchor: {
@@ -62,6 +68,7 @@ const AdminLogin = () => {
             },
           }}
           providers={[]}
+          view="sign_in"
         />
       </div>
     </div>
