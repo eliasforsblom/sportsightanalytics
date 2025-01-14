@@ -71,19 +71,13 @@ export function AnalyticsDashboard() {
       <CardHeader>
         <CardTitle className="text-card-foreground">Website Traffic</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
-          <ChartContainer
-            config={{
-              views: {
-                theme: {
-                  light: "#8E9196",
-                  dark: "#8E9196",
-                },
-              },
-            }}
-          >
-            <BarChart data={analytics} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+      <CardContent className="p-4">
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart 
+              data={analytics} 
+              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+            >
               <XAxis 
                 dataKey="visit_date" 
                 tickFormatter={(value) => format(new Date(value), 'MMM d')}
@@ -103,7 +97,7 @@ export function AnalyticsDashboard() {
                 maxBarSize={50}
               />
             </BarChart>
-          </ChartContainer>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
