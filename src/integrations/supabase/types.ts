@@ -110,6 +110,7 @@ export type Database = {
           id: string
           last_visit: string | null
           referrer_domain: string
+          session_id: string | null
           visit_date: string
           visitor_count: number | null
         }
@@ -118,6 +119,7 @@ export type Database = {
           id?: string
           last_visit?: string | null
           referrer_domain: string
+          session_id?: string | null
           visit_date?: string
           visitor_count?: number | null
         }
@@ -126,6 +128,7 @@ export type Database = {
           id?: string
           last_visit?: string | null
           referrer_domain?: string
+          session_id?: string | null
           visit_date?: string
           visitor_count?: number | null
         }
