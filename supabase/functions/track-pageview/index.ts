@@ -22,16 +22,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Upsert the analytics record for today
     const { data, error } = await supabaseClient
       .from('analytics')
       .upsert(
-        { 
+        {
           page_path,
-          visitor_count: 1,
+          visit_date: new Date().toISOString().split('T')[0],
           last_visit: new Date().toISOString()
         },
         {
-          onConflict: 'page_path',
+          onConflict: 'page_path,visit_date',
           ignoreDuplicates: false
         }
       )
@@ -41,6 +42,20 @@ serve(async (req) => {
     if (error) {
       console.error('Error tracking pageview:', error)
       throw error
+    }
+
+    // If successful, increment the visitor count
+    const { error: updateError } = await supabaseClient
+      .from('analytics')
+      .update({ 
+        visitor_count: (data.visitor_count || 0) + 1,
+        last_visit: new Date().toISOString()
+      })
+      .eq('id', data.id)
+
+    if (updateError) {
+      console.error('Error updating visitor count:', updateError)
+      throw updateError
     }
 
     console.log('Successfully tracked pageview:', data)

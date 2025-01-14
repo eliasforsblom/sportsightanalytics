@@ -15,6 +15,7 @@ export type Database = {
           id: string
           last_visit: string | null
           page_path: string
+          visit_date: string
           visitor_count: number | null
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           id?: string
           last_visit?: string | null
           page_path: string
+          visit_date?: string
           visitor_count?: number | null
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           id?: string
           last_visit?: string | null
           page_path?: string
+          visit_date?: string
           visitor_count?: number | null
         }
         Relationships: []

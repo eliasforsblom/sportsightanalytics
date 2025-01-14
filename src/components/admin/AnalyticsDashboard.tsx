@@ -4,10 +4,12 @@ import { ChartContainer } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { format } from "date-fns"
 
 interface AnalyticsData {
   page_path: string
   visitor_count: number
+  visit_date: string
   last_visit: string
 }
 
@@ -19,9 +21,12 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-background p-2 shadow-sm">
-        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm font-medium">{format(new Date(label), 'MMM d, yyyy')}</p>
         <p className="text-sm text-muted-foreground">
           Views: {payload[0].value}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Page: {payload[0].payload.page_path}
         </p>
       </div>
     )
@@ -36,7 +41,7 @@ export function AnalyticsDashboard() {
       const { data, error } = await supabase
         .from("analytics")
         .select("*")
-        .order("visitor_count", { ascending: false })
+        .order("visit_date", { ascending: true })
 
       if (error) throw error
       return data as AnalyticsData[]
@@ -55,7 +60,7 @@ export function AnalyticsDashboard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Page Analytics</CardTitle>
+        <CardTitle>Daily Page Views</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -70,7 +75,10 @@ export function AnalyticsDashboard() {
             }}
           >
             <BarChart data={analytics}>
-              <XAxis dataKey="page_path" />
+              <XAxis 
+                dataKey="visit_date" 
+                tickFormatter={(value) => format(new Date(value), 'MMM d')}
+              />
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Bar
