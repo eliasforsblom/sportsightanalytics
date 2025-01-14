@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { ChartContainer } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
@@ -67,34 +67,40 @@ export function AnalyticsDashboard() {
   }
 
   return (
-    <Card>
+    <Card className="bg-card">
       <CardHeader>
-        <CardTitle>Daily Total Visitors</CardTitle>
+        <CardTitle className="text-card-foreground">Website Traffic</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
+        <div className="h-[300px] w-full">
           <ChartContainer
             config={{
               views: {
                 theme: {
-                  light: "#0ea5e9",
-                  dark: "#0ea5e9",
+                  light: "#8E9196",
+                  dark: "#8E9196",
                 },
               },
             }}
           >
-            <BarChart data={analytics}>
+            <BarChart data={analytics} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               <XAxis 
                 dataKey="visit_date" 
                 tickFormatter={(value) => format(new Date(value), 'MMM d')}
+                stroke="#8E9196"
+                fontSize={12}
               />
-              <YAxis />
+              <YAxis 
+                stroke="#8E9196"
+                fontSize={12}
+              />
               <Tooltip content={<CustomTooltip />} />
               <Bar
                 dataKey="total_visitors"
                 name="Total Visitors"
                 fill="var(--color-views)"
                 radius={[4, 4, 0, 0]}
+                maxBarSize={50}
               />
             </BarChart>
           </ChartContainer>
