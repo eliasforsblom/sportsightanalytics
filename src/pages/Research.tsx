@@ -4,7 +4,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Research = () => {
   const { id } = useParams();
@@ -12,17 +11,16 @@ const Research = () => {
   const categoryFilter = searchParams.get('category');
 
   const { data: posts, isLoading, error } = useQuery({
-    queryKey: ['posts', categoryFilter, id],
+    queryKey: ['posts', categoryFilter],
     queryFn: async () => {
-      let query = supabase.from('posts').select('*');
+      let query = supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      if (id) {
-        query = query.eq('id', id);
-      } else if (categoryFilter) {
+      if (categoryFilter) {
         query = query.eq('category', categoryFilter);
       }
-      
-      query = query.order('created_at', { ascending: false });
       
       const { data, error } = await query;
       if (error) throw error;
@@ -36,35 +34,21 @@ const Research = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="container mx-auto px-4 py-12">
-          {id ? (
-            <div className="max-w-4xl mx-auto">
-              <Skeleton className="h-8 w-32 mb-4" />
-              <Skeleton className="h-12 w-3/4 mb-6" />
-              <Skeleton className="h-6 w-48 mb-8" />
-              <div className="space-y-4">
-                <Skeleton className="h-64 w-full mb-6" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-4/6" />
-              </div>
-            </div>
-          ) : (
-            <div className="animate-pulse">
-              <Skeleton className="h-8 w-1/4 mb-8" />
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="bg-white rounded-lg shadow-sm h-96">
-                    <Skeleton className="h-48 w-full rounded-t-lg" />
-                    <div className="p-4">
-                      <Skeleton className="h-4 w-1/4 mb-4" />
-                      <Skeleton className="h-6 w-3/4 mb-4" />
-                      <Skeleton className="h-4 w-full" />
-                    </div>
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white rounded-lg shadow-sm h-96">
+                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </main>
       </div>
     );
@@ -87,7 +71,7 @@ const Research = () => {
 
   // If there's an ID parameter, show the full post
   if (id && posts) {
-    const post = posts[0]; // Since we filtered by ID, we expect only one post
+    const post = posts.find(post => post.id === id);
     
     // Show not found state for single post
     if (!post) {
@@ -113,6 +97,7 @@ const Research = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
+        
         <main className="container mx-auto px-4 py-12">
           <article className="max-w-4xl mx-auto">
             <div className="mb-8">
@@ -129,12 +114,6 @@ const Research = () => {
               </p>
             </div>
 
-            <img
-              src={post.image_url}
-              alt={post.title}
-              className="w-full h-auto rounded-lg mb-8"
-            />
-
             <div 
               className="prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: post.content }}
@@ -149,6 +128,7 @@ const Research = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+      
       <main className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">
