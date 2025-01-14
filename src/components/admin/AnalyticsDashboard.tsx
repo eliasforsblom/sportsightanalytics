@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ChartContainer } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps, ResponsiveContainer } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps, ResponsiveContainer, CartesianGrid } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
@@ -78,6 +77,11 @@ export function AnalyticsDashboard() {
               data={analytics} 
               margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             >
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke="#E5E7EB" 
+                vertical={false}
+              />
               <XAxis 
                 dataKey="visit_date" 
                 tickFormatter={(value) => format(new Date(value), 'MMM d')}
