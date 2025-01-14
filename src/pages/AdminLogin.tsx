@@ -1,42 +1,42 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Auth } from "@supabase/auth-ui-react"
+import { ThemeSupa } from "@supabase/auth-ui-shared"
+import { supabase } from "@/integrations/supabase/client"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com'];
+const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com']
 
 const AdminLogin = () => {
-  const navigate = useNavigate();
-  const [error, setError] = useState("");
+  const navigate = useNavigate()
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession()
       if (session?.user?.email && ADMIN_EMAILS.includes(session.user.email)) {
-        navigate("/admin/posts");
+        navigate("/admin/posts")
       }
-    };
+    }
     
-    checkSession();
+    checkSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN") {
-          const email = session?.user?.email;
+          const email = session?.user?.email
           if (email && ADMIN_EMAILS.includes(email)) {
-            navigate("/admin/posts");
+            navigate("/admin/posts")
           } else {
-            await supabase.auth.signOut();
-            setError("Only admin users can access this area");
+            await supabase.auth.signOut()
+            setError("Only admin users can access this area")
           }
         }
       }
-    );
+    )
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -65,7 +65,7 @@ const AdminLogin = () => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminLogin;
+export default AdminLogin
