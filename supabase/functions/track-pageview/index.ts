@@ -13,14 +13,14 @@ serve(async (req) => {
   }
 
   try {
-    const { page_path } = await req.json()
+    const { page_path, session_id } = await req.json()
     
     // Get visitor's IP address and referrer
     const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
     const referrer = req.headers.get('referer') || 'direct'
     const today = new Date().toISOString().split('T')[0]
     
-    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP, 'referrer:', referrer)
+    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP, 'referrer:', referrer, 'session:', session_id)
 
     // Extract domain from referrer
     let referrerDomain = 'direct'
@@ -28,6 +28,14 @@ serve(async (req) => {
       if (referrer !== 'direct') {
         const url = new URL(referrer)
         referrerDomain = url.hostname
+        
+        // Check if the referrer is from the same site
+        const currentDomain = req.headers.get('host') || ''
+        if (url.hostname === currentDomain || url.hostname.includes('localhost')) {
+          // Skip tracking internal referrers
+          console.log('Skipping internal referrer:', referrerDomain)
+          referrerDomain = 'direct'
+        }
       }
     } catch (e) {
       console.error('Error parsing referrer URL:', e)
@@ -76,22 +84,35 @@ serve(async (req) => {
       console.log('Created new visit record')
     }
 
-    // Try to upsert referrer data (will fail if duplicate due to unique constraint)
-    const { error: referrerError } = await supabaseClient
-      .from('referrer_analytics')
-      .upsert({
-        referrer_domain: referrerDomain,
-        visit_date: today,
-        visitor_count: 1,
-        last_visit: new Date().toISOString()
-      }, {
-        onConflict: 'referrer_domain,visit_date'
-      })
+    // Only track external referrers and use session_id for uniqueness
+    if (referrerDomain !== 'direct') {
+      const { data: existingReferrer } = await supabaseClient
+        .from('referrer_analytics')
+        .select('*')
+        .eq('referrer_domain', referrerDomain)
+        .eq('visit_date', today)
+        .eq('session_id', session_id)
+        .single()
 
-    if (referrerError) {
-      console.error('Error upserting referrer:', referrerError)
-    } else {
-      console.log('Tracked unique referrer visit')
+      if (!existingReferrer) {
+        const { error: referrerError } = await supabaseClient
+          .from('referrer_analytics')
+          .insert({
+            referrer_domain: referrerDomain,
+            visit_date: today,
+            visitor_count: 1,
+            last_visit: new Date().toISOString(),
+            session_id: session_id
+          })
+
+        if (referrerError) {
+          console.error('Error inserting referrer:', referrerError)
+        } else {
+          console.log('Tracked new unique referrer visit')
+        }
+      } else {
+        console.log('Referrer already tracked for this session')
+      }
     }
 
     // Track location data if available
