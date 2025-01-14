@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -14,9 +15,11 @@ serve(async (req) => {
   try {
     const { page_path } = await req.json()
     
+    console.log('Tracking pageview for:', page_path)
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     const { data, error } = await supabaseClient
@@ -35,7 +38,12 @@ serve(async (req) => {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Error tracking pageview:', error)
+      throw error
+    }
+
+    console.log('Successfully tracked pageview:', data)
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -45,6 +53,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Failed to track pageview:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

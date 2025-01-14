@@ -1,1 +1,4 @@
 project_id = "adicyrhhhoqgiugdqvqm"
+
+[functions.track-pageview]
+verify_jwt = false
