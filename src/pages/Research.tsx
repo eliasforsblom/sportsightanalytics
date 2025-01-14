@@ -10,7 +10,7 @@ const Research = () => {
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts, isLoading, error } = useQuery({
     queryKey: ['posts', categoryFilter],
     queryFn: async () => {
       let query = supabase
@@ -28,10 +28,71 @@ const Research = () => {
     }
   });
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white rounded-lg shadow-sm h-96">
+                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Posts</h2>
+            <p className="text-gray-600">There was an error loading the posts. Please try again later.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // If there's an ID parameter, show the full post
   if (id && posts) {
     const post = posts.find(post => post.id === id);
-    if (!post) return <div>Post not found</div>;
+    
+    // Show not found state for single post
+    if (!post) {
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main className="container mx-auto px-4 py-12">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Post Not Found</h2>
+              <p className="text-gray-600 mb-8">The post you're looking for doesn't exist or has been removed.</p>
+              <a 
+                href="/research" 
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                View all research posts
+              </a>
+            </div>
+          </main>
+        </div>
+      );
+    }
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -63,10 +124,7 @@ const Research = () => {
     );
   }
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
+  // Show the list of posts
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -91,23 +149,34 @@ const Research = () => {
             </Badge>
           )}
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts?.map((post) => (
-            <PostCard 
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              excerpt={post.excerpt}
-              date={new Date(post.created_at || '').toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-              category={post.category}
-              imageUrl={post.image_url}
-            />
-          ))}
-        </div>
+        {posts && posts.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <PostCard 
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                excerpt={post.excerpt}
+                date={new Date(post.created_at || '').toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+                category={post.category}
+                imageUrl={post.image_url}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">No Posts Found</h2>
+            <p className="text-gray-600">
+              {categoryFilter 
+                ? `No posts found in the ${categoryFilter} category.` 
+                : 'No posts have been published yet.'}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );
