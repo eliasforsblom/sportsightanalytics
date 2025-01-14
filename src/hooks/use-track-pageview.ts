@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { supabase } from "@/integrations/supabase/client"
 
 export function useTrackPageview() {
   const location = useLocation()
@@ -7,15 +8,15 @@ export function useTrackPageview() {
   useEffect(() => {
     const trackPageview = async () => {
       try {
-        await fetch("/functions/v1/track-pageview", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const { error } = await supabase.functions.invoke('track-pageview', {
           body: JSON.stringify({
             page_path: location.pathname,
           }),
         })
+
+        if (error) {
+          console.error("Failed to track pageview:", error)
+        }
       } catch (error) {
         console.error("Failed to track pageview:", error)
       }
