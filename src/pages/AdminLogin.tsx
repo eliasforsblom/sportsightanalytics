@@ -50,25 +50,12 @@ const AdminLogin = () => {
           supabaseClient={supabase}
           appearance={{
             theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: 'rgb(var(--primary))',
-                  brandAccent: 'rgb(var(--primary))',
-                }
-              }
-            },
             style: {
-              button: {
-                borderRadius: '0.375rem',
-              },
-              anchor: {
-                color: 'rgb(var(--primary))',
-              },
+              button: { background: '#8E9196', color: 'white' },
+              anchor: { color: '#8E9196' },
             },
           }}
           providers={[]}
-          view="sign_in"
         />
       </div>
     </div>
