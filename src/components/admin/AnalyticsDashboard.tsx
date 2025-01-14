@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps, ResponsiveContainer, CartesianGrid } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface AnalyticsData {
   visit_date: string
@@ -51,6 +53,48 @@ const PostViewsTooltip = ({
 }
 
 export function AnalyticsDashboard() {
+  const queryClient = useQueryClient()
+
+  // Set up real-time listeners for posts and analytics tables
+  useEffect(() => {
+    const postsChannel = supabase
+      .channel('posts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'posts'
+        },
+        () => {
+          // Invalidate and refetch queries when posts change
+          queryClient.invalidateQueries({ queryKey: ["post-views"] })
+        }
+      )
+      .subscribe()
+
+    const analyticsChannel = supabase
+      .channel('analytics-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'analytics'
+        },
+        () => {
+          // Invalidate and refetch queries when analytics change
+          queryClient.invalidateQueries({ queryKey: ["analytics"] })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(postsChannel)
+      supabase.removeChannel(analyticsChannel)
+    }
+  }, [queryClient])
+
   const { data: analytics, isLoading: isLoadingAnalytics } = useQuery({
     queryKey: ["analytics"],
     queryFn: async () => {
