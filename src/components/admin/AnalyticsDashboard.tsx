@@ -7,10 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 
 interface AnalyticsData {
-  page_path: string
-  visitor_count: number
   visit_date: string
-  last_visit: string
+  total_visitors: number
 }
 
 const CustomTooltip = ({
@@ -23,10 +21,7 @@ const CustomTooltip = ({
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <p className="text-sm font-medium">{format(new Date(label), 'MMM d, yyyy')}</p>
         <p className="text-sm text-muted-foreground">
-          Views: {payload[0].value}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Page: {payload[0].payload.page_path}
+          Total Visitors: {payload[0].value}
         </p>
       </div>
     )
@@ -40,11 +35,25 @@ export function AnalyticsDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("analytics")
-        .select("*")
+        .select("visit_date, visitor_count")
         .order("visit_date", { ascending: true })
 
       if (error) throw error
-      return data as AnalyticsData[]
+
+      // Aggregate visitors by date
+      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
+        const date = curr.visit_date
+        acc[date] = (acc[date] || 0) + (curr.visitor_count || 0)
+        return acc
+      }, {})
+
+      // Convert to array format for the chart
+      const chartData = Object.entries(aggregatedData).map(([date, total_visitors]) => ({
+        visit_date: date,
+        total_visitors
+      }))
+
+      return chartData as AnalyticsData[]
     },
   })
 
@@ -60,7 +69,7 @@ export function AnalyticsDashboard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Daily Page Views</CardTitle>
+        <CardTitle>Daily Total Visitors</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -82,8 +91,8 @@ export function AnalyticsDashboard() {
               <YAxis />
               <Tooltip content={<CustomTooltip />} />
               <Bar
-                dataKey="visitor_count"
-                name="views"
+                dataKey="total_visitors"
+                name="Total Visitors"
                 fill="var(--color-views)"
                 radius={[4, 4, 0, 0]}
               />
