@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { PostForm } from "@/components/admin/PostForm";
 import { PostList } from "@/components/admin/PostList";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 
 const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com'];
 
@@ -171,8 +172,8 @@ const AdminPosts = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Manage Posts</h1>
           <div className="flex gap-4">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -196,6 +197,8 @@ const AdminPosts = () => {
             </Button>
           </div>
         </div>
+
+        <AnalyticsDashboard />
 
         <PostList
           posts={posts}
