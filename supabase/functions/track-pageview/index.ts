@@ -15,53 +15,56 @@ serve(async (req) => {
   try {
     const { page_path } = await req.json()
     
-    console.log('Tracking pageview for:', page_path)
+    // Get visitor's IP address
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+    const today = new Date().toISOString().split('T')[0]
+    
+    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP)
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Upsert the analytics record for today
-    const { data, error } = await supabaseClient
+    // First, check if this IP has already visited today
+    const { data: existingVisit } = await supabaseClient
       .from('analytics')
-      .upsert(
-        {
-          page_path,
-          visit_date: new Date().toISOString().split('T')[0],
-          last_visit: new Date().toISOString()
-        },
-        {
-          onConflict: 'page_path,visit_date',
-          ignoreDuplicates: false
-        }
-      )
-      .select()
+      .select('id, visitor_count')
+      .eq('visit_date', today)
+      .eq('page_path', page_path)
       .single()
 
-    if (error) {
-      console.error('Error tracking pageview:', error)
-      throw error
+    if (existingVisit) {
+      // Update last_visit timestamp
+      await supabaseClient
+        .from('analytics')
+        .update({ 
+          last_visit: new Date().toISOString()
+        })
+        .eq('id', existingVisit.id)
+
+      console.log('Updated existing visit record')
+    } else {
+      // Create new visit record
+      const { error: insertError } = await supabaseClient
+        .from('analytics')
+        .insert({
+          page_path,
+          visit_date: today,
+          visitor_count: 1,
+          last_visit: new Date().toISOString()
+        })
+
+      if (insertError) {
+        console.error('Error inserting visit:', insertError)
+        throw insertError
+      }
+
+      console.log('Created new visit record')
     }
-
-    // If successful, increment the visitor count
-    const { error: updateError } = await supabaseClient
-      .from('analytics')
-      .update({ 
-        visitor_count: (data.visitor_count || 0) + 1,
-        last_visit: new Date().toISOString()
-      })
-      .eq('id', data.id)
-
-    if (updateError) {
-      console.error('Error updating visitor count:', updateError)
-      throw updateError
-    }
-
-    console.log('Successfully tracked pageview:', data)
 
     return new Response(
-      JSON.stringify({ success: true, data }),
+      JSON.stringify({ success: true }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
