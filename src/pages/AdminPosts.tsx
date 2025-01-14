@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PostForm } from "@/components/admin/PostForm";
 import { PostList } from "@/components/admin/PostList";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ADMIN_EMAILS = ['forsblomelias@gmail.com', 'john.ahlstedt.plym@gmail.com'];
 
@@ -60,11 +61,6 @@ const AdminPosts = () => {
     
     checkAdmin();
   }, [navigate]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
 
   const handleSubmit = async (data: Omit<Post, "id">) => {
     try {
@@ -166,6 +162,11 @@ const AdminPosts = () => {
     setDialogOpen(true);
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
   if (!isAdmin) {
     return null;
   }
@@ -174,38 +175,50 @@ const AdminPosts = () => {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Manage Posts</h1>
-          <div className="flex gap-4">
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={handleCreateNew}>Create New Post</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px] h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{isEditing ? "Edit Post" : "Create New Post"}</DialogTitle>
-                </DialogHeader>
-                <PostForm
-                  initialData={posts.find(post => post.id === isEditing)}
-                  onSubmit={handleSubmit}
-                  isEditing={!!isEditing}
-                  onClose={() => setDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-            <Button onClick={handleSignOut} variant="outline">
-              Sign Out
-            </Button>
-          </div>
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <Button onClick={handleSignOut} variant="outline">
+            Sign Out
+          </Button>
         </div>
 
-        <AnalyticsDashboard />
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="posts">Posts</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="posts" className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={handleCreateNew}>Create New Post</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[800px] h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{isEditing ? "Edit Post" : "Create New Post"}</DialogTitle>
+                  </DialogHeader>
+                  <PostForm
+                    initialData={posts.find(post => post.id === isEditing)}
+                    onSubmit={handleSubmit}
+                    isEditing={!!isEditing}
+                    onClose={() => setDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
 
-        <PostList
-          posts={posts}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggleHighlight={toggleHighlight}
-        />
+            <PostList
+              posts={posts}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleHighlight={toggleHighlight}
+            />
+          </TabsContent>
+          
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
