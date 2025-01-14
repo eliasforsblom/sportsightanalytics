@@ -37,7 +37,7 @@ const CustomTooltip = ({
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <p className="text-sm font-medium">{format(new Date(label), 'MMM d, yyyy')}</p>
         <p className="text-sm text-muted-foreground">
-          Total Visitors: {payload[0].value}
+          Unique Visitors: {payload[0].value}
         </p>
       </div>
     )
@@ -71,7 +71,7 @@ const LocationTooltip = ({
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <p className="text-sm font-medium">{payload[0].payload.country}</p>
         <p className="text-sm text-muted-foreground">
-          Visitors: {payload[0].value}
+          Unique Visitors: {payload[0].value}
         </p>
       </div>
     )
@@ -88,7 +88,7 @@ const ReferrerTooltip = ({
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <p className="text-sm font-medium">{payload[0].payload.referrer_domain}</p>
         <p className="text-sm text-muted-foreground">
-          Visitors: {payload[0].value}
+          Unique Visitors: {payload[0].value}
         </p>
       </div>
     )
@@ -304,11 +304,12 @@ export function AnalyticsDashboard() {
                 <YAxis 
                   stroke="#8E9196"
                   fontSize={12}
+                  label={{ value: 'Unique Visitors', angle: -90, position: 'insideLeft' }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar
                   dataKey="total_visitors"
-                  name="Total Visitors"
+                  name="Unique Visitors"
                   fill="var(--color-views)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={50}
@@ -384,6 +385,7 @@ export function AnalyticsDashboard() {
                   type="number"
                   stroke="#8E9196"
                   fontSize={12}
+                  label={{ value: 'Unique Visitors', position: 'insideBottom' }}
                 />
                 <YAxis 
                   type="category"
@@ -395,7 +397,7 @@ export function AnalyticsDashboard() {
                 <Tooltip content={<LocationTooltip />} />
                 <Bar
                   dataKey="total_visitors"
-                  name="Visitors"
+                  name="Unique Visitors"
                   fill="var(--color-views)"
                   radius={[0, 4, 4, 0]}
                   maxBarSize={30}
@@ -427,6 +429,7 @@ export function AnalyticsDashboard() {
                   type="number"
                   stroke="#8E9196"
                   fontSize={12}
+                  label={{ value: 'Unique Visitors', position: 'insideBottom' }}
                 />
                 <YAxis 
                   type="category"
@@ -438,7 +441,7 @@ export function AnalyticsDashboard() {
                 <Tooltip content={<ReferrerTooltip />} />
                 <Bar
                   dataKey="total_visitors"
-                  name="Visitors"
+                  name="Unique Visitors"
                   fill="var(--color-views)"
                   radius={[0, 4, 4, 0]}
                   maxBarSize={30}

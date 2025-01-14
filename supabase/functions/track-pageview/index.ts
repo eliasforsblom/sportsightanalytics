@@ -76,74 +76,41 @@ serve(async (req) => {
       console.log('Created new visit record')
     }
 
-    // Track referrer data
-    const { data: existingReferrer } = await supabaseClient
+    // Try to upsert referrer data (will fail if duplicate due to unique constraint)
+    const { error: referrerError } = await supabaseClient
       .from('referrer_analytics')
-      .select('id, visitor_count')
-      .eq('visit_date', today)
-      .eq('referrer_domain', referrerDomain)
-      .single()
+      .upsert({
+        referrer_domain: referrerDomain,
+        visit_date: today,
+        visitor_count: 1,
+        last_visit: new Date().toISOString()
+      }, {
+        onConflict: 'referrer_domain,visit_date'
+      })
 
-    if (existingReferrer) {
-      await supabaseClient
-        .from('referrer_analytics')
-        .update({
-          visitor_count: (existingReferrer.visitor_count || 0) + 1,
-          last_visit: new Date().toISOString()
-        })
-        .eq('id', existingReferrer.id)
-
-      console.log('Updated existing referrer record')
+    if (referrerError) {
+      console.error('Error upserting referrer:', referrerError)
     } else {
-      const { error: referrerError } = await supabaseClient
-        .from('referrer_analytics')
-        .insert({
-          referrer_domain: referrerDomain,
-          visit_date: today,
-          visitor_count: 1,
-          last_visit: new Date().toISOString()
-        })
-
-      if (referrerError) {
-        console.error('Error inserting referrer:', referrerError)
-        throw referrerError
-      }
-      console.log('Created new referrer record')
+      console.log('Tracked unique referrer visit')
     }
 
     // Track location data if available
     if (geoData.status === 'success') {
-      const { data: existingLocation } = await supabaseClient
+      const { error: locationError } = await supabaseClient
         .from('viewer_locations')
-        .select('id, visitor_count')
-        .eq('visit_date', today)
-        .eq('country', geoData.country)
-        .eq('city', geoData.city || null)
-        .single()
+        .upsert({
+          country: geoData.country,
+          city: geoData.city,
+          visit_date: today,
+          visitor_count: 1
+        }, {
+          onConflict: 'country,city,visit_date'
+        })
 
-      if (existingLocation) {
-        await supabaseClient
-          .from('viewer_locations')
-          .update({
-            visitor_count: (existingLocation.visitor_count || 0) + 1
-          })
-          .eq('id', existingLocation.id)
-        
-        console.log('Updated existing location record')
+      if (locationError) {
+        console.error('Error upserting location:', locationError)
       } else {
-        const { error: locationError } = await supabaseClient
-          .from('viewer_locations')
-          .insert({
-            country: geoData.country,
-            city: geoData.city,
-            visitor_count: 1
-          })
-
-        if (locationError) {
-          console.error('Error inserting location:', locationError)
-          throw locationError
-        }
-        console.log('Created new location record')
+        console.log('Tracked unique location visit')
       }
     }
 
