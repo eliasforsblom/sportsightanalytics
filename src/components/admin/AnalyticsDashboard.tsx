@@ -17,6 +17,11 @@ interface PostViewsData {
   views: number
 }
 
+interface LocationData {
+  country: string
+  total_visitors: number
+}
+
 const CustomTooltip = ({
   active,
   payload,
@@ -52,10 +57,27 @@ const PostViewsTooltip = ({
   return null
 }
 
+const LocationTooltip = ({
+  active,
+  payload,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <p className="text-sm font-medium">{payload[0].payload.country}</p>
+        <p className="text-sm text-muted-foreground">
+          Visitors: {payload[0].value}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export function AnalyticsDashboard() {
   const queryClient = useQueryClient()
 
-  // Set up real-time listeners for posts and analytics tables
+  // Set up real-time listeners for tables
   useEffect(() => {
     const postsChannel = supabase
       .channel('posts-changes')
@@ -67,7 +89,6 @@ export function AnalyticsDashboard() {
           table: 'posts'
         },
         () => {
-          // Invalidate and refetch queries when posts change
           queryClient.invalidateQueries({ queryKey: ["post-views"] })
         }
       )
@@ -83,8 +104,22 @@ export function AnalyticsDashboard() {
           table: 'analytics'
         },
         () => {
-          // Invalidate and refetch queries when analytics change
           queryClient.invalidateQueries({ queryKey: ["analytics"] })
+        }
+      )
+      .subscribe()
+
+    const locationsChannel = supabase
+      .channel('locations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'viewer_locations'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["locations"] })
         }
       )
       .subscribe()
@@ -92,6 +127,7 @@ export function AnalyticsDashboard() {
     return () => {
       supabase.removeChannel(postsChannel)
       supabase.removeChannel(analyticsChannel)
+      supabase.removeChannel(locationsChannel)
     }
   }, [queryClient])
 
@@ -136,7 +172,36 @@ export function AnalyticsDashboard() {
     },
   })
 
-  if (isLoadingAnalytics || isLoadingPostViews) {
+  const { data: locations, isLoading: isLoadingLocations } = useQuery({
+    queryKey: ["locations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("viewer_locations")
+        .select("country, visitor_count")
+
+      if (error) throw error
+
+      // Aggregate visitors by country
+      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
+        const country = curr.country
+        acc[country] = (acc[country] || 0) + (curr.visitor_count || 0)
+        return acc
+      }, {})
+
+      // Convert to array format for the chart and sort by total visitors
+      const chartData = Object.entries(aggregatedData)
+        .map(([country, total_visitors]) => ({
+          country,
+          total_visitors
+        }))
+        .sort((a, b) => b.total_visitors - a.total_visitors)
+        .slice(0, 10) // Only show top 10 countries
+
+      return chartData as LocationData[]
+    },
+  })
+
+  if (isLoadingAnalytics || isLoadingPostViews || isLoadingLocations) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-[200px]" />
@@ -221,6 +286,49 @@ export function AnalyticsDashboard() {
                 <Bar
                   dataKey="views"
                   name="Views"
+                  fill="var(--color-views)"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-card-foreground">Top Visitor Locations</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={locations} 
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                layout="vertical"
+              >
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#E5E7EB" 
+                  horizontal={false}
+                />
+                <XAxis 
+                  type="number"
+                  stroke="#8E9196"
+                  fontSize={12}
+                />
+                <YAxis 
+                  type="category"
+                  dataKey="country"
+                  width={100}
+                  stroke="#8E9196"
+                  fontSize={12}
+                />
+                <Tooltip content={<LocationTooltip />} />
+                <Bar
+                  dataKey="total_visitors"
+                  name="Visitors"
                   fill="var(--color-views)"
                   radius={[0, 4, 4, 0]}
                   maxBarSize={30}

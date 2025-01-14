@@ -125,6 +125,33 @@ export type Database = {
         }
         Relationships: []
       }
+      viewer_locations: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string | null
+          id: string
+          visit_date: string
+          visitor_count: number | null
+        }
+        Insert: {
+          city?: string | null
+          country: string
+          created_at?: string | null
+          id?: string
+          visit_date?: string
+          visitor_count?: number | null
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string | null
+          id?: string
+          visit_date?: string
+          visitor_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

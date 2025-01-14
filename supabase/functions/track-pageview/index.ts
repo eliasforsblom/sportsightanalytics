@@ -20,13 +20,17 @@ serve(async (req) => {
     const today = new Date().toISOString().split('T')[0]
     
     console.log('Tracking pageview for:', page_path, 'from IP:', clientIP)
+
+    // Get location data from IP
+    const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
+    const geoData = await geoResponse.json()
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // First, check if this IP has already visited today
+    // Track regular pageview
     const { data: existingVisit } = await supabaseClient
       .from('analytics')
       .select('id, visitor_count')
@@ -35,7 +39,6 @@ serve(async (req) => {
       .single()
 
     if (existingVisit) {
-      // Update last_visit timestamp
       await supabaseClient
         .from('analytics')
         .update({ 
@@ -45,7 +48,6 @@ serve(async (req) => {
 
       console.log('Updated existing visit record')
     } else {
-      // Create new visit record
       const { error: insertError } = await supabaseClient
         .from('analytics')
         .insert({
@@ -59,8 +61,43 @@ serve(async (req) => {
         console.error('Error inserting visit:', insertError)
         throw insertError
       }
-
       console.log('Created new visit record')
+    }
+
+    // Track location data if available
+    if (geoData.status === 'success') {
+      const { data: existingLocation } = await supabaseClient
+        .from('viewer_locations')
+        .select('id, visitor_count')
+        .eq('visit_date', today)
+        .eq('country', geoData.country)
+        .eq('city', geoData.city || null)
+        .single()
+
+      if (existingLocation) {
+        await supabaseClient
+          .from('viewer_locations')
+          .update({
+            visitor_count: (existingLocation.visitor_count || 0) + 1
+          })
+          .eq('id', existingLocation.id)
+        
+        console.log('Updated existing location record')
+      } else {
+        const { error: locationError } = await supabaseClient
+          .from('viewer_locations')
+          .insert({
+            country: geoData.country,
+            city: geoData.city,
+            visitor_count: 1
+          })
+
+        if (locationError) {
+          console.error('Error inserting location:', locationError)
+          throw locationError
+        }
+        console.log('Created new location record')
+      }
     }
 
     return new Response(
