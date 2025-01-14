@@ -15,11 +15,23 @@ serve(async (req) => {
   try {
     const { page_path } = await req.json()
     
-    // Get visitor's IP address
+    // Get visitor's IP address and referrer
     const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+    const referrer = req.headers.get('referer') || 'direct'
     const today = new Date().toISOString().split('T')[0]
     
-    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP)
+    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP, 'referrer:', referrer)
+
+    // Extract domain from referrer
+    let referrerDomain = 'direct'
+    try {
+      if (referrer !== 'direct') {
+        const url = new URL(referrer)
+        referrerDomain = url.hostname
+      }
+    } catch (e) {
+      console.error('Error parsing referrer URL:', e)
+    }
 
     // Get location data from IP
     const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
@@ -62,6 +74,41 @@ serve(async (req) => {
         throw insertError
       }
       console.log('Created new visit record')
+    }
+
+    // Track referrer data
+    const { data: existingReferrer } = await supabaseClient
+      .from('referrer_analytics')
+      .select('id, visitor_count')
+      .eq('visit_date', today)
+      .eq('referrer_domain', referrerDomain)
+      .single()
+
+    if (existingReferrer) {
+      await supabaseClient
+        .from('referrer_analytics')
+        .update({
+          visitor_count: (existingReferrer.visitor_count || 0) + 1,
+          last_visit: new Date().toISOString()
+        })
+        .eq('id', existingReferrer.id)
+
+      console.log('Updated existing referrer record')
+    } else {
+      const { error: referrerError } = await supabaseClient
+        .from('referrer_analytics')
+        .insert({
+          referrer_domain: referrerDomain,
+          visit_date: today,
+          visitor_count: 1,
+          last_visit: new Date().toISOString()
+        })
+
+      if (referrerError) {
+        console.error('Error inserting referrer:', referrerError)
+        throw referrerError
+      }
+      console.log('Created new referrer record')
     }
 
     // Track location data if available

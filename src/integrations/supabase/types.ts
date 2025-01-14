@@ -104,6 +104,33 @@ export type Database = {
         }
         Relationships: []
       }
+      referrer_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_visit: string | null
+          referrer_domain: string
+          visit_date: string
+          visitor_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_visit?: string | null
+          referrer_domain: string
+          visit_date?: string
+          visitor_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_visit?: string | null
+          referrer_domain?: string
+          visit_date?: string
+          visitor_count?: number | null
+        }
+        Relationships: []
+      }
       season_data: {
         Row: {
           avgfee: number | null

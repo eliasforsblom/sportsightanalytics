@@ -22,6 +22,11 @@ interface LocationData {
   total_visitors: number
 }
 
+interface ReferrerData {
+  referrer_domain: string
+  total_visitors: number
+}
+
 const CustomTooltip = ({
   active,
   payload,
@@ -65,6 +70,23 @@ const LocationTooltip = ({
     return (
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <p className="text-sm font-medium">{payload[0].payload.country}</p>
+        <p className="text-sm text-muted-foreground">
+          Visitors: {payload[0].value}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
+const ReferrerTooltip = ({
+  active,
+  payload,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <p className="text-sm font-medium">{payload[0].payload.referrer_domain}</p>
         <p className="text-sm text-muted-foreground">
           Visitors: {payload[0].value}
         </p>
@@ -124,10 +146,26 @@ export function AnalyticsDashboard() {
       )
       .subscribe()
 
+    const referrersChannel = supabase
+      .channel('referrers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'referrer_analytics'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["referrers"] })
+        }
+      )
+      .subscribe()
+
     return () => {
       supabase.removeChannel(postsChannel)
       supabase.removeChannel(analyticsChannel)
       supabase.removeChannel(locationsChannel)
+      supabase.removeChannel(referrersChannel)
     }
   }, [queryClient])
 
@@ -201,7 +239,36 @@ export function AnalyticsDashboard() {
     },
   })
 
-  if (isLoadingAnalytics || isLoadingPostViews || isLoadingLocations) {
+  const { data: referrers, isLoading: isLoadingReferrers } = useQuery({
+    queryKey: ["referrers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referrer_analytics")
+        .select("referrer_domain, visitor_count")
+
+      if (error) throw error
+
+      // Aggregate visitors by referrer
+      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
+        const domain = curr.referrer_domain
+        acc[domain] = (acc[domain] || 0) + (curr.visitor_count || 0)
+        return acc
+      }, {})
+
+      // Convert to array format for the chart and sort by total visitors
+      const chartData = Object.entries(aggregatedData)
+        .map(([referrer_domain, total_visitors]) => ({
+          referrer_domain,
+          total_visitors
+        }))
+        .sort((a, b) => b.total_visitors - a.total_visitors)
+        .slice(0, 10) // Only show top 10 referrers
+
+      return chartData as ReferrerData[]
+    },
+  })
+
+  if (isLoadingAnalytics || isLoadingPostViews || isLoadingLocations || isLoadingReferrers) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-[200px]" />
@@ -326,6 +393,49 @@ export function AnalyticsDashboard() {
                   fontSize={12}
                 />
                 <Tooltip content={<LocationTooltip />} />
+                <Bar
+                  dataKey="total_visitors"
+                  name="Visitors"
+                  fill="var(--color-views)"
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={30}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card">
+        <CardHeader>
+          <CardTitle className="text-card-foreground">Top Referrers</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={referrers} 
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                layout="vertical"
+              >
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#E5E7EB" 
+                  horizontal={false}
+                />
+                <XAxis 
+                  type="number"
+                  stroke="#8E9196"
+                  fontSize={12}
+                />
+                <YAxis 
+                  type="category"
+                  dataKey="referrer_domain"
+                  width={150}
+                  stroke="#8E9196"
+                  fontSize={12}
+                />
+                <Tooltip content={<ReferrerTooltip />} />
                 <Bar
                   dataKey="total_visitors"
                   name="Visitors"
