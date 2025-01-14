@@ -38,7 +38,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
       category: "",
       image_url: "",
       highlighted: false,
-      created_at: new Date().toISOString().split('T')[0], // Default to today's date
+      created_at: new Date().toISOString().split('T')[0],
     },
   });
 
@@ -82,15 +82,15 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel className="text-base font-semibold">Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} className="w-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,9 +101,9 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           name="excerpt"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Excerpt</FormLabel>
+              <FormLabel className="text-base font-semibold">Excerpt</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} className="w-full min-h-[100px] resize-y" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,7 +114,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Content</FormLabel>
+              <FormLabel className="text-base font-semibold">Content</FormLabel>
               <FormControl>
                 <RichTextEditor 
                   value={field.value} 
@@ -131,9 +131,9 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
+              <FormLabel className="text-base font-semibold">Category</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} className="w-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,9 +144,9 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           name="created_at"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Publication Date</FormLabel>
+              <FormLabel className="text-base font-semibold">Publication Date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" {...field} className="w-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -157,13 +157,14 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           name="image_url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Featured Image</FormLabel>
-              <div className="space-y-2">
+              <FormLabel className="text-base font-semibold">Featured Image</FormLabel>
+              <div className="space-y-3">
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
                   disabled={uploading}
+                  className="w-full"
                 />
                 {field.value && (
                   <div className="mt-2">
@@ -189,7 +190,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
-                <FormLabel className="text-base">Highlight Post</FormLabel>
+                <FormLabel className="text-base font-semibold">Highlight Post</FormLabel>
               </div>
               <FormControl>
                 <Switch
@@ -200,7 +201,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
