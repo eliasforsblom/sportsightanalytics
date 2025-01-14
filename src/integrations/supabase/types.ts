@@ -36,6 +36,35 @@ export type Database = {
         }
         Relationships: []
       }
+      post_views: {
+        Row: {
+          id: string
+          page_path: string
+          post_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          page_path: string
+          post_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          page_path?: string
+          post_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           category: string
@@ -47,6 +76,7 @@ export type Database = {
           image_url: string
           title: string
           updated_at: string | null
+          views: number | null
         }
         Insert: {
           category: string
@@ -58,6 +88,7 @@ export type Database = {
           image_url: string
           title: string
           updated_at?: string | null
+          views?: number | null
         }
         Update: {
           category?: string
@@ -69,6 +100,7 @@ export type Database = {
           image_url?: string
           title?: string
           updated_at?: string | null
+          views?: number | null
         }
         Relationships: []
       }
