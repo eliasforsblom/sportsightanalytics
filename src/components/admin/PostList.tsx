@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash, Star } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface Post {
   id: string;
@@ -22,29 +23,31 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
   return (
     <div className="space-y-4">
       {posts.map((post) => (
-        <div key={post.id} className="bg-white p-4 rounded-lg shadow">
-          <div className="flex justify-between items-start">
-            <div className="flex gap-4">
+        <Card key={post.id} className="p-6 transition-shadow hover:shadow-md">
+          <div className="flex justify-between items-start gap-6">
+            <div className="flex gap-6 flex-1 min-w-0">
               {post.image_url && (
                 <img 
                   src={post.image_url} 
                   alt={post.title}
-                  className="w-24 h-24 object-cover rounded"
+                  className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
                 />
               )}
-              <div>
-                <h2 className="text-xl font-semibold">{post.title}</h2>
-                <p className="text-gray-600">{post.category}</p>
-                <p className="text-gray-500 text-sm">{new Date(post.created_at).toLocaleDateString()}</p>
-                <p className="mt-2">{post.excerpt}</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-semibold text-gray-900 mb-1 truncate">{post.title}</h2>
+                <p className="text-sm text-primary mb-1">{post.category}</p>
+                <p className="text-sm text-gray-500 mb-2">
+                  {new Date(post.created_at).toLocaleDateString()}
+                </p>
+                <p className="text-gray-600 line-clamp-2">{post.excerpt}</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => onToggleHighlight(post.id, post.highlighted)}
-                className={post.highlighted ? "text-yellow-500" : ""}
+                className={post.highlighted ? "text-yellow-500 hover:text-yellow-600" : ""}
               >
                 <Star className="h-4 w-4" />
               </Button>
@@ -64,7 +67,7 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );
