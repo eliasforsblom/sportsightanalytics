@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis } from "recharts"
+import { ChartContainer } from "@/components/ui/chart"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, TooltipProps } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -9,6 +9,24 @@ interface AnalyticsData {
   page_path: string
   visitor_count: number
   last_visit: string
+}
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm text-muted-foreground">
+          Views: {payload[0].value}
+        </p>
+      </div>
+    )
+  }
+  return null
 }
 
 export function AnalyticsDashboard() {
@@ -54,15 +72,13 @@ export function AnalyticsDashboard() {
             <BarChart data={analytics}>
               <XAxis dataKey="page_path" />
               <YAxis />
+              <Tooltip content={<CustomTooltip />} />
               <Bar
                 dataKey="visitor_count"
                 name="views"
                 fill="var(--color-views)"
                 radius={[4, 4, 0, 0]}
               />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
             </BarChart>
           </ChartContainer>
         </div>
