@@ -1,75 +1,183 @@
-import { useParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { useParams, useSearchParams } from "react-router-dom";
+import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const Research = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get('category');
 
-  const { data: post, isLoading } = useQuery({
-    queryKey: ["post", id],
+  const { data: posts, isLoading, error } = useQuery({
+    queryKey: ['posts', categoryFilter],
     queryFn: async () => {
-      if (!id) return null;
+      let query = supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .single();
-
+      if (categoryFilter) {
+        query = query.eq('category', categoryFilter);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    },
-    enabled: !!id,
+    }
   });
 
-  // Track post view when the post is loaded
-  useEffect(() => {
-    const trackPostView = async () => {
-      if (!post?.id) return;
-
-      try {
-        // Insert the view record
-        const { error: viewError } = await supabase
-          .from("post_views")
-          .insert({
-            post_id: post.id,
-            page_path: `/research/${post.id}`,
-          });
-
-        if (viewError) {
-          console.error("Error tracking post view:", viewError);
-          return;
-        }
-
-        // Update the post's view count using the RPC function
-        const { error: updateError } = await supabase
-          .rpc('increment_post_views', {
-            post_id: post.id
-          });
-
-        if (updateError) {
-          console.error("Error updating post views:", updateError);
-        }
-      } catch (error) {
-        console.error("Error tracking post view:", error);
-      }
-    };
-
-    trackPostView();
-  }, [post?.id]);
-
+  // Show loading state
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-12">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white rounded-lg shadow-sm h-96">
+                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-12">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Posts</h2>
+            <p className="text-gray-600">There was an error loading the posts. Please try again later.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // If there's an ID parameter, show the full post
+  if (id && posts) {
+    const post = posts.find(post => post.id === id);
+    
+    // Show not found state for single post
+    if (!post) {
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main className="container mx-auto px-4 py-12">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Post Not Found</h2>
+              <p className="text-gray-600 mb-8">The post you're looking for doesn't exist or has been removed.</p>
+              <a 
+                href="/research" 
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                View all research posts
+              </a>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        
+        <main className="container mx-auto px-4 py-12">
+          <article className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <Badge variant="secondary" className="mb-4">
+                {post.category}
+              </Badge>
+              <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+              <p className="text-gray-500">
+                {new Date(post.created_at || '').toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+
+            <div 
+              className="prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          </article>
+        </main>
+      </div>
+    );
+  }
+
+  // Show the list of posts
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <h1>{post?.title}</h1>
-      <p>{post?.content}</p>
-      <p>Views: {post?.views}</p>
+      
+      <main className="container mx-auto px-4 py-12">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold">
+            {categoryFilter ? `${categoryFilter} Research` : 'All Research'}
+          </h1>
+          {categoryFilter && (
+            <Badge 
+              variant="outline" 
+              className="cursor-pointer"
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('category');
+                window.history.pushState({}, '', url);
+                window.location.reload();
+              }}
+            >
+              Clear Filter
+            </Badge>
+          )}
+        </div>
+        {posts && posts.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <PostCard 
+                key={post.id}
+                id={post.id}
+                title={post.title}
+                excerpt={post.excerpt}
+                date={new Date(post.created_at || '').toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+                category={post.category}
+                imageUrl={post.image_url}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">No Posts Found</h2>
+            <p className="text-gray-600">
+              {categoryFilter 
+                ? `No posts found in the ${categoryFilter} category.` 
+                : 'No posts have been published yet.'}
+            </p>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
