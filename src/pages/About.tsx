@@ -8,7 +8,7 @@ const About = () => {
       <Navbar />
       <main className="container mx-auto px-4 py-16 md:py-20">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-primary">About SportSight Analytics</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8">About SportSight Analytics</h1>
           
           <div className="prose prose-lg mb-12 prose-headings:text-primary prose-p:text-gray-600">
             <p className="mb-6">
@@ -22,7 +22,7 @@ const About = () => {
             </p>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-primary">Connect With Us</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Connect With Us</h2>
           <div className="flex gap-4">
             <Button 
               variant="outline" 
