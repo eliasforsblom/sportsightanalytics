@@ -179,20 +179,22 @@ export function AnalyticsDashboard() {
 
       if (error) throw error
 
-      // Aggregate visitors by date
-      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
-        const date = curr.visit_date
-        acc[date] = (acc[date] || 0) + (curr.visitor_count || 0)
-        return acc
-      }, {})
+      // Create a map to aggregate visitors by date
+      const visitorsByDate = new Map()
+      
+      data.forEach(entry => {
+        const date = entry.visit_date
+        const currentCount = visitorsByDate.get(date) || 0
+        visitorsByDate.set(date, currentCount + (entry.visitor_count || 0))
+      })
 
       // Convert to array format for the chart
-      const chartData = Object.entries(aggregatedData).map(([date, total_visitors]) => ({
+      const chartData = Array.from(visitorsByDate.entries()).map(([date, total_visitors]) => ({
         visit_date: date,
         total_visitors
       }))
 
-      return chartData as AnalyticsData[]
+      return chartData
     },
   })
 
@@ -206,7 +208,7 @@ export function AnalyticsDashboard() {
         .limit(10)
 
       if (error) throw error
-      return data as PostViewsData[]
+      return data
     },
   })
 
@@ -219,15 +221,17 @@ export function AnalyticsDashboard() {
 
       if (error) throw error
 
-      // Aggregate visitors by country
-      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
-        const country = curr.country
-        acc[country] = (acc[country] || 0) + (curr.visitor_count || 0)
-        return acc
-      }, {})
+      // Create a map to aggregate visitors by country
+      const visitorsByCountry = new Map()
+      
+      data.forEach(entry => {
+        const country = entry.country
+        const currentCount = visitorsByCountry.get(country) || 0
+        visitorsByCountry.set(country, currentCount + (entry.visitor_count || 0))
+      })
 
-      // Convert to array format for the chart and sort by total visitors
-      const chartData = Object.entries(aggregatedData)
+      // Convert to array format and sort by total visitors
+      const chartData = Array.from(visitorsByCountry.entries())
         .map(([country, total_visitors]) => ({
           country,
           total_visitors
@@ -235,7 +239,7 @@ export function AnalyticsDashboard() {
         .sort((a, b) => b.total_visitors - a.total_visitors)
         .slice(0, 10) // Only show top 10 countries
 
-      return chartData as LocationData[]
+      return chartData
     },
   })
 
@@ -248,15 +252,17 @@ export function AnalyticsDashboard() {
 
       if (error) throw error
 
-      // Aggregate visitors by referrer
-      const aggregatedData = data.reduce((acc: { [key: string]: number }, curr) => {
-        const domain = curr.referrer_domain
-        acc[domain] = (acc[domain] || 0) + (curr.visitor_count || 0)
-        return acc
-      }, {})
+      // Create a map to aggregate visitors by referrer
+      const visitorsByReferrer = new Map()
+      
+      data.forEach(entry => {
+        const domain = entry.referrer_domain
+        const currentCount = visitorsByReferrer.get(domain) || 0
+        visitorsByReferrer.set(domain, currentCount + (entry.visitor_count || 0))
+      })
 
-      // Convert to array format for the chart and sort by total visitors
-      const chartData = Object.entries(aggregatedData)
+      // Convert to array format and sort by total visitors
+      const chartData = Array.from(visitorsByReferrer.entries())
         .map(([referrer_domain, total_visitors]) => ({
           referrer_domain,
           total_visitors
@@ -264,7 +270,7 @@ export function AnalyticsDashboard() {
         .sort((a, b) => b.total_visitors - a.total_visitors)
         .slice(0, 10) // Only show top 10 referrers
 
-      return chartData as ReferrerData[]
+      return chartData
     },
   })
 
