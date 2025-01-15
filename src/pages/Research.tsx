@@ -43,9 +43,11 @@ const Research = () => {
           return;
         }
 
-        // Update the post's view count
+        // Update the post's view count using the RPC function
         const { error: updateError } = await supabase
-          .rpc('increment_post_views', { post_id: post.id });
+          .rpc('increment_post_views', {
+            post_id: post.id
+          });
 
         if (updateError) {
           console.error("Error updating post views:", updateError);
