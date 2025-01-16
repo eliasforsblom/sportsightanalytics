@@ -56,17 +56,24 @@ const Index = () => {
   }, [api]);
 
   if (isLoadingHighlighted || isLoadingLatest) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+          <div className="text-gray-400">Loading content...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
       
       {highlightedPosts.length > 0 && (
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-8">
           <Carousel 
-            className="w-full relative" 
+            className="w-full relative rounded-xl overflow-hidden shadow-2xl" 
             opts={{
               align: "start",
               loop: true
@@ -86,42 +93,50 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
-              <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
-              <div className="flex gap-1 md:gap-2">
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10 backdrop-blur-sm bg-black/10 px-4 py-2 rounded-full">
+              <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-full border-none bg-white/20 hover:bg-white/40 transition-colors text-white" />
+              <div className="flex gap-1.5 md:gap-2">
                 {highlightedPosts.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => api?.scrollTo(index)}
-                    className={`h-1.5 md:h-2 rounded-full transition-all ${
-                      currentSlide === index ? "bg-white w-3 md:w-4" : "bg-white/50 w-1.5 md:w-2"
+                    className={`h-1.5 md:h-2 rounded-full transition-all duration-300 ${
+                      currentSlide === index ? "bg-white w-4 md:w-6" : "bg-white/50 w-1.5 md:w-2 hover:bg-white/70"
                     }`}
                   />
                 ))}
               </div>
-              <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-none border-none bg-transparent hover:bg-transparent text-white" />
+              <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-full border-none bg-white/20 hover:bg-white/40 transition-colors text-white" />
             </div>
           </Carousel>
         </div>
       )}
       
-      <main className="container mx-auto px-4 py-4">
-        <h2 className="text-xl md:text-2xl font-bold mb-4">Latest Research</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <main className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+            Latest Research
+          </h1>
+          <p className="text-gray-600 leading-relaxed">
+            Explore our latest insights and analysis on football transfer market trends and historical data.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {latestPosts.map((post) => (
-            <PostCard 
-              key={post.id}
-              id={post.id}
-              title={post.title}
-              excerpt={post.excerpt}
-              date={new Date(post.created_at || '').toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-              category={post.category}
-              imageUrl={post.image_url}
-            />
+            <div key={post.id} className="transform hover:-translate-y-1 transition-all duration-300">
+              <PostCard 
+                id={post.id}
+                title={post.title}
+                excerpt={post.excerpt}
+                date={new Date(post.created_at || '').toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+                category={post.category}
+                imageUrl={post.image_url}
+              />
+            </div>
           ))}
         </div>
       </main>
