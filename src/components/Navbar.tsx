@@ -22,11 +22,11 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-10">
-            <a href="/" className="flex items-center">
+            <a href="/" className="flex items-center transition-transform hover:scale-105 duration-200">
               <img 
                 src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png" 
                 alt="SportSight Analytics" 
@@ -38,10 +38,10 @@ export const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={`font-medium transition-colors duration-200 ${
+                  className={`font-medium transition-all duration-200 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-primary after:transition-all after:duration-200 ${
                     isActive(link.href)
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-gray-600 hover:text-primary"
+                      ? "text-primary after:w-full"
+                      : "text-gray-600 hover:text-primary after:w-0 hover:after:w-full"
                   }`}
                 >
                   {link.label}
@@ -52,7 +52,7 @@ export const Navbar = () => {
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-gray-100 transition-colors duration-200">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -62,10 +62,10 @@ export const Navbar = () => {
                   <a
                     key={link.href}
                     href={link.href}
-                    className={`text-lg font-medium transition-colors ${
+                    className={`text-lg font-medium transition-all duration-200 ${
                       isActive(link.href)
                         ? "text-primary"
-                        : "text-gray-600 hover:text-primary"
+                        : "text-gray-600 hover:text-primary hover:translate-x-1"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
