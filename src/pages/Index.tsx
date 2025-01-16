@@ -93,7 +93,7 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="absolute bottom-24 md:bottom-32 lg:bottom-40 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
               <CarouselPrevious className="relative left-0 translate-y-0 h-8 w-8 md:h-9 md:w-9 rounded-full border-none bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white shadow-lg" />
               <div className="flex gap-1.5 md:gap-2 backdrop-blur-sm bg-black/10 px-4 py-2 rounded-full">
                 {highlightedPosts.map((_, index) => (
