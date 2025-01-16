@@ -93,9 +93,9 @@ const Index = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10 backdrop-blur-sm bg-black/10 px-4 py-2 rounded-full">
-              <CarouselPrevious className="relative left-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-full border-none bg-white/20 hover:bg-white/40 transition-colors text-white" />
-              <div className="flex gap-1.5 md:gap-2">
+            <div className="absolute bottom-24 md:bottom-32 lg:bottom-40 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
+              <CarouselPrevious className="relative left-0 translate-y-0 h-8 w-8 md:h-9 md:w-9 rounded-full border-none bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white shadow-lg" />
+              <div className="flex gap-1.5 md:gap-2 backdrop-blur-sm bg-black/10 px-4 py-2 rounded-full">
                 {highlightedPosts.map((_, index) => (
                   <button
                     key={index}
@@ -106,7 +106,7 @@ const Index = () => {
                   />
                 ))}
               </div>
-              <CarouselNext className="relative right-0 translate-y-0 h-6 w-6 md:h-7 md:w-7 rounded-full border-none bg-white/20 hover:bg-white/40 transition-colors text-white" />
+              <CarouselNext className="relative right-0 translate-y-0 h-8 w-8 md:h-9 md:w-9 rounded-full border-none bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white shadow-lg" />
             </div>
           </Carousel>
         </div>
