@@ -13,57 +13,22 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          last_visit: string | null
-          page_path: string
           visit_date: string
-          visitor_count: number | null
+          visitor_count: number
         }
         Insert: {
           created_at?: string | null
           id?: string
-          last_visit?: string | null
-          page_path: string
           visit_date?: string
-          visitor_count?: number | null
+          visitor_count?: number
         }
         Update: {
           created_at?: string | null
           id?: string
-          last_visit?: string | null
-          page_path?: string
           visit_date?: string
-          visitor_count?: number | null
+          visitor_count?: number
         }
         Relationships: []
-      }
-      post_views: {
-        Row: {
-          id: string
-          page_path: string
-          post_id: string | null
-          viewed_at: string | null
-        }
-        Insert: {
-          id?: string
-          page_path: string
-          post_id?: string | null
-          viewed_at?: string | null
-        }
-        Update: {
-          id?: string
-          page_path?: string
-          post_id?: string | null
-          viewed_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_views_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       posts: {
         Row: {
@@ -104,36 +69,6 @@ export type Database = {
         }
         Relationships: []
       }
-      referrer_analytics: {
-        Row: {
-          created_at: string | null
-          id: string
-          last_visit: string | null
-          referrer_domain: string
-          session_id: string | null
-          visit_date: string
-          visitor_count: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          last_visit?: string | null
-          referrer_domain: string
-          session_id?: string | null
-          visit_date?: string
-          visitor_count?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          last_visit?: string | null
-          referrer_domain?: string
-          session_id?: string | null
-          visit_date?: string
-          visitor_count?: number | null
-        }
-        Relationships: []
-      }
       season_data: {
         Row: {
           avgfee: number | null
@@ -152,33 +87,6 @@ export type Database = {
           cpi?: number | null
           rank?: number | null
           season?: string | null
-        }
-        Relationships: []
-      }
-      viewer_locations: {
-        Row: {
-          city: string | null
-          country: string
-          created_at: string | null
-          id: string
-          visit_date: string
-          visitor_count: number | null
-        }
-        Insert: {
-          city?: string | null
-          country: string
-          created_at?: string | null
-          id?: string
-          visit_date?: string
-          visitor_count?: number | null
-        }
-        Update: {
-          city?: string | null
-          country?: string
-          created_at?: string | null
-          id?: string
-          visit_date?: string
-          visitor_count?: number | null
         }
         Relationships: []
       }

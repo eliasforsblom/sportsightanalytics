@@ -13,7 +13,6 @@ export function useTrackPageview() {
       try {
         const { error } = await supabase.functions.invoke('track-pageview', {
           body: JSON.stringify({
-            page_path: location.pathname,
             session_id: SESSION_ID,
           }),
         })

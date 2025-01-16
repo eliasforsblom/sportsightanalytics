@@ -14,32 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    const { page_path, session_id } = await req.json()
-    
-    // Get visitor's IP address and referrer
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-    const referrer = req.headers.get('referer') || 'direct'
+    const { session_id } = await req.json()
     const today = new Date().toISOString().split('T')[0]
     
-    console.log('Tracking pageview:', { page_path, clientIP, referrer, session_id })
-
-    // Extract domain from referrer
-    let referrerDomain = 'direct'
-    try {
-      if (referrer !== 'direct') {
-        const url = new URL(referrer)
-        referrerDomain = url.hostname
-        
-        // Check if the referrer is from the same site
-        const currentDomain = req.headers.get('host') || ''
-        if (url.hostname === currentDomain || url.hostname.includes('localhost')) {
-          referrerDomain = 'direct'
-          console.log('Skipping internal referrer:', url.hostname)
-        }
-      }
-    } catch (e) {
-      console.error('Error parsing referrer URL:', e)
-    }
+    console.log('Tracking pageview:', { session_id })
 
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -47,12 +25,11 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Track regular pageview
+    // Track pageview
     const { data: existingVisit, error: selectError } = await supabaseClient
       .from('analytics')
       .select('id, visitor_count')
       .eq('visit_date', today)
-      .eq('page_path', page_path)
       .single()
 
     if (selectError && selectError.code !== 'PGRST116') {
@@ -64,7 +41,7 @@ serve(async (req) => {
       const { error: updateError } = await supabaseClient
         .from('analytics')
         .update({ 
-          last_visit: new Date().toISOString()
+          visitor_count: existingVisit.visitor_count + 1
         })
         .eq('id', existingVisit.id)
 
@@ -77,10 +54,8 @@ serve(async (req) => {
       const { error: insertError } = await supabaseClient
         .from('analytics')
         .insert({
-          page_path,
           visit_date: today,
-          visitor_count: 1,
-          last_visit: new Date().toISOString()
+          visitor_count: 1
         })
 
       if (insertError) {
@@ -88,58 +63,6 @@ serve(async (req) => {
         throw insertError
       }
       console.log('Created new visit record')
-    }
-
-    // Get location data from IP
-    let geoData = { status: 'fail', country: 'unknown', city: 'unknown' }
-    try {
-      const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
-      if (!geoResponse.ok) {
-        throw new Error(`HTTP error! status: ${geoResponse.status}`)
-      }
-      geoData = await geoResponse.json()
-      console.log('Retrieved geo data:', geoData)
-    } catch (e) {
-      console.error('Error fetching geo data:', e)
-    }
-
-    // Track location data if available
-    if (geoData.status === 'success') {
-      const { error: locationError } = await supabaseClient
-        .from('viewer_locations')
-        .upsert({
-          country: geoData.country,
-          city: geoData.city,
-          visit_date: today,
-          visitor_count: 1
-        }, {
-          onConflict: 'country,city,visit_date'
-        })
-
-      if (locationError) {
-        console.error('Error upserting location:', locationError)
-      } else {
-        console.log('Tracked location visit')
-      }
-    }
-
-    // Track referrer if external
-    if (referrerDomain !== 'direct') {
-      const { error: referrerError } = await supabaseClient
-        .from('referrer_analytics')
-        .insert({
-          referrer_domain: referrerDomain,
-          visit_date: today,
-          visitor_count: 1,
-          last_visit: new Date().toISOString(),
-          session_id
-        })
-
-      if (referrerError && referrerError.code !== 'PGRST116') {
-        console.error('Error inserting referrer:', referrerError)
-      } else {
-        console.log('Tracked referrer visit')
-      }
     }
 
     return new Response(
