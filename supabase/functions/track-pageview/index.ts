@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
@@ -42,8 +43,13 @@ serve(async (req) => {
     }
 
     // Get location data from IP
-    const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
-    const geoData = await geoResponse.json()
+    let geoData = { status: 'fail', country: 'unknown', city: 'unknown' }
+    try {
+      const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
+      geoData = await geoResponse.json()
+    } catch (e) {
+      console.error('Error fetching geo data:', e)
+    }
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -51,21 +57,30 @@ serve(async (req) => {
     )
 
     // Track regular pageview
-    const { data: existingVisit } = await supabaseClient
+    const { data: existingVisit, error: selectError } = await supabaseClient
       .from('analytics')
       .select('id, visitor_count')
       .eq('visit_date', today)
       .eq('page_path', page_path)
       .single()
 
+    if (selectError && selectError.code !== 'PGRST116') {
+      console.error('Error selecting visit:', selectError)
+      throw selectError
+    }
+
     if (existingVisit) {
-      await supabaseClient
+      const { error: updateError } = await supabaseClient
         .from('analytics')
         .update({ 
           last_visit: new Date().toISOString()
         })
         .eq('id', existingVisit.id)
 
+      if (updateError) {
+        console.error('Error updating visit:', updateError)
+        throw updateError
+      }
       console.log('Updated existing visit record')
     } else {
       const { error: insertError } = await supabaseClient
@@ -86,32 +101,22 @@ serve(async (req) => {
 
     // Only track external referrers and use session_id for uniqueness
     if (referrerDomain !== 'direct') {
-      const { data: existingReferrer } = await supabaseClient
+      const { error: referrerError } = await supabaseClient
         .from('referrer_analytics')
-        .select('*')
-        .eq('referrer_domain', referrerDomain)
-        .eq('visit_date', today)
-        .eq('session_id', session_id)
+        .insert({
+          referrer_domain: referrerDomain,
+          visit_date: today,
+          visitor_count: 1,
+          last_visit: new Date().toISOString(),
+          session_id: session_id
+        })
+        .select()
         .single()
 
-      if (!existingReferrer) {
-        const { error: referrerError } = await supabaseClient
-          .from('referrer_analytics')
-          .insert({
-            referrer_domain: referrerDomain,
-            visit_date: today,
-            visitor_count: 1,
-            last_visit: new Date().toISOString(),
-            session_id: session_id
-          })
-
-        if (referrerError) {
-          console.error('Error inserting referrer:', referrerError)
-        } else {
-          console.log('Tracked new unique referrer visit')
-        }
+      if (referrerError && referrerError.code !== 'PGRST116') {
+        console.error('Error inserting referrer:', referrerError)
       } else {
-        console.log('Referrer already tracked for this session')
+        console.log('Tracked new unique referrer visit')
       }
     }
 
