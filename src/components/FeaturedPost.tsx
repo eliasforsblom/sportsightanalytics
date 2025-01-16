@@ -20,7 +20,7 @@ export const FeaturedPost = ({ id, title, excerpt, category, imageUrl }: Feature
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 lg:p-12 transform transition-all duration-300 group-hover:translate-y-[-8px]">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <Link
               to={`/research?category=${category}`}
               onClick={(e) => e.stopPropagation()}
@@ -31,7 +31,7 @@ export const FeaturedPost = ({ id, title, excerpt, category, imageUrl }: Feature
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 group-hover:underline decoration-2 underline-offset-4 leading-tight">
               {title}
             </h2>
-            <p className="text-white/90 text-base md:text-lg lg:text-xl leading-relaxed max-w-3xl">
+            <p className="text-white/90 text-base md:text-lg lg:text-xl leading-relaxed">
               {excerpt}
             </p>
           </div>
