@@ -21,7 +21,7 @@ serve(async (req) => {
     const referrer = req.headers.get('referer') || 'direct'
     const today = new Date().toISOString().split('T')[0]
     
-    console.log('Tracking pageview for:', page_path, 'from IP:', clientIP, 'referrer:', referrer, 'session:', session_id)
+    console.log('Tracking pageview:', { page_path, clientIP, referrer, session_id })
 
     // Extract domain from referrer
     let referrerDomain = 'direct'
@@ -33,24 +33,15 @@ serve(async (req) => {
         // Check if the referrer is from the same site
         const currentDomain = req.headers.get('host') || ''
         if (url.hostname === currentDomain || url.hostname.includes('localhost')) {
-          // Skip tracking internal referrers
-          console.log('Skipping internal referrer:', referrerDomain)
           referrerDomain = 'direct'
+          console.log('Skipping internal referrer:', url.hostname)
         }
       }
     } catch (e) {
       console.error('Error parsing referrer URL:', e)
     }
 
-    // Get location data from IP
-    let geoData = { status: 'fail', country: 'unknown', city: 'unknown' }
-    try {
-      const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
-      geoData = await geoResponse.json()
-    } catch (e) {
-      console.error('Error fetching geo data:', e)
-    }
-    
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -99,6 +90,19 @@ serve(async (req) => {
       console.log('Created new visit record')
     }
 
+    // Get location data from IP
+    let geoData = { status: 'fail', country: 'unknown', city: 'unknown' }
+    try {
+      const geoResponse = await fetch(`http://ip-api.com/json/${clientIP}`)
+      if (!geoResponse.ok) {
+        throw new Error(`HTTP error! status: ${geoResponse.status}`)
+      }
+      geoData = await geoResponse.json()
+      console.log('Retrieved geo data:', geoData)
+    } catch (e) {
+      console.error('Error fetching geo data:', e)
+    }
+
     // Track location data if available
     if (geoData.status === 'success') {
       const { error: locationError } = await supabaseClient
@@ -115,11 +119,11 @@ serve(async (req) => {
       if (locationError) {
         console.error('Error upserting location:', locationError)
       } else {
-        console.log('Tracked unique location visit')
+        console.log('Tracked location visit')
       }
     }
 
-    // Only track external referrers and use session_id for uniqueness
+    // Track referrer if external
     if (referrerDomain !== 'direct') {
       const { error: referrerError } = await supabaseClient
         .from('referrer_analytics')
@@ -128,13 +132,13 @@ serve(async (req) => {
           visit_date: today,
           visitor_count: 1,
           last_visit: new Date().toISOString(),
-          session_id: session_id
+          session_id
         })
 
       if (referrerError && referrerError.code !== 'PGRST116') {
         console.error('Error inserting referrer:', referrerError)
       } else {
-        console.log('Tracked new unique referrer visit')
+        console.log('Tracked referrer visit')
       }
     }
 
