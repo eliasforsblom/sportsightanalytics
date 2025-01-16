@@ -19,7 +19,7 @@ export const FeaturedPost = ({ id, title, excerpt, category, imageUrl }: Feature
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 lg:p-12 transform transition-all duration-300 group-hover:translate-y-[-8px]">
+        <div className="absolute bottom-0 left-0 right-0 pb-8 pt-16 px-8 md:pb-10 md:pt-20 md:px-10 lg:pb-12 lg:pt-24 lg:px-12 transform transition-all duration-300 group-hover:translate-y-[-8px]">
           <div className="max-w-3xl mx-auto">
             <Link
               to={`/research?category=${category}`}
