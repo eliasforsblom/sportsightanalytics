@@ -99,27 +99,6 @@ serve(async (req) => {
       console.log('Created new visit record')
     }
 
-    // Only track external referrers and use session_id for uniqueness
-    if (referrerDomain !== 'direct') {
-      const { error: referrerError } = await supabaseClient
-        .from('referrer_analytics')
-        .insert({
-          referrer_domain: referrerDomain,
-          visit_date: today,
-          visitor_count: 1,
-          last_visit: new Date().toISOString(),
-          session_id: session_id
-        })
-        .select()
-        .single()
-
-      if (referrerError && referrerError.code !== 'PGRST116') {
-        console.error('Error inserting referrer:', referrerError)
-      } else {
-        console.log('Tracked new unique referrer visit')
-      }
-    }
-
     // Track location data if available
     if (geoData.status === 'success') {
       const { error: locationError } = await supabaseClient
@@ -137,6 +116,25 @@ serve(async (req) => {
         console.error('Error upserting location:', locationError)
       } else {
         console.log('Tracked unique location visit')
+      }
+    }
+
+    // Only track external referrers and use session_id for uniqueness
+    if (referrerDomain !== 'direct') {
+      const { error: referrerError } = await supabaseClient
+        .from('referrer_analytics')
+        .insert({
+          referrer_domain: referrerDomain,
+          visit_date: today,
+          visitor_count: 1,
+          last_visit: new Date().toISOString(),
+          session_id: session_id
+        })
+
+      if (referrerError && referrerError.code !== 'PGRST116') {
+        console.error('Error inserting referrer:', referrerError)
+      } else {
+        console.log('Tracked new unique referrer visit')
       }
     }
 
