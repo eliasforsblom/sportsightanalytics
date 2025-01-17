@@ -69,11 +69,10 @@ const Research = () => {
     );
   }
 
-  // If there's an ID parameter, show the full post
+  // If there's an ID parameter, show the full post with Medium-style design
   if (id && posts) {
     const post = posts.find(post => post.id === id);
     
-    // Show not found state for single post
     if (!post) {
       return (
         <div className="min-h-screen bg-gray-50">
@@ -98,37 +97,59 @@ const Research = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         
-        <main className="container mx-auto px-4 py-12">
-          <article className="max-w-4xl mx-auto">
-            <div className="mb-8">
-              <Badge variant="secondary" className="mb-4">
+        <article className="w-full">
+          {/* Hero Image Section */}
+          <div className="w-full h-[60vh] relative mb-8">
+            <img
+              src={post.image_url}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 max-w-3xl mx-auto px-4 pb-12">
+              <Badge 
+                variant="secondary" 
+                className="mb-4 bg-white/90 text-gray-800 hover:bg-white/100"
+              >
                 {post.category}
               </Badge>
-              <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-              <p className="text-gray-500">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                {post.title}
+              </h1>
+              <p className="text-lg text-gray-200 mb-4">
+                {post.excerpt}
+              </p>
+              <div className="text-sm text-gray-300">
                 {new Date(post.created_at || '').toLocaleDateString('en-US', {
                   year: 'numeric',
-                  month: 'short',
+                  month: 'long',
                   day: 'numeric'
                 })}
-              </p>
+                {post.views && ` · ${post.views} views`}
+              </div>
             </div>
+          </div>
 
+          {/* Article Content */}
+          <div className="max-w-3xl mx-auto px-4 pb-16">
             <div 
-              className="prose prose-lg max-w-none"
+              className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 
+                prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary/80
+                prose-strong:text-gray-900 prose-code:text-gray-800 prose-code:bg-gray-100 
+                prose-pre:bg-gray-100 prose-img:rounded-lg prose-blockquote:border-l-primary
+                prose-blockquote:text-gray-700 prose-blockquote:italic"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
-          </article>
-        </main>
+          </div>
+        </article>
       </div>
     );
   }
 
-  // Show the list of posts
+  // Show the list of posts (keeping existing code for the list view)
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
       <main className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">
