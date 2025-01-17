@@ -94,6 +94,12 @@ const Research = () => {
       );
     }
 
+    const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Helmet>
@@ -114,7 +120,7 @@ const Research = () => {
         <article className="w-full">
           {/* Hero Image Section */}
           <div className="w-full h-[60vh] relative mb-8">
-            <div className="absolute inset-0 bg-black/40 z-10" /> {/* Darker overlay */}
+            <div className="absolute inset-0 bg-black/40 z-10" />
             <img
               src={post.image_url}
               alt={post.title}
@@ -135,11 +141,7 @@ const Research = () => {
                 {post.excerpt}
               </p>
               <div className="text-sm text-gray-300">
-                {new Date(post.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {formattedDate}
                 {post.views && ` · ${post.views} views`}
               </div>
             </div>
