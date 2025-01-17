@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet";
 
 const Research = () => {
   const { id } = useParams();
@@ -95,6 +96,19 @@ const Research = () => {
 
     return (
       <div className="min-h-screen bg-gray-50">
+        <Helmet>
+          <title>{post.title} - SportSight Analytics</title>
+          <meta name="description" content={post.excerpt} />
+          <meta property="og:title" content={post.title} />
+          <meta property="og:description" content={post.excerpt} />
+          <meta property="og:image" content={post.image_url} />
+          <meta property="og:type" content="article" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={post.title} />
+          <meta name="twitter:description" content={post.excerpt} />
+          <meta name="twitter:image" content={post.image_url} />
+        </Helmet>
+        
         <Navbar />
         
         <article className="w-full">
