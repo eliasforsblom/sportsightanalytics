@@ -28,20 +28,20 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#403E43", // Darker gray for better contrast
+          DEFAULT: "#403E43",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#555555", // Darker secondary color
+          DEFAULT: "#555555",
           foreground: "#ffffff",
         },
         accent: {
           DEFAULT: "#F1F1F1",
-          foreground: "#221F26", // Dark charcoal for better readability
+          foreground: "#221F26",
         },
         card: {
           DEFAULT: "#ffffff",
-          foreground: "#333333", // Darker text for better contrast
+          foreground: "#333333",
         },
       },
       borderRadius: {
@@ -67,22 +67,30 @@ export default {
         DEFAULT: {
           css: {
             maxWidth: 'none',
-            color: '#333333', // Darker base text color
+            color: '#333333',
             fontFamily: 'Inter, system-ui, sans-serif',
             a: {
-              color: '#403E43', // Darker link color
+              color: '#403E43',
               '&:hover': {
-                color: '#221F26', // Even darker on hover
+                color: '#221F26',
               },
             },
             strong: {
-              color: '#221F26', // Dark charcoal for strong text
+              color: '#221F26',
             },
             code: {
               color: '#333333',
               background: '#F1F1F1',
               padding: '0.2em 0.4em',
               borderRadius: '0.25rem',
+            },
+            pre: {
+              backgroundColor: '#F1F1F1',
+              color: '#333333',
+              code: {
+                color: '#333333',
+                background: 'transparent',
+              },
             },
           },
         },
