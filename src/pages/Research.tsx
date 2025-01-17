@@ -100,7 +100,7 @@ const Research = () => {
         <article className="w-full">
           {/* Hero Image Section */}
           <div className="w-full h-[60vh] relative mb-8">
-            <div className="absolute inset-0 bg-black/60 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10" /> {/* Darker overlay */}
             <img
               src={post.image_url}
               alt={post.title}
