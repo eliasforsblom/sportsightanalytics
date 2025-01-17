@@ -100,13 +100,14 @@ const Research = () => {
         <article className="w-full">
           {/* Hero Image Section */}
           <div className="w-full h-[60vh] relative mb-8">
+            <div className="absolute inset-0 bg-black/40 z-10" /> {/* Darker overlay */}
             <img
               src={post.image_url}
               alt={post.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 max-w-3xl mx-auto px-4 pb-12">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-20" />
+            <div className="absolute bottom-0 left-0 right-0 max-w-3xl mx-auto px-4 pb-12 z-30">
               <Badge 
                 variant="secondary" 
                 className="mb-4 bg-white/90 text-gray-800 hover:bg-white/100"
@@ -120,7 +121,7 @@ const Research = () => {
                 {post.excerpt}
               </p>
               <div className="text-sm text-gray-300">
-                {new Date(post.created_at || '').toLocaleDateString('en-US', {
+                {new Date(post.created_at).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
@@ -133,7 +134,7 @@ const Research = () => {
           {/* Article Content */}
           <div className="max-w-3xl mx-auto px-4 pb-16">
             <div 
-              className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 
+              className="prose prose-lg max-w-none text-left prose-headings:font-bold prose-headings:text-gray-900 
                 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary/80
                 prose-strong:text-gray-900 prose-code:text-gray-800 prose-code:bg-gray-100 
                 prose-pre:bg-gray-100 prose-img:rounded-lg prose-blockquote:border-l-primary
