@@ -28,20 +28,20 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#8E9196",
+          DEFAULT: "#403E43", // Darker gray for better contrast
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#C8C8C9",
+          DEFAULT: "#555555", // Darker secondary color
           foreground: "#ffffff",
         },
         accent: {
           DEFAULT: "#F1F1F1",
-          foreground: "#8E9196",
+          foreground: "#221F26", // Dark charcoal for better readability
         },
         card: {
           DEFAULT: "#ffffff",
-          foreground: "#8E9196",
+          foreground: "#333333", // Darker text for better contrast
         },
       },
       borderRadius: {
@@ -67,19 +67,19 @@ export default {
         DEFAULT: {
           css: {
             maxWidth: 'none',
-            color: 'inherit',
+            color: '#333333', // Darker base text color
             fontFamily: 'Inter, system-ui, sans-serif',
             a: {
-              color: '#8E9196',
+              color: '#403E43', // Darker link color
               '&:hover': {
-                color: '#6B6E73',
+                color: '#221F26', // Even darker on hover
               },
             },
             strong: {
-              color: 'inherit',
+              color: '#221F26', // Dark charcoal for strong text
             },
             code: {
-              color: 'inherit',
+              color: '#333333',
               background: '#F1F1F1',
               padding: '0.2em 0.4em',
               borderRadius: '0.25rem',
