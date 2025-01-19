@@ -20,6 +20,7 @@ interface Post {
   image_url: string;
   highlighted: boolean;
   created_at: string;
+  draft: boolean;
 }
 
 const AdminPosts = () => {
