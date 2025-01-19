@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash, Star, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
 
 interface Post {
   id: string;
@@ -23,9 +25,21 @@ interface PostListProps {
 }
 
 export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostListProps) => {
+  const [showDrafts, setShowDrafts] = useState(true);
+  
+  const filteredPosts = showDrafts ? posts : posts.filter(post => !post.draft);
+
   return (
     <div className="space-y-4">
-      {posts.map((post) => (
+      <div className="flex items-center justify-end space-x-2 mb-4">
+        <span className="text-sm text-gray-600">Show drafts</span>
+        <Switch
+          checked={showDrafts}
+          onCheckedChange={setShowDrafts}
+        />
+      </div>
+
+      {filteredPosts.map((post) => (
         <Card key={post.id} className="p-6 transition-shadow hover:shadow-md">
           <div className="flex justify-between items-start gap-6">
             <div className="flex gap-6 flex-1 min-w-0">
