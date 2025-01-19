@@ -3,6 +3,7 @@ import { Pencil, Trash, Star, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 
 interface Post {
@@ -26,6 +27,7 @@ interface PostListProps {
 
 export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostListProps) => {
   const [showDrafts, setShowDrafts] = useState(true);
+  const [previewPost, setPreviewPost] = useState<Post | null>(null);
   
   const filteredPosts = showDrafts ? posts : posts.filter(post => !post.draft);
 
@@ -74,6 +76,15 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
               </div>
             </div>
             <div className="flex gap-2 flex-shrink-0">
+              {post.draft && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPreviewPost(post)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="icon"
@@ -100,6 +111,32 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
           </div>
         </Card>
       ))}
+
+      <Dialog open={!!previewPost} onOpenChange={() => setPreviewPost(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          {previewPost && (
+            <div className="space-y-6">
+              {previewPost.image_url && (
+                <img 
+                  src={previewPost.image_url} 
+                  alt={previewPost.title}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              )}
+              <h1 className="text-3xl font-bold">{previewPost.title}</h1>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span>{new Date(previewPost.created_at).toLocaleDateString()}</span>
+                <span>{previewPost.category}</span>
+              </div>
+              <p className="text-lg text-gray-600">{previewPost.excerpt}</p>
+              <div 
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: previewPost.content }}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
