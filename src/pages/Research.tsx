@@ -17,6 +17,7 @@ const Research = () => {
       let query = supabase
         .from('posts')
         .select('*')
+        .eq('draft', false)
         .order('created_at', { ascending: false });
       
       if (categoryFilter) {
