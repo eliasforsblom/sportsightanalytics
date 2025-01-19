@@ -35,6 +35,7 @@ export type Database = {
           category: string
           content: string
           created_at: string | null
+          draft: boolean | null
           excerpt: string
           highlighted: boolean | null
           id: string
@@ -47,6 +48,7 @@ export type Database = {
           category: string
           content: string
           created_at?: string | null
+          draft?: boolean | null
           excerpt: string
           highlighted?: boolean | null
           id?: string
@@ -59,6 +61,7 @@ export type Database = {
           category?: string
           content?: string
           created_at?: string | null
+          draft?: boolean | null
           excerpt?: string
           highlighted?: boolean | null
           id?: string

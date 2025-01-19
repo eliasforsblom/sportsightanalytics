@@ -17,6 +17,7 @@ interface PostFormData {
   image_url: string;
   highlighted: boolean;
   created_at: string;
+  draft: boolean;
 }
 
 interface PostFormProps {
@@ -39,6 +40,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
       image_url: "",
       highlighted: false,
       created_at: new Date().toISOString().split('T')[0],
+      draft: true,
     },
   });
 
@@ -201,6 +203,25 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
+        
+        <FormField
+          control={form.control}
+          name="draft"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base font-semibold">Draft</FormLabel>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel

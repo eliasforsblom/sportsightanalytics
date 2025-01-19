@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash, Star } from "lucide-react";
+import { Pencil, Trash, Star, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface Post {
   id: string;
@@ -10,6 +11,7 @@ interface Post {
   image_url: string;
   highlighted: boolean;
   created_at: string;
+  draft: boolean;
 }
 
 interface PostListProps {
@@ -34,7 +36,21 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
                 />
               )}
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1 truncate">{post.title}</h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-semibold text-gray-900 truncate">{post.title}</h2>
+                  {post.draft && (
+                    <Badge variant="secondary" className="ml-2">
+                      <EyeOff className="h-3 w-3 mr-1" />
+                      Draft
+                    </Badge>
+                  )}
+                  {!post.draft && (
+                    <Badge variant="default" className="ml-2">
+                      <Eye className="h-3 w-3 mr-1" />
+                      Published
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-primary mb-1">{post.category}</p>
                 <p className="text-sm text-gray-500 mb-2">
                   {new Date(post.created_at).toLocaleDateString()}
