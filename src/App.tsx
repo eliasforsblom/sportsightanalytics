@@ -6,6 +6,7 @@ import Research from "./pages/Research";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPosts from "./pages/AdminPosts";
 import InflationCalculator from "./pages/InflationCalculator";
+import SportsDashboard from "./pages/SportsDashboard";
 import { Toaster } from "./components/ui/sonner";
 import { useTrackPageview } from "@/hooks/use-track-pageview";
 import "./App.css";
@@ -25,6 +26,7 @@ function AppContent() {
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/posts" element={<AdminPosts />} />
         <Route path="/inflation-calculator" element={<InflationCalculator />} />
+        <Route path="/sports-dashboard" element={<SportsDashboard />} />
       </Routes>
       <Toaster />
     </>
