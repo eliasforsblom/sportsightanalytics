@@ -85,8 +85,8 @@ const SportsDashboard = () => {
             <CardHeader>
               <CardTitle>Performance Trend</CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
-              <div className="h-[300px] w-full">
+            <CardContent>
+              <div className="h-[300px]">
                 <ChartContainer config={config}>
                   <LineChart data={performanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -110,8 +110,8 @@ const SportsDashboard = () => {
             <CardHeader>
               <CardTitle>Match Results Distribution</CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
-              <div className="h-[300px] w-full">
+            <CardContent>
+              <div className="h-[300px]">
                 <ChartContainer config={config}>
                   <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <Pie
@@ -138,8 +138,8 @@ const SportsDashboard = () => {
             <CardHeader>
               <CardTitle>Stadium Attendance</CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">
-              <div className="h-[300px] w-full">
+            <CardContent>
+              <div className="h-[400px]">
                 <ChartContainer config={config}>
                   <BarChart data={attendanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" />
