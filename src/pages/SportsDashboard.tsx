@@ -138,10 +138,15 @@ const SportsDashboard = () => {
             <CardHeader>
               <CardTitle>Stadium Attendance</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
+            <CardContent className="p-0">
+              <div className="h-[400px] w-full">
                 <ChartContainer config={config}>
-                  <BarChart data={attendanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <BarChart 
+                    data={attendanceData} 
+                    margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                    width={800}
+                    height={360}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
