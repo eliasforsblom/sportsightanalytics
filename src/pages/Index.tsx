@@ -24,7 +24,7 @@ const Index = () => {
         .from('posts')
         .select('*')
         .eq('highlighted', true)
-        .eq('draft', false)
+        .is('draft', false)  // Changed from eq to is
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -38,7 +38,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
-        .eq('draft', false)
+        .is('draft', false)  // Changed from eq to is
         .order('created_at', { ascending: false })
         .limit(3);
       
