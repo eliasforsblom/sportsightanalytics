@@ -30,6 +30,42 @@ export type Database = {
         }
         Relationships: []
       }
+      Fixtures: {
+        Row: {
+          Date: string | null
+          Goal1: string | null
+          Goal2: number | null
+          Points: string | null
+          Points_weight: string | null
+          Result: number | null
+          Team1: string | null
+          Team2: string | null
+          Weight: number | null
+        }
+        Insert: {
+          Date?: string | null
+          Goal1?: string | null
+          Goal2?: number | null
+          Points?: string | null
+          Points_weight?: string | null
+          Result?: number | null
+          Team1?: string | null
+          Team2?: string | null
+          Weight?: number | null
+        }
+        Update: {
+          Date?: string | null
+          Goal1?: string | null
+          Goal2?: number | null
+          Points?: string | null
+          Points_weight?: string | null
+          Result?: number | null
+          Team1?: string | null
+          Team2?: string | null
+          Weight?: number | null
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           away_goals: number
