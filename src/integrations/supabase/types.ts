@@ -30,6 +30,51 @@ export type Database = {
         }
         Relationships: []
       }
+      matches: {
+        Row: {
+          away_goals: number
+          away_team_id: string
+          created_at: string | null
+          home_goals: number
+          home_team_id: string
+          id: string
+          match_date: string
+        }
+        Insert: {
+          away_goals: number
+          away_team_id: string
+          created_at?: string | null
+          home_goals: number
+          home_team_id: string
+          id?: string
+          match_date: string
+        }
+        Update: {
+          away_goals?: number
+          away_team_id?: string
+          created_at?: string | null
+          home_goals?: number
+          home_team_id?: string
+          id?: string
+          match_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           category: string
@@ -90,6 +135,24 @@ export type Database = {
           cpi?: number | null
           rank?: number | null
           season?: string | null
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }
