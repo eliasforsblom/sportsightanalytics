@@ -8,7 +8,7 @@ const useTeamStats = () => {
   return useQuery({
     queryKey: ["teamStats"],
     queryFn: async () => {
-      const { data: matches, error } = await supabase
+      const { data: matches, error: matchesError } = await supabase
         .from("matches")
         .select(`
           *,
@@ -17,7 +17,14 @@ const useTeamStats = () => {
         `)
         .order('match_date', { ascending: true });
 
-      if (error) throw error;
+      if (matchesError) throw matchesError;
+
+      const { data: fixtures, error: fixturesError } = await supabase
+        .from("Fixtures")
+        .select('*')
+        .order('Date', { ascending: true });
+
+      if (fixturesError) throw fixturesError;
 
       // Process matches to calculate team statistics
       const teamStats = new Map();
@@ -62,7 +69,8 @@ const useTeamStats = () => {
           ...stats,
           goalDifference: stats.goalsFor - stats.goalsAgainst
         })),
-        matches
+        matches,
+        fixtures
       };
     }
   });
@@ -91,7 +99,7 @@ const SportsDashboard = () => {
     );
   }
 
-  const { teamStats, matches } = data;
+  const { teamStats, matches, fixtures } = data;
 
   // Calculate league standings
   const standings = [...teamStats]
@@ -107,6 +115,40 @@ const SportsDashboard = () => {
       <Navbar />
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8">League Dashboard</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Total Matches</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{matches.length}</div>
+              <p className="text-sm text-gray-500">Played this season</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Upcoming Fixtures</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{fixtures?.length || 0}</div>
+              <p className="text-sm text-gray-500">Scheduled matches</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>League Leader</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{standings[0].name}</div>
+              <p className="text-sm text-gray-500">
+                {standings[0].wins * 3 + standings[0].draws} points
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className="mb-8">
           <CardHeader>
@@ -149,46 +191,10 @@ const SportsDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Matches</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{matches.length}</div>
-              <p className="text-sm text-gray-500">Played this season</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Average Goals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {(matches.reduce((acc, match) => acc + match.home_goals + match.away_goals, 0) / matches.length).toFixed(1)}
-              </div>
-              <p className="text-sm text-gray-500">Per match</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>League Leader</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{standings[0].name}</div>
-              <p className="text-sm text-gray-500">
-                {standings[0].wins * 3 + standings[0].draws} points
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Fixtures</CardTitle>
+            <CardTitle>All Matches & Fixtures</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -210,6 +216,27 @@ const SportsDashboard = () => {
                   </div>
                   <div className="text-sm text-muted-foreground text-center mt-2">
                     {format(new Date(match.match_date), 'PPP')}
+                  </div>
+                </div>
+              ))}
+              {fixtures?.map((fixture) => (
+                <div 
+                  key={fixture.Date} 
+                  className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <span className="font-semibold">{fixture.Team1}</span>
+                    </div>
+                    <div className="px-4 font-bold text-muted-foreground">
+                      Upcoming
+                    </div>
+                    <div className="flex-1 text-right">
+                      <span className="font-semibold">{fixture.Team2}</span>
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground text-center mt-2">
+                    {fixture.Date}
                   </div>
                 </div>
               ))}
