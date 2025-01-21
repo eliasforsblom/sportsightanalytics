@@ -1,15 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-} from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, ResponsiveContainer, Tooltip } from "recharts";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
-// Fetch team statistics
 const useTeamStats = () => {
   return useQuery({
     queryKey: ["teamStats"],
@@ -99,13 +93,6 @@ const SportsDashboard = () => {
 
   const { teamStats, matches } = data;
 
-  // Calculate total goals per match day
-  const goalsByMatchDay = matches.map(match => ({
-    date: format(new Date(match.match_date), 'MMM dd'),
-    goals: match.home_goals + match.away_goals,
-    match: `${match.home_team.name} ${match.home_goals} - ${match.away_goals} ${match.away_team.name}`
-  }));
-
   // Calculate league standings
   const standings = [...teamStats]
     .sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws));
@@ -120,42 +107,6 @@ const SportsDashboard = () => {
       <Navbar />
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8">League Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Matches</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{matches.length}</div>
-              <p className="text-sm text-gray-500">Played this season</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Average Goals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {(matches.reduce((acc, match) => acc + match.home_goals + match.away_goals, 0) / matches.length).toFixed(1)}
-              </div>
-              <p className="text-sm text-gray-500">Per match</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>League Leader</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{standings[0].name}</div>
-              <p className="text-sm text-gray-500">
-                {standings[0].wins * 3 + standings[0].draws} points
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         <Card className="mb-8">
           <CardHeader>
@@ -198,6 +149,42 @@ const SportsDashboard = () => {
             </div>
           </CardContent>
         </Card>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Total Matches</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{matches.length}</div>
+              <p className="text-sm text-gray-500">Played this season</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Average Goals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {(matches.reduce((acc, match) => acc + match.home_goals + match.away_goals, 0) / matches.length).toFixed(1)}
+              </div>
+              <p className="text-sm text-gray-500">Per match</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>League Leader</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{standings[0].name}</div>
+              <p className="text-sm text-gray-500">
+                {standings[0].wins * 3 + standings[0].draws} points
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card>
           <CardHeader>
