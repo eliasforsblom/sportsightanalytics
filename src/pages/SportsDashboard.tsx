@@ -55,9 +55,7 @@ const useTeamStats = () => {
         teamStats: Array.from(teamStats.entries()).map(([name, stats]) => ({
           name,
           ...stats,
-          goalDifference: stats.goalsFor - stats.goalsAgainst,
-          averagePoints: stats.matches > 0 ? (stats.points / stats.matches).toFixed(2) : "0.00",
-          averageWeightedPoints: stats.matches > 0 ? (stats.weightedPoints / stats.matches).toFixed(2) : "0.00"
+          goalDifference: stats.goalsFor - stats.goalsAgainst
         })),
         fixtures
       };
@@ -118,13 +116,13 @@ const SportsDashboard = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Average Points</CardTitle>
+              <CardTitle>Total Goals</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {standings[0]?.averagePoints || "0.00"}
+                {standings[0]?.goalsFor || "0"}
               </div>
-              <p className="text-sm text-gray-500">Leader's points per game</p>
+              <p className="text-sm text-gray-500">Leader's total goals</p>
             </CardContent>
           </Card>
         </div>
@@ -145,9 +143,7 @@ const SportsDashboard = () => {
                     <th className="text-center py-2">GA</th>
                     <th className="text-center py-2">GD</th>
                     <th className="text-center py-2">Points</th>
-                    <th className="text-center py-2">Avg Points</th>
                     <th className="text-center py-2">Weighted Points</th>
-                    <th className="text-center py-2">Avg Weighted</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,9 +156,7 @@ const SportsDashboard = () => {
                       <td className="text-center py-2">{team.goalsAgainst}</td>
                       <td className="text-center py-2">{team.goalDifference}</td>
                       <td className="text-center py-2">{team.points.toFixed(2)}</td>
-                      <td className="text-center py-2">{team.averagePoints}</td>
                       <td className="text-center py-2 font-bold">{team.weightedPoints.toFixed(2)}</td>
-                      <td className="text-center py-2">{team.averageWeightedPoints}</td>
                     </tr>
                   ))}
                 </tbody>
