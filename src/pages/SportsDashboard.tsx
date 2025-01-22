@@ -155,7 +155,7 @@ const SportsDashboard = () => {
                       <td className="text-center py-2">{team.goalsFor}</td>
                       <td className="text-center py-2">{team.goalsAgainst}</td>
                       <td className="text-center py-2">{team.goalDifference}</td>
-                      <td className="text-center py-2">{team.points.toFixed(2)}</td>
+                      <td className="text-center py-2">{Math.round(team.points)}</td>
                       <td className="text-center py-2 font-bold">{team.weightedPoints.toFixed(2)}</td>
                     </tr>
                   ))}
