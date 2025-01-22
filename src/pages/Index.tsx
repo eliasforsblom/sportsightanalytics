@@ -12,7 +12,6 @@ import { useState, useEffect } from "react";
 import type { CarouselApi } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -48,19 +47,6 @@ const Index = () => {
     }
   });
 
-  const { data: fixtures = [], isLoading: isLoadingFixtures } = useQuery({
-    queryKey: ['fixtures'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Fixtures')
-        .select('*')
-        .order('Date', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
   useEffect(() => {
     if (!api) {
       return;
@@ -71,7 +57,7 @@ const Index = () => {
     });
   }, [api]);
 
-  if (isLoadingHighlighted || isLoadingLatest || isLoadingFixtures) {
+  if (isLoadingHighlighted || isLoadingLatest) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center space-y-4">
@@ -129,41 +115,6 @@ const Index = () => {
       )}
       
       <main className="container mx-auto px-4 py-12">
-        {fixtures.length > 0 && (
-          <div className="mb-12">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Fixtures</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {fixtures.map((fixture, index) => (
-                    <div 
-                      key={index}
-                      className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex-1">
-                          <span className="font-semibold">{fixture.Team1}</span>
-                        </div>
-                        <div className="px-4 font-bold text-muted-foreground">
-                          vs
-                        </div>
-                        <div className="flex-1 text-right">
-                          <span className="font-semibold">{fixture.Team2}</span>
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground text-center mt-2">
-                        {fixture.Date}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         <div className="max-w-2xl mx-auto text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
             Latest Research
