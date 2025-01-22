@@ -2,23 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 
 const useTeamStats = () => {
   return useQuery({
     queryKey: ["teamStats"],
     queryFn: async () => {
-      const { data: matches, error: matchesError } = await supabase
-        .from("matches")
-        .select(`
-          *,
-          home_team:teams!matches_home_team_id_fkey(name),
-          away_team:teams!matches_away_team_id_fkey(name)
-        `)
-        .order('match_date', { ascending: true });
-
-      if (matchesError) throw matchesError;
-
       const { data: fixtures, error: fixturesError } = await supabase
         .from("Fixtures")
         .select('*')
@@ -26,63 +14,55 @@ const useTeamStats = () => {
 
       if (fixturesError) throw fixturesError;
 
-      // Process matches to calculate team statistics
+      // Process fixtures to calculate team statistics
       const teamStats = new Map();
 
-      matches.forEach((match) => {
-        // Process home team
-        const homeTeam = match.home_team.name;
-        if (!teamStats.has(homeTeam)) {
-          teamStats.set(homeTeam, { wins: 0, losses: 0, draws: 0, goalsFor: 0, goalsAgainst: 0 });
+      fixtures.forEach((fixture) => {
+        const team = fixture.Team1;
+        if (!team) return;
+
+        if (!teamStats.has(team)) {
+          teamStats.set(team, {
+            points: 0,
+            weightedPoints: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            matches: 0
+          });
         }
+
+        const stats = teamStats.get(team);
         
-        // Process away team
-        const awayTeam = match.away_team.name;
-        if (!teamStats.has(awayTeam)) {
-          teamStats.set(awayTeam, { wins: 0, losses: 0, draws: 0, goalsFor: 0, goalsAgainst: 0 });
+        // Only count matches where we have goals recorded
+        if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
+          stats.goalsFor += parseInt(fixture.Goal1);
+          stats.goalsAgainst += fixture.Goal2;
+          stats.matches += 1;
         }
 
-        // Update statistics
-        const homeStats = teamStats.get(homeTeam);
-        const awayStats = teamStats.get(awayTeam);
-
-        if (match.home_goals > match.away_goals) {
-          homeStats.wins++;
-          awayStats.losses++;
-        } else if (match.home_goals < match.away_goals) {
-          homeStats.losses++;
-          awayStats.wins++;
-        } else {
-          homeStats.draws++;
-          awayStats.draws++;
+        // Add points if available
+        if (fixture.Points) {
+          stats.points += parseFloat(fixture.Points);
         }
 
-        homeStats.goalsFor += match.home_goals;
-        homeStats.goalsAgainst += match.away_goals;
-        awayStats.goalsFor += match.away_goals;
-        awayStats.goalsAgainst += match.home_goals;
+        // Add weighted points if available
+        if (fixture.Points_weight) {
+          stats.weightedPoints += parseFloat(fixture.Points_weight);
+        }
       });
 
       return {
         teamStats: Array.from(teamStats.entries()).map(([name, stats]) => ({
           name,
           ...stats,
-          goalDifference: stats.goalsFor - stats.goalsAgainst
+          goalDifference: stats.goalsFor - stats.goalsAgainst,
+          averagePoints: stats.matches > 0 ? (stats.points / stats.matches).toFixed(2) : "0.00",
+          averageWeightedPoints: stats.matches > 0 ? (stats.weightedPoints / stats.matches).toFixed(2) : "0.00"
         })),
-        matches,
         fixtures
       };
     }
   });
-};
-
-const config = {
-  primary: {
-    color: "#403E43",
-  },
-  secondary: {
-    color: "#555555",
-  },
 };
 
 const SportsDashboard = () => {
@@ -99,16 +79,11 @@ const SportsDashboard = () => {
     );
   }
 
-  const { teamStats, matches, fixtures } = data;
+  const { teamStats, fixtures } = data;
 
-  // Calculate league standings
+  // Sort teams by weighted points
   const standings = [...teamStats]
-    .sort((a, b) => (b.wins * 3 + b.draws) - (a.wins * 3 + a.draws));
-
-  // Sort matches by date for fixtures
-  const sortedMatches = [...matches].sort((a, b) => 
-    new Date(a.match_date).getTime() - new Date(b.match_date).getTime()
-  );
+    .sort((a, b) => b.weightedPoints - a.weightedPoints);
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,18 +97,10 @@ const SportsDashboard = () => {
               <CardTitle>Total Matches</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{matches.length}</div>
+              <div className="text-3xl font-bold">
+                {fixtures.filter(f => f.Goal1 !== null && f.Goal2 !== null).length}
+              </div>
               <p className="text-sm text-gray-500">Played this season</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Fixtures</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{fixtures?.length || 0}</div>
-              <p className="text-sm text-gray-500">Scheduled matches</p>
             </CardContent>
           </Card>
           
@@ -142,10 +109,22 @@ const SportsDashboard = () => {
               <CardTitle>League Leader</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{standings[0].name}</div>
+              <div className="text-3xl font-bold">{standings[0]?.name || "N/A"}</div>
               <p className="text-sm text-gray-500">
-                {standings[0].wins * 3 + standings[0].draws} points
+                {standings[0]?.weightedPoints.toFixed(2) || 0} weighted points
               </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Average Points</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {standings[0]?.averagePoints || "0.00"}
+              </div>
+              <p className="text-sm text-gray-500">Leader's points per game</p>
             </CardContent>
           </Card>
         </div>
@@ -162,13 +141,13 @@ const SportsDashboard = () => {
                     <th className="text-left py-2">Position</th>
                     <th className="text-left py-2">Team</th>
                     <th className="text-center py-2">Played</th>
-                    <th className="text-center py-2">Won</th>
-                    <th className="text-center py-2">Drawn</th>
-                    <th className="text-center py-2">Lost</th>
                     <th className="text-center py-2">GF</th>
                     <th className="text-center py-2">GA</th>
                     <th className="text-center py-2">GD</th>
                     <th className="text-center py-2">Points</th>
+                    <th className="text-center py-2">Avg Points</th>
+                    <th className="text-center py-2">Weighted Points</th>
+                    <th className="text-center py-2">Avg Weighted</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -176,14 +155,14 @@ const SportsDashboard = () => {
                     <tr key={team.name} className="border-b">
                       <td className="py-2">{index + 1}</td>
                       <td className="py-2">{team.name}</td>
-                      <td className="text-center py-2">{team.wins + team.draws + team.losses}</td>
-                      <td className="text-center py-2">{team.wins}</td>
-                      <td className="text-center py-2">{team.draws}</td>
-                      <td className="text-center py-2">{team.losses}</td>
+                      <td className="text-center py-2">{team.matches}</td>
                       <td className="text-center py-2">{team.goalsFor}</td>
                       <td className="text-center py-2">{team.goalsAgainst}</td>
                       <td className="text-center py-2">{team.goalDifference}</td>
-                      <td className="text-center py-2 font-bold">{team.wins * 3 + team.draws}</td>
+                      <td className="text-center py-2">{team.points.toFixed(2)}</td>
+                      <td className="text-center py-2">{team.averagePoints}</td>
+                      <td className="text-center py-2 font-bold">{team.weightedPoints.toFixed(2)}</td>
+                      <td className="text-center py-2">{team.averageWeightedPoints}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -194,42 +173,25 @@ const SportsDashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>All Matches & Fixtures</CardTitle>
+            <CardTitle>Match Results & Fixtures</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sortedMatches.map((match) => (
+              {fixtures.map((fixture, index) => (
                 <div 
-                  key={match.id} 
-                  className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <span className="font-semibold">{match.home_team.name}</span>
-                    </div>
-                    <div className="px-4 font-bold">
-                      {match.home_goals} - {match.away_goals}
-                    </div>
-                    <div className="flex-1 text-right">
-                      <span className="font-semibold">{match.away_team.name}</span>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground text-center mt-2">
-                    {format(new Date(match.match_date), 'PPP')}
-                  </div>
-                </div>
-              ))}
-              {fixtures?.map((fixture) => (
-                <div 
-                  key={fixture.Date} 
+                  key={index} 
                   className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
                       <span className="font-semibold">{fixture.Team1}</span>
                     </div>
-                    <div className="px-4 font-bold text-muted-foreground">
-                      Upcoming
+                    <div className="px-4 font-bold">
+                      {fixture.Goal1 !== null && fixture.Goal2 !== null ? (
+                        `${fixture.Goal1} - ${fixture.Goal2}`
+                      ) : (
+                        <span className="text-muted-foreground">Upcoming</span>
+                      )}
                     </div>
                     <div className="flex-1 text-right">
                       <span className="font-semibold">{fixture.Team2}</span>
@@ -237,6 +199,11 @@ const SportsDashboard = () => {
                   </div>
                   <div className="text-sm text-muted-foreground text-center mt-2">
                     {fixture.Date}
+                    {fixture.Points && (
+                      <span className="ml-2">
+                        (Points: {fixture.Points}, Weighted: {fixture.Points_weight})
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
