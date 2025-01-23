@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/hooks/use-language";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PostCardProps {
   id: string;
@@ -11,7 +14,28 @@ interface PostCardProps {
   imageUrl: string;
 }
 
-export const PostCard = ({ id, title, excerpt, date, category, imageUrl }: PostCardProps) => {
+export const PostCard = ({ id, title: defaultTitle, excerpt: defaultExcerpt, date, category, imageUrl }: PostCardProps) => {
+  const { language } = useLanguage();
+
+  const { data: translation } = useQuery({
+    queryKey: ['post-translation', id, language],
+    queryFn: async () => {
+      if (language === 'en') return null;
+      
+      const { data } = await supabase
+        .from('post_translations')
+        .select('title, excerpt')
+        .eq('post_id', id)
+        .eq('language', language)
+        .single();
+      
+      return data;
+    },
+  });
+
+  const title = translation?.title || defaultTitle;
+  const excerpt = translation?.excerpt || defaultExcerpt;
+
   return (
     <Link to={`/research/${id}`} className="block h-full group">
       <Card className="overflow-hidden transition-all duration-300 h-full border-gray-200 hover:border-gray-300 hover:shadow-lg hover:-translate-y-1">

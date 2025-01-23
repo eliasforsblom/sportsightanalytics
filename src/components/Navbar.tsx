@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/hooks/use-language";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState("en");
+  const { language, setLanguage } = useLanguage();
   const location = useLocation();
 
   const navLinks = [
@@ -32,8 +33,6 @@ export const Navbar = () => {
 
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
-    // Store the language preference in localStorage
-    localStorage.setItem("preferred-language", value);
   };
 
   return (

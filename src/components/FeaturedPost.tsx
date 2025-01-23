@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/hooks/use-language";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FeaturedPostProps {
   id: string;
@@ -8,7 +11,28 @@ interface FeaturedPostProps {
   imageUrl: string;
 }
 
-export const FeaturedPost = ({ id, title, excerpt, category, imageUrl }: FeaturedPostProps) => {
+export const FeaturedPost = ({ id, title: defaultTitle, excerpt: defaultExcerpt, category, imageUrl }: FeaturedPostProps) => {
+  const { language } = useLanguage();
+
+  const { data: translation } = useQuery({
+    queryKey: ['post-translation', id, language],
+    queryFn: async () => {
+      if (language === 'en') return null;
+      
+      const { data } = await supabase
+        .from('post_translations')
+        .select('title, excerpt')
+        .eq('post_id', id)
+        .eq('language', language)
+        .single();
+      
+      return data;
+    },
+  });
+
+  const title = translation?.title || defaultTitle;
+  const excerpt = translation?.excerpt || defaultExcerpt;
+
   return (
     <Link to={`/research/${id}`} className="block relative w-full h-[400px] md:h-[500px] lg:h-[600px] group">
       <div className="absolute inset-0">
