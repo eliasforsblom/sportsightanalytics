@@ -3,9 +3,17 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [language, setLanguage] = useState("en");
   const location = useLocation();
 
   const navLinks = [
@@ -20,6 +28,12 @@ export const Navbar = () => {
     if (path === "/" && location.pathname === "/") return true;
     if (path !== "/" && location.pathname.startsWith(path)) return true;
     return false;
+  };
+
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    // Store the language preference in localStorage
+    localStorage.setItem("preferred-language", value);
   };
 
   return (
@@ -51,31 +65,56 @@ export const Navbar = () => {
             </div>
           </div>
 
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="hover:bg-gray-100 transition-colors duration-200">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[240px] sm:w-[300px]">
-              <div className="flex flex-col space-y-4 mt-8">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className={`text-lg font-medium transition-all duration-200 ${
-                      isActive(link.href)
-                        ? "text-primary"
-                        : "text-gray-600 hover:text-primary hover:translate-x-1"
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-4">
+            <Select value={language} onValueChange={handleLanguageChange}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue>
+                  {language === "en" ? "English" : "Svenska"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="sv">Svenska</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="hover:bg-gray-100 transition-colors duration-200">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[240px] sm:w-[300px]">
+                <div className="flex flex-col space-y-4 mt-8">
+                  {navLinks.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className={`text-lg font-medium transition-all duration-200 ${
+                        isActive(link.href)
+                          ? "text-primary"
+                          : "text-gray-600 hover:text-primary hover:translate-x-1"
+                      }`}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                  <Select value={language} onValueChange={handleLanguageChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {language === "en" ? "English" : "Svenska"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="sv">Svenska</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
