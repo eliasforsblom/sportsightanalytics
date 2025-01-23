@@ -1,14 +1,19 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type LanguageStore = {
   language: string;
   setLanguage: (language: string) => void;
 };
 
-export const useLanguage = create<LanguageStore>((set) => ({
-  language: localStorage.getItem("preferred-language") || "en",
-  setLanguage: (language: string) => {
-    localStorage.setItem("preferred-language", language);
-    set({ language });
-  },
-}));
+export const useLanguage = create<LanguageStore>()(
+  persist(
+    (set) => ({
+      language: "en",
+      setLanguage: (language: string) => set({ language }),
+    }),
+    {
+      name: "language-storage",
+    }
+  )
+);
