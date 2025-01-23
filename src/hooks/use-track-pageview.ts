@@ -12,9 +12,9 @@ export function useTrackPageview() {
     const trackPageview = async () => {
       try {
         const { error } = await supabase.functions.invoke('track-pageview', {
-          body: JSON.stringify({
+          body: {
             session_id: SESSION_ID,
-          }),
+          },
         })
 
         if (error) {

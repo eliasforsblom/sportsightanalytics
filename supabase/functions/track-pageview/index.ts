@@ -17,7 +17,7 @@ serve(async (req) => {
     const { session_id } = await req.json()
     const today = new Date().toISOString().split('T')[0]
     
-    console.log('Tracking pageview:', { session_id })
+    console.log('Tracking pageview:', { session_id, today })
 
     // Initialize Supabase client
     const supabaseClient = createClient(
