@@ -1,5 +1,7 @@
 import { Navbar } from "@/components/Navbar";
 import { PostCard } from "@/components/PostCard";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -140,6 +142,16 @@ const Index = () => {
               />
             </div>
           ))}
+        </div>
+        <div className="mt-12 text-center">
+          <Link to="/research">
+            <Button 
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold"
+            >
+              View More Research
+            </Button>
+          </Link>
         </div>
       </main>
     </div>
