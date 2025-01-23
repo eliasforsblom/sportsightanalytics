@@ -76,6 +76,7 @@ const AdminPosts = () => {
             image_url: data.image_url,
             highlighted: data.highlighted,
             created_at: data.created_at,
+            draft: data.draft, // Explicitly include draft status in update
             updated_at: new Date().toISOString(),
           })
           .eq("id", isEditing);
@@ -91,6 +92,7 @@ const AdminPosts = () => {
           .insert([{
             ...data,
             created_at: data.created_at,
+            draft: data.draft, // Explicitly include draft status in insert
           }]);
 
         if (error) throw error;
