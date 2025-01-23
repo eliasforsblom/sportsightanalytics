@@ -67,14 +67,14 @@ export const Navbar = () => {
           <div className="flex items-center gap-4">
             <div className="relative z-50">
               <Select value={language} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="w-[120px] bg-white">
+                <SelectTrigger className="w-[120px] bg-white border-gray-200">
                   <SelectValue>
                     {language === "en" ? "English" : "Svenska"}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="sv">Svenska</SelectItem>
+                <SelectContent className="bg-white shadow-lg border-gray-200">
+                  <SelectItem value="en" className="hover:bg-gray-50">English</SelectItem>
+                  <SelectItem value="sv" className="hover:bg-gray-50">Svenska</SelectItem>
                 </SelectContent>
               </Select>
             </div>
