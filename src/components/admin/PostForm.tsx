@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "./RichTextEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PostFormData {
   title: string;
@@ -18,6 +19,13 @@ interface PostFormData {
   highlighted: boolean;
   created_at: string;
   draft: boolean;
+  translations?: {
+    sv: {
+      title: string;
+      excerpt: string;
+      content: string;
+    };
+  };
 }
 
 interface PostFormProps {
@@ -30,17 +38,27 @@ interface PostFormProps {
 export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostFormProps) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const [currentLanguage, setCurrentLanguage] = useState<"en" | "sv">("en");
 
   const form = useForm<PostFormData>({
-    defaultValues: initialData || {
-      title: "",
-      excerpt: "",
-      content: "",
-      category: "",
-      image_url: "",
-      highlighted: false,
-      created_at: new Date().toISOString().split('T')[0],
-      draft: true,
+    defaultValues: {
+      ...initialData || {
+        title: "",
+        excerpt: "",
+        content: "",
+        category: "",
+        image_url: "",
+        highlighted: false,
+        created_at: new Date().toISOString().split('T')[0],
+        draft: true,
+      },
+      translations: initialData?.translations || {
+        sv: {
+          title: "",
+          excerpt: "",
+          content: "",
+        },
+      },
     },
   });
 
@@ -82,12 +100,15 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
     }
   };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+  const renderFormFields = (language: "en" | "sv") => {
+    const basePrefix = language === "en" ? "" : `translations.${language}.`;
+    const isTranslation = language !== "en";
+
+    return (
+      <div className="space-y-6">
         <FormField
           control={form.control}
-          name="title"
+          name={`${basePrefix}title` as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base font-semibold">Title</FormLabel>
@@ -100,7 +121,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
         />
         <FormField
           control={form.control}
-          name="excerpt"
+          name={`${basePrefix}excerpt` as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base font-semibold">Excerpt</FormLabel>
@@ -113,7 +134,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
         />
         <FormField
           control={form.control}
-          name="content"
+          name={`${basePrefix}content` as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base font-semibold">Content</FormLabel>
@@ -128,6 +149,26 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
+      </div>
+    );
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Tabs value={currentLanguage} onValueChange={(value) => setCurrentLanguage(value as "en" | "sv")}>
+          <TabsList>
+            <TabsTrigger value="en">English</TabsTrigger>
+            <TabsTrigger value="sv">Svenska</TabsTrigger>
+          </TabsList>
+          <TabsContent value="en" className="space-y-6">
+            {renderFormFields("en")}
+          </TabsContent>
+          <TabsContent value="sv" className="space-y-6">
+            {renderFormFields("sv")}
+          </TabsContent>
+        </Tabs>
+
         <FormField
           control={form.control}
           name="category"
@@ -141,6 +182,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="created_at"
@@ -154,6 +196,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="image_url"
@@ -186,6 +229,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="highlighted"

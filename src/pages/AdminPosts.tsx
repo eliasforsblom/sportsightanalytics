@@ -21,6 +21,13 @@ interface Post {
   highlighted: boolean;
   created_at: string;
   draft: boolean;
+  translations?: {
+    sv: {
+      title: string;
+      excerpt: string;
+      content: string;
+    };
+  };
 }
 
 const AdminPosts = () => {
@@ -32,21 +39,48 @@ const AdminPosts = () => {
   const { toast } = useToast();
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase
+    const { data: postsData, error: postsError } = await supabase
       .from("posts")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
+    if (postsError) {
       toast({
         title: "Error fetching posts",
-        description: error.message,
+        description: postsError.message,
         variant: "destructive",
       });
       return;
     }
 
-    setPosts(data || []);
+    // Fetch translations for each post
+    const postsWithTranslations = await Promise.all(
+      (postsData || []).map(async (post) => {
+        const { data: translationsData } = await supabase
+          .from("post_translations")
+          .select("*")
+          .eq("post_id", post.id)
+          .eq("language", "sv")
+          .single();
+
+        return {
+          ...post,
+          translations: {
+            sv: translationsData ? {
+              title: translationsData.title,
+              excerpt: translationsData.excerpt,
+              content: translationsData.content,
+            } : {
+              title: "",
+              excerpt: "",
+              content: "",
+            },
+          },
+        };
+      })
+    );
+
+    setPosts(postsWithTranslations);
   };
 
   useEffect(() => {
@@ -63,10 +97,11 @@ const AdminPosts = () => {
     checkAdmin();
   }, [navigate]);
 
-  const handleSubmit = async (data: Omit<Post, "id">) => {
+  const handleSubmit = async (data: Post) => {
     try {
       if (isEditing) {
-        const { error } = await supabase
+        // Update main post
+        const { error: postError } = await supabase
           .from("posts")
           .update({
             title: data.title,
@@ -76,26 +111,83 @@ const AdminPosts = () => {
             image_url: data.image_url,
             highlighted: data.highlighted,
             created_at: data.created_at,
-            draft: data.draft, // Explicitly include draft status in update
+            draft: data.draft,
             updated_at: new Date().toISOString(),
           })
           .eq("id", isEditing);
 
-        if (error) throw error;
+        if (postError) throw postError;
+
+        // Update or insert Swedish translation
+        const { data: existingTranslation } = await supabase
+          .from("post_translations")
+          .select("id")
+          .eq("post_id", isEditing)
+          .eq("language", "sv")
+          .single();
+
+        if (existingTranslation) {
+          const { error: translationError } = await supabase
+            .from("post_translations")
+            .update({
+              title: data.translations?.sv.title,
+              excerpt: data.translations?.sv.excerpt,
+              content: data.translations?.sv.content,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existingTranslation.id);
+
+          if (translationError) throw translationError;
+        } else {
+          const { error: translationError } = await supabase
+            .from("post_translations")
+            .insert([{
+              post_id: isEditing,
+              language: "sv",
+              title: data.translations?.sv.title,
+              excerpt: data.translations?.sv.excerpt,
+              content: data.translations?.sv.content,
+            }]);
+
+          if (translationError) throw translationError;
+        }
 
         toast({
           title: "Post updated successfully",
         });
       } else {
-        const { error } = await supabase
+        // Create new post
+        const { data: newPost, error: postError } = await supabase
           .from("posts")
           .insert([{
-            ...data,
+            title: data.title,
+            excerpt: data.excerpt,
+            content: data.content,
+            category: data.category,
+            image_url: data.image_url,
+            highlighted: data.highlighted,
             created_at: data.created_at,
-            draft: data.draft, // Explicitly include draft status in insert
-          }]);
+            draft: data.draft,
+          }])
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (postError) throw postError;
+
+        // Create Swedish translation
+        if (data.translations?.sv.title || data.translations?.sv.excerpt || data.translations?.sv.content) {
+          const { error: translationError } = await supabase
+            .from("post_translations")
+            .insert([{
+              post_id: newPost.id,
+              language: "sv",
+              title: data.translations.sv.title,
+              excerpt: data.translations.sv.excerpt,
+              content: data.translations.sv.content,
+            }]);
+
+          if (translationError) throw translationError;
+        }
 
         toast({
           title: "Post created successfully",
