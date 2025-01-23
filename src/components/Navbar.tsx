@@ -65,17 +65,19 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Select value={language} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue>
-                  {language === "en" ? "English" : "Svenska"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="sv">Svenska</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative z-50">
+              <Select value={language} onValueChange={handleLanguageChange}>
+                <SelectTrigger className="w-[120px] bg-white">
+                  <SelectValue>
+                    {language === "en" ? "English" : "Svenska"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="sv">Svenska</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className="md:hidden">
@@ -99,17 +101,6 @@ export const Navbar = () => {
                       {link.label}
                     </a>
                   ))}
-                  <Select value={language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {language === "en" ? "English" : "Svenska"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="sv">Svenska</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </SheetContent>
             </Sheet>

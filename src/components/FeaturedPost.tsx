@@ -19,22 +19,28 @@ export const FeaturedPost = ({ id, title: defaultTitle, excerpt: defaultExcerpt,
     queryFn: async () => {
       if (language === 'en') return null;
       
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('post_translations')
         .select('title, excerpt')
         .eq('post_id', id)
         .eq('language', language)
         .single();
       
+      if (error) {
+        console.error('Translation fetch error:', error);
+        return null;
+      }
+      
       return data;
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const title = translation?.title || defaultTitle;
   const excerpt = translation?.excerpt || defaultExcerpt;
 
   return (
-    <Link to={`/research/${id}`} className="block relative w-full h-[400px] md:h-[500px] lg:h-[600px] group">
+    <div className="block relative w-full h-[400px] md:h-[500px] lg:h-[600px] group">
       <div className="absolute inset-0">
         <img
           src={imageUrl}
@@ -47,20 +53,21 @@ export const FeaturedPost = ({ id, title: defaultTitle, excerpt: defaultExcerpt,
           <div className="max-w-3xl mx-auto">
             <Link
               to={`/research?category=${category}`}
-              onClick={(e) => e.stopPropagation()}
               className="inline-block px-4 py-1.5 mb-4 text-sm bg-white/95 text-gray-900 rounded-full hover:bg-white transition-colors duration-200 font-medium"
             >
               {category}
             </Link>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 group-hover:underline decoration-2 underline-offset-4 leading-tight">
-              {title}
-            </h2>
-            <p className="text-white/90 text-base md:text-lg lg:text-xl leading-relaxed">
-              {excerpt}
-            </p>
+            <Link to={`/research/${id}`}>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 group-hover:underline decoration-2 underline-offset-4 leading-tight">
+                {title}
+              </h2>
+              <p className="text-white/90 text-base md:text-lg lg:text-xl leading-relaxed">
+                {excerpt}
+              </p>
+            </Link>
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };

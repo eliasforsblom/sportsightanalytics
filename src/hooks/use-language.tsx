@@ -10,7 +10,11 @@ export const useLanguage = create<LanguageStore>()(
   persist(
     (set) => ({
       language: "en",
-      setLanguage: (language: string) => set({ language }),
+      setLanguage: (language: string) => {
+        set({ language });
+        // Force a page reload to ensure all components update
+        window.location.reload();
+      },
     }),
     {
       name: "language-storage",
