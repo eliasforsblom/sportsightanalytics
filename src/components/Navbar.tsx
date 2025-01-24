@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Flag } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLocation } from "react-router-dom";
@@ -69,12 +69,25 @@ export const Navbar = () => {
               <Select value={language} onValueChange={handleLanguageChange}>
                 <SelectTrigger className="w-[120px] bg-white border-gray-200">
                   <SelectValue>
-                    {language === "en" ? "English" : "Svenska"}
+                    <div className="flex items-center gap-2">
+                      <Flag className={`h-4 w-4 ${language === 'en' ? 'text-blue-600' : 'text-yellow-500'}`} />
+                      {language === "en" ? "English" : "Svenska"}
+                    </div>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-white shadow-lg border-gray-200">
-                  <SelectItem value="en" className="hover:bg-gray-50">English</SelectItem>
-                  <SelectItem value="sv" className="hover:bg-gray-50">Svenska</SelectItem>
+                  <SelectItem value="en" className="hover:bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Flag className="h-4 w-4 text-blue-600" />
+                      English
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="sv" className="hover:bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Flag className="h-4 w-4 text-yellow-500" />
+                      Svenska
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
