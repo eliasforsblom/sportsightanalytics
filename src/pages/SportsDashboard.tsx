@@ -12,13 +12,19 @@ const useTeamStats = () => {
         .select('*')
         .order('Date', { ascending: true });
 
-      if (fixturesError) throw fixturesError;
+      if (fixturesError) {
+        console.error("Error fetching fixtures:", fixturesError);
+        throw fixturesError;
+      }
+
+      if (!fixtures) {
+        throw new Error("No fixtures data returned");
+      }
 
       // Process fixtures to calculate team statistics
       const teamStats = new Map();
 
       fixtures.forEach((fixture) => {
-        // Only process Team1 statistics
         if (fixture.Team1) {
           if (!teamStats.has(fixture.Team1)) {
             teamStats.set(fixture.Team1, {
@@ -32,20 +38,16 @@ const useTeamStats = () => {
 
           const team1Stats = teamStats.get(fixture.Team1);
           
-          // Only count matches where we have goals recorded
           if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
             team1Stats.goalsFor += parseInt(fixture.Goal1);
-            // Convert Goal2 to string before parsing since it's a bigint in the database
             team1Stats.goalsAgainst += parseInt(String(fixture.Goal2));
             team1Stats.matches += 1;
           }
 
-          // Add points if available and valid
           if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
             team1Stats.points += parseFloat(fixture.Points);
           }
 
-          // Add weighted points if available and valid
           if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
             team1Stats.weightedPoints += parseFloat(fixture.Points_weight);
           }
@@ -65,9 +67,21 @@ const useTeamStats = () => {
 };
 
 const SportsDashboard = () => {
-  const { data, isLoading } = useTeamStats();
+  const { data, isLoading, error } = useTeamStats();
 
-  if (isLoading) {
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto py-8 px-4">
+          <h1 className="text-3xl font-bold mb-8 text-red-500">Error loading dashboard</h1>
+          <p className="text-gray-600">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || !data) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -81,8 +95,7 @@ const SportsDashboard = () => {
   const { teamStats, fixtures } = data;
 
   // Sort teams by weighted points
-  const standings = [...teamStats]
-    .sort((a, b) => b.weightedPoints - a.weightedPoints);
+  const standings = [...teamStats].sort((a, b) => b.weightedPoints - a.weightedPoints);
 
   return (
     <div className="min-h-screen bg-background">
