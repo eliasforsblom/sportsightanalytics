@@ -35,7 +35,8 @@ const useTeamStats = () => {
           // Only count matches where we have goals recorded
           if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
             team1Stats.goalsFor += parseInt(fixture.Goal1);
-            team1Stats.goalsAgainst += parseInt(fixture.Goal2);
+            // Convert Goal2 to string before parsing since it's a bigint in the database
+            team1Stats.goalsAgainst += parseInt(String(fixture.Goal2));
             team1Stats.matches += 1;
           }
 
@@ -210,4 +211,3 @@ const SportsDashboard = () => {
 };
 
 export default SportsDashboard;
-
