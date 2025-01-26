@@ -5,11 +5,13 @@ import { PostCard } from "@/components/PostCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet";
+import { useLanguage } from "@/hooks/use-language";
 
 const Research = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get('category');
+  const { language } = useLanguage();
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['posts', categoryFilter],
@@ -28,6 +30,30 @@ const Research = () => {
       if (error) throw error;
       return data;
     }
+  });
+
+  // Add translation query for individual post
+  const { data: translation } = useQuery({
+    queryKey: ['post-translation', id, language],
+    queryFn: async () => {
+      if (!id || language === 'en') return null;
+      
+      const { data, error } = await supabase
+        .from('post_translations')
+        .select('title, excerpt, content')
+        .eq('post_id', id)
+        .eq('language', language)
+        .single();
+      
+      if (error) {
+        console.error('Translation fetch error:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!id && language !== 'en',
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   // Show loading state
@@ -101,30 +127,34 @@ const Research = () => {
       day: 'numeric'
     });
 
+    // Use translated content if available
+    const title = translation?.title || post.title;
+    const excerpt = translation?.excerpt || post.excerpt;
+    const content = translation?.content || post.content;
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Helmet>
-          <title>{post.title} - SportSight Analytics</title>
-          <meta name="description" content={post.excerpt} />
-          <meta property="og:title" content={post.title} />
-          <meta property="og:description" content={post.excerpt} />
+          <title>{title} - SportSight Analytics</title>
+          <meta name="description" content={excerpt} />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={excerpt} />
           <meta property="og:image" content={post.image_url} />
           <meta property="og:type" content="article" />
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={post.title} />
-          <meta name="twitter:description" content={post.excerpt} />
+          <meta name="twitter:title" content={title} />
+          <meta name="twitter:description" content={excerpt} />
           <meta name="twitter:image" content={post.image_url} />
         </Helmet>
         
         <Navbar />
         
         <article className="w-full">
-          {/* Hero Image Section */}
           <div className="w-full h-[60vh] relative mb-8">
             <div className="absolute inset-0 bg-black/40 z-10" />
             <img
               src={post.image_url}
-              alt={post.title}
+              alt={title}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-20" />
@@ -136,10 +166,10 @@ const Research = () => {
                 {post.category}
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                {post.title}
+                {title}
               </h1>
               <p className="text-lg text-gray-200 mb-4">
-                {post.excerpt}
+                {excerpt}
               </p>
               <div className="text-sm text-gray-300">
                 {formattedDate}
@@ -148,7 +178,6 @@ const Research = () => {
             </div>
           </div>
 
-          {/* Article Content */}
           <div className="max-w-3xl mx-auto px-4 pb-16">
             <div 
               className="prose prose-lg max-w-none text-left prose-headings:font-bold prose-headings:text-gray-900 
@@ -156,7 +185,7 @@ const Research = () => {
                 prose-strong:text-gray-900 prose-code:text-gray-800 prose-code:bg-gray-100 
                 prose-pre:bg-gray-100 prose-img:rounded-lg prose-blockquote:border-l-primary
                 prose-blockquote:text-gray-700 prose-blockquote:italic"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: content }}
             />
           </div>
         </article>
@@ -164,7 +193,7 @@ const Research = () => {
     );
   }
 
-  // Show the list of posts (keeping existing code for the list view)
+  // Show the list of posts
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
