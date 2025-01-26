@@ -18,80 +18,62 @@ const useTeamStats = () => {
       const teamStats = new Map();
 
       fixtures.forEach((fixture) => {
-        const team = fixture.Team1;
-        if (!team) return;
+        // Process Team1
+        if (fixture.Team1) {
+          if (!teamStats.has(fixture.Team1)) {
+            teamStats.set(fixture.Team1, {
+              points: 0,
+              weightedPoints: 0,
+              goalsFor: 0,
+              goalsAgainst: 0,
+              matches: 0
+            });
+          }
 
-        if (!teamStats.has(team)) {
-          teamStats.set(team, {
-            points: 0,
-            weightedPoints: 0,
-            goalsFor: 0,
-            goalsAgainst: 0,
-            matches: 0
-          });
-        }
+          const team1Stats = teamStats.get(fixture.Team1);
+          
+          // Only count matches where we have goals recorded
+          if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
+            team1Stats.goalsFor += parseInt(fixture.Goal1);
+            team1Stats.goalsAgainst += fixture.Goal2;
+            team1Stats.matches += 1;
+          }
 
-        const stats = teamStats.get(team);
-        
-        // Only count matches where we have goals recorded
-        if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
-          stats.goalsFor += parseInt(fixture.Goal1);
-          stats.goalsAgainst += fixture.Goal2;
-          stats.matches += 1;
-        }
+          // Add points if available and valid
+          if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
+            team1Stats.points += parseFloat(fixture.Points);
+          }
 
-        // Add points if available and valid
-        if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
-          stats.points += parseFloat(fixture.Points);
-        }
-
-        // Add weighted points if available and valid
-        if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
-          const weightedPoints = parseFloat(fixture.Points_weight);
-          if (weightedPoints >= 0) { // Ensure we only add non-negative points
-            stats.weightedPoints += weightedPoints;
-          } else {
-            console.warn(`Invalid negative weighted points found for ${team}: ${weightedPoints}`);
+          // Add weighted points if available and valid
+          if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
+            const weightedPoints = parseFloat(fixture.Points_weight);
+            if (weightedPoints >= 0) {
+              team1Stats.weightedPoints += weightedPoints;
+            } else {
+              console.warn(`Invalid negative weighted points found for ${fixture.Team1}: ${weightedPoints}`);
+            }
           }
         }
-      });
 
-      // Calculate stats for Team2 as well
-      fixtures.forEach((fixture) => {
-        const team = fixture.Team2;
-        if (!team) return;
+        // Process Team2 (adding their stats to their own entry)
+        if (fixture.Team2) {
+          if (!teamStats.has(fixture.Team2)) {
+            teamStats.set(fixture.Team2, {
+              points: 0,
+              weightedPoints: 0,
+              goalsFor: 0,
+              goalsAgainst: 0,
+              matches: 0
+            });
+          }
 
-        if (!teamStats.has(team)) {
-          teamStats.set(team, {
-            points: 0,
-            weightedPoints: 0,
-            goalsFor: 0,
-            goalsAgainst: 0,
-            matches: 0
-          });
-        }
-
-        const stats = teamStats.get(team);
-        
-        // Only count matches where we have goals recorded
-        if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
-          stats.goalsFor += fixture.Goal2;
-          stats.goalsAgainst += parseInt(fixture.Goal1);
-          stats.matches += 1;
-        }
-
-        // Add points if available and valid
-        if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
-          stats.points += parseFloat(fixture.Points);
-        }
-
-        // Add weighted points if available and valid
-        if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
-          const weightedPoints = parseFloat(fixture.Points_weight);
-          if (weightedPoints >= 0) { // Ensure we only add non-negative points
-            stats.weightedPoints += weightedPoints;
-          } else {
-            console.warn(`Invalid negative weighted points found for ${team}: ${weightedPoints}`);
+          const team2Stats = teamStats.get(fixture.Team2);
+          
+          // Only count matches where we have goals recorded
+          if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
+            team2Stats.goalsFor += fixture.Goal2;
+            team2Stats.goalsAgainst += parseInt(fixture.Goal1);
+            team2Stats.matches += 1;
           }
         }
       });
