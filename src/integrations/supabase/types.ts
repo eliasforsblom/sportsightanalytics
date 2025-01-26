@@ -35,36 +35,33 @@ export type Database = {
           Date: string | null
           Goal1: string | null
           Goal2: number | null
-          ID: string
           Points: string | null
           Points_weight: string | null
           Result: string | null
           Team1: string | null
-          Team2: string
+          Team2: string | null
           Weight: number | null
         }
         Insert: {
           Date?: string | null
           Goal1?: string | null
           Goal2?: number | null
-          ID: string
           Points?: string | null
           Points_weight?: string | null
           Result?: string | null
           Team1?: string | null
-          Team2: string
+          Team2?: string | null
           Weight?: number | null
         }
         Update: {
           Date?: string | null
           Goal1?: string | null
           Goal2?: number | null
-          ID?: string
           Points?: string | null
           Points_weight?: string | null
           Result?: string | null
           Team1?: string | null
-          Team2?: string
+          Team2?: string | null
           Weight?: number | null
         }
         Relationships: []
