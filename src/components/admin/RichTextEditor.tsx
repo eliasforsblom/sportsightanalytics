@@ -12,7 +12,8 @@ import {
   List,
   ListOrdered,
   Quote,
-  Code
+  Code,
+  Video
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,14 +22,17 @@ interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
   onImageUpload?: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  onVideoUpload?: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 }
 
-export const RichTextEditor = ({ value, onChange, onImageUpload }: RichTextEditorProps) => {
+export const RichTextEditor = ({ value, onChange, onImageUpload, onVideoUpload }: RichTextEditorProps) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const [showImageInput, setShowImageInput] = useState(false);
+  const [showVideoInput, setShowVideoInput] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
 
@@ -42,7 +46,6 @@ export const RichTextEditor = ({ value, onChange, onImageUpload }: RichTextEdito
     const newText = value.substring(0, start) + before + selectedText + after + value.substring(end);
     onChange(newText);
 
-    // Reset cursor position
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(
@@ -87,11 +90,64 @@ export const RichTextEditor = ({ value, onChange, onImageUpload }: RichTextEdito
     }
   };
 
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) return;
+      
+      setUploading(true);
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('post-videos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-videos')
+        .getPublicUrl(filePath);
+
+      insertAtCursor(`<video controls class="w-full rounded-lg my-4">
+        <source src="${publicUrl}" type="${file.type}">
+        Your browser does not support the video tag.
+      </video>\n`);
+      
+      if (onVideoUpload) {
+        onVideoUpload(event);
+      }
+      
+      toast({
+        title: "Video uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading video",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleImageUrl = () => {
     if (imageUrl) {
       insertAtCursor(`<img src="${imageUrl}" alt="Image" class="max-w-full rounded-lg my-4" />\n`);
       setImageUrl("");
       setShowImageInput(false);
+    }
+  };
+
+  const handleVideoUrl = () => {
+    if (videoUrl) {
+      insertAtCursor(`<video controls class="w-full rounded-lg my-4">
+        <source src="${videoUrl}">
+        Your browser does not support the video tag.
+      </video>\n`);
+      setVideoUrl("");
+      setShowVideoInput(false);
     }
   };
 
@@ -183,6 +239,14 @@ export const RichTextEditor = ({ value, onChange, onImageUpload }: RichTextEdito
           type="button"
           variant="ghost"
           size="sm"
+          onClick={() => setShowVideoInput(!showVideoInput)}
+        >
+          <Video className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => setShowLinkInput(!showLinkInput)}
         >
           <Link className="h-4 w-4" />
@@ -209,6 +273,31 @@ export const RichTextEditor = ({ value, onChange, onImageUpload }: RichTextEdito
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
+            disabled={uploading}
+          />
+        </div>
+      )}
+
+      {showVideoInput && (
+        <div className="flex gap-2 items-center">
+          <Input
+            type="text"
+            placeholder="Enter video URL"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+          />
+          <Button 
+            type="button"
+            onClick={handleVideoUrl}
+            size="sm"
+          >
+            Insert
+          </Button>
+          <div className="mx-2">or</div>
+          <Input
+            type="file"
+            accept="video/*"
+            onChange={handleVideoUpload}
             disabled={uploading}
           />
         </div>

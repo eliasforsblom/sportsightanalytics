@@ -48,6 +48,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
         content: "",
         category: "",
         image_url: "",
+        video_url: "",
         highlighted: false,
         created_at: new Date().toISOString().split('T')[0],
         draft: true,
@@ -100,6 +101,44 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
     }
   };
 
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+      setUploading(true);
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('post-videos')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-videos')
+        .getPublicUrl(filePath);
+
+      form.setValue('video_url', publicUrl);
+      
+      toast({
+        title: "Video uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading video",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const renderFormFields = (language: "en" | "sv") => {
     const basePrefix = language === "en" ? "" : `translations.${language}.`;
     const isTranslation = language !== "en";
@@ -143,6 +182,7 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
                   value={field.value} 
                   onChange={field.onChange}
                   onImageUpload={handleImageUpload}
+                  onVideoUpload={handleVideoUpload}
                 />
               </FormControl>
               <FormMessage />
@@ -216,6 +256,39 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
                     <img 
                       src={field.value} 
                       alt="Preview" 
+                      className="max-w-[200px] rounded-md"
+                    />
+                  </div>
+                )}
+                <Input 
+                  type="hidden" 
+                  {...field}
+                />
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="video_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-semibold">Featured Video</FormLabel>
+              <div className="space-y-3">
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  disabled={uploading}
+                  className="w-full"
+                />
+                {field.value && (
+                  <div className="mt-2">
+                    <video 
+                      src={field.value} 
+                      controls
                       className="max-w-[200px] rounded-md"
                     />
                   </div>

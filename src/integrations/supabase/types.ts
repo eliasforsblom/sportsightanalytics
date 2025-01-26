@@ -124,6 +124,7 @@ export type Database = {
           post_id: string
           title: string
           updated_at: string | null
+          video_url: string | null
         }
         Insert: {
           content: string
@@ -134,6 +135,7 @@ export type Database = {
           post_id: string
           title: string
           updated_at?: string | null
+          video_url?: string | null
         }
         Update: {
           content?: string
@@ -144,6 +146,7 @@ export type Database = {
           post_id?: string
           title?: string
           updated_at?: string | null
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -167,6 +170,7 @@ export type Database = {
           image_url: string
           title: string
           updated_at: string | null
+          video_url: string | null
           views: number | null
         }
         Insert: {
@@ -180,6 +184,7 @@ export type Database = {
           image_url: string
           title: string
           updated_at?: string | null
+          video_url?: string | null
           views?: number | null
         }
         Update: {
@@ -193,6 +198,7 @@ export type Database = {
           image_url?: string
           title?: string
           updated_at?: string | null
+          video_url?: string | null
           views?: number | null
         }
         Relationships: []
