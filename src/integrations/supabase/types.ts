@@ -37,7 +37,7 @@ export type Database = {
           Goal2: number | null
           Points: string | null
           Points_weight: string | null
-          Result: number | null
+          Result: string | null
           Team1: string | null
           Team2: string | null
           Weight: number | null
@@ -48,7 +48,7 @@ export type Database = {
           Goal2?: number | null
           Points?: string | null
           Points_weight?: string | null
-          Result?: number | null
+          Result?: string | null
           Team1?: string | null
           Team2?: string | null
           Weight?: number | null
@@ -59,7 +59,7 @@ export type Database = {
           Goal2?: number | null
           Points?: string | null
           Points_weight?: string | null
-          Result?: number | null
+          Result?: string | null
           Team1?: string | null
           Team2?: string | null
           Weight?: number | null

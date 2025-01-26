@@ -40,14 +40,59 @@ const useTeamStats = () => {
           stats.matches += 1;
         }
 
-        // Add points if available
-        if (fixture.Points) {
+        // Add points if available and valid
+        if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
           stats.points += parseFloat(fixture.Points);
         }
 
-        // Add weighted points if available
-        if (fixture.Points_weight) {
-          stats.weightedPoints += parseFloat(fixture.Points_weight);
+        // Add weighted points if available and valid
+        if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
+          const weightedPoints = parseFloat(fixture.Points_weight);
+          if (weightedPoints >= 0) { // Ensure we only add non-negative points
+            stats.weightedPoints += weightedPoints;
+          } else {
+            console.warn(`Invalid negative weighted points found for ${team}: ${weightedPoints}`);
+          }
+        }
+      });
+
+      // Calculate stats for Team2 as well
+      fixtures.forEach((fixture) => {
+        const team = fixture.Team2;
+        if (!team) return;
+
+        if (!teamStats.has(team)) {
+          teamStats.set(team, {
+            points: 0,
+            weightedPoints: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            matches: 0
+          });
+        }
+
+        const stats = teamStats.get(team);
+        
+        // Only count matches where we have goals recorded
+        if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
+          stats.goalsFor += fixture.Goal2;
+          stats.goalsAgainst += parseInt(fixture.Goal1);
+          stats.matches += 1;
+        }
+
+        // Add points if available and valid
+        if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
+          stats.points += parseFloat(fixture.Points);
+        }
+
+        // Add weighted points if available and valid
+        if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
+          const weightedPoints = parseFloat(fixture.Points_weight);
+          if (weightedPoints >= 0) { // Ensure we only add non-negative points
+            stats.weightedPoints += weightedPoints;
+          } else {
+            console.warn(`Invalid negative weighted points found for ${team}: ${weightedPoints}`);
+          }
         }
       });
 
