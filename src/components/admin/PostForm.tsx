@@ -16,6 +16,7 @@ interface PostFormData {
   content: string;
   category: string;
   image_url: string;
+  video_url?: string;
   highlighted: boolean;
   created_at: string;
   draft: boolean;
@@ -262,7 +263,8 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
                 )}
                 <Input 
                   type="hidden" 
-                  {...field}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </div>
               <FormMessage />
@@ -295,7 +297,8 @@ export const PostForm = ({ initialData, onSubmit, isEditing, onClose }: PostForm
                 )}
                 <Input 
                   type="hidden" 
-                  {...field}
+                  value={field.value || ''}
+                  onChange={field.onChange}
                 />
               </div>
               <FormMessage />
