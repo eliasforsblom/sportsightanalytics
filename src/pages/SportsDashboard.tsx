@@ -90,44 +90,6 @@ const SportsDashboard = () => {
       <div className="container mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-8">League Dashboard</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Matches</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {fixtures.filter(f => f.Goal1 !== null && f.Goal2 !== null).length}
-              </div>
-              <p className="text-sm text-gray-500">Played this season</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>League Leader</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{standings[0]?.name || "N/A"}</div>
-              <p className="text-sm text-gray-500">
-                {standings[0]?.weightedPoints.toFixed(2) || 0} weighted points
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Total Goals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {standings[0]?.goalsFor || "0"}
-              </div>
-              <p className="text-sm text-gray-500">Leader's total goals</p>
-            </CardContent>
-          </Card>
-        </div>
-
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>League Table</CardTitle>
