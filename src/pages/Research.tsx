@@ -32,7 +32,6 @@ const Research = () => {
     }
   });
 
-  // Add translation query for individual post
   const { data: translation } = useQuery({
     queryKey: ['post-translation', id, language],
     queryFn: async () => {
@@ -53,10 +52,9 @@ const Research = () => {
       return data;
     },
     enabled: !!id && language !== 'en',
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -82,7 +80,6 @@ const Research = () => {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -97,7 +94,6 @@ const Research = () => {
     );
   }
 
-  // If there's an ID parameter, show the full post with Medium-style design
   if (id && posts) {
     const post = posts.find(post => post.id === id);
     
@@ -127,7 +123,6 @@ const Research = () => {
       day: 'numeric'
     });
 
-    // Use translated content if available
     const title = translation?.title || post.title;
     const excerpt = translation?.excerpt || post.excerpt;
     const content = translation?.content || post.content;
@@ -193,7 +188,6 @@ const Research = () => {
     );
   }
 
-  // Show the list of posts
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
