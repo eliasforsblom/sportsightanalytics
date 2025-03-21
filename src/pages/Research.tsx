@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -96,27 +95,21 @@ const Research = () => {
   }
 
   const formatDate = (dateString: string) => {
-    // Fix the issue with the extra zero in the year
-    // First, ensure we're working with a clean date string
     if (!dateString) return "";
     
     try {
-      // Create a new date object from the string
       const date = new Date(dateString);
       
-      // Check if date is valid
       if (isNaN(date.getTime())) {
         console.error("Invalid date:", dateString);
         return "";
       }
       
-      // Use a custom formatting approach to avoid the extra zero issue
-      const month = date.toLocaleString('en-US', { month: 'short' });
-      const day = date.getDate();
-      const year = date.getFullYear();
-      
-      // Return the formatted date
-      return `${month} ${day}, ${year}`;
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }).format(date);
     } catch (e) {
       console.error("Error formatting date:", e);
       return "";
@@ -146,7 +139,6 @@ const Research = () => {
       );
     }
 
-    // The key fix: Use the formatDate function here instead of directly using post.created_at
     const formattedDate = formatDate(post.created_at);
 
     const title = translation?.title || post.title;
