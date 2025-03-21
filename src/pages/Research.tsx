@@ -146,6 +146,7 @@ const Research = () => {
       );
     }
 
+    // The key fix: Use the formatDate function here instead of directly using post.created_at
     const formattedDate = formatDate(post.created_at);
 
     const title = translation?.title || post.title;
