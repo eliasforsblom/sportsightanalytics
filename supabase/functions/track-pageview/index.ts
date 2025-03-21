@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -15,6 +16,7 @@ serve(async (req) => {
 
   try {
     const { session_id } = await req.json()
+    // Ensure date is in ISO format without any issues
     const today = new Date().toISOString().split('T')[0]
     
     console.log('Tracking pageview:', { session_id, today })

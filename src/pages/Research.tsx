@@ -96,14 +96,31 @@ const Research = () => {
   }
 
   const formatDate = (dateString: string) => {
-    // Parse the date correctly ensuring no timezone issues
-    const date = new Date(dateString);
-    // Format without any extra characters at the end of the year
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    // Fix the issue with the extra zero in the year
+    // First, ensure we're working with a clean date string
+    if (!dateString) return "";
+    
+    try {
+      // Create a new date object from the string
+      const date = new Date(dateString);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return "";
+      }
+      
+      // Use a custom formatting approach to avoid the extra zero issue
+      const month = date.toLocaleString('en-US', { month: 'short' });
+      const day = date.getDate();
+      const year = date.getFullYear();
+      
+      // Return the formatted date
+      return `${month} ${day}, ${year}`;
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return "";
+    }
   };
 
   if (id && posts) {
