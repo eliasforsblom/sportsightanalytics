@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,17 @@ const Index = () => {
     );
   }
 
+  const formatDate = (dateString: string) => {
+    // Parse the date correctly ensuring no timezone issues
+    const date = new Date(dateString);
+    // Format without any extra characters at the end of the year
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
@@ -132,11 +144,7 @@ const Index = () => {
                 id={post.id}
                 title={post.title}
                 excerpt={post.excerpt}
-                date={new Date(post.created_at || '').toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+                date={formatDate(post.created_at || '')}
                 category={post.category}
                 imageUrl={post.image_url}
               />

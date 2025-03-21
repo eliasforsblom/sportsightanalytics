@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -94,6 +95,17 @@ const Research = () => {
     );
   }
 
+  const formatDate = (dateString: string) => {
+    // Parse the date correctly ensuring no timezone issues
+    const date = new Date(dateString);
+    // Format without any extra characters at the end of the year
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   if (id && posts) {
     const post = posts.find(post => post.id === id);
     
@@ -117,11 +129,7 @@ const Research = () => {
       );
     }
 
-    const formattedDate = new Date(post.created_at).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    const formattedDate = formatDate(post.created_at);
 
     const title = translation?.title || post.title;
     const excerpt = translation?.excerpt || post.excerpt;
@@ -219,11 +227,7 @@ const Research = () => {
                 id={post.id}
                 title={post.title}
                 excerpt={post.excerpt}
-                date={new Date(post.created_at || '').toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+                date={formatDate(post.created_at || '')}
                 category={post.category}
                 imageUrl={post.image_url}
               />
