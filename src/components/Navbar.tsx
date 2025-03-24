@@ -21,7 +21,7 @@ export const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/research", label: "Research" },
-    { href: "/sports-dashboard", label: "Allsvenskan preseason" },
+    { href: "/inflation-calculator", label: "Inflation Calculator" },
     { href: "/about", label: "About" },
   ];
 
