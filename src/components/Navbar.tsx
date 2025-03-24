@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
@@ -20,7 +21,6 @@ export const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/research", label: "Research" },
-    { href: "/inflation-calculator", label: "Inflation Calculator" },
     { href: "/sports-dashboard", label: "Allsvenskan preseason" },
     { href: "/about", label: "About" },
   ];
