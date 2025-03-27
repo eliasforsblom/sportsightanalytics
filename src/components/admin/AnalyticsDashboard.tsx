@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
@@ -6,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { useQueryClient } from "@tanstack/react-query"
+import { Users } from "lucide-react"
 
 interface AnalyticsData {
   visit_date: string
@@ -68,6 +70,9 @@ export function AnalyticsDashboard() {
     },
   })
 
+  // Calculate total visitors
+  const totalVisitors = analytics?.reduce((sum, day) => sum + day.visitor_count, 0) || 0
+
   if (isLoadingAnalytics) {
     return (
       <div className="space-y-4">
@@ -79,6 +84,19 @@ export function AnalyticsDashboard() {
 
   return (
     <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-card-foreground text-lg">Total Visitors</CardTitle>
+            <Users className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{totalVisitors}</p>
+            <p className="text-xs text-muted-foreground mt-1">All Time</p>
+          </CardContent>
+        </Card>
+      </div>
+      
       <Card className="bg-card">
         <CardHeader>
           <CardTitle className="text-card-foreground">Website Traffic</CardTitle>
