@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import { useQueryClient } from "@tanstack/react-query"
-import { Users } from "lucide-react"
+import { Users, TrendingUp } from "lucide-react"
 
 interface AnalyticsData {
   visit_date: string
@@ -72,6 +72,11 @@ export function AnalyticsDashboard() {
 
   // Calculate total visitors
   const totalVisitors = analytics?.reduce((sum, day) => sum + day.visitor_count, 0) || 0
+  
+  // Calculate average daily visitors
+  const avgDailyVisitors = analytics?.length 
+    ? Math.round(totalVisitors / analytics.length) 
+    : 0
 
   if (isLoadingAnalytics) {
     return (
@@ -93,6 +98,17 @@ export function AnalyticsDashboard() {
           <CardContent>
             <p className="text-3xl font-bold">{totalVisitors}</p>
             <p className="text-xs text-muted-foreground mt-1">All Time</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-card-foreground text-lg">Avg. Daily Visitors</CardTitle>
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{avgDailyVisitors}</p>
+            <p className="text-xs text-muted-foreground mt-1">Per Day</p>
           </CardContent>
         </Card>
       </div>
