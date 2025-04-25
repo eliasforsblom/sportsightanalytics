@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
   Label,
   ReferenceLine,
-  Legend,
   ZAxis
 } from 'recharts';
 
@@ -89,7 +88,6 @@ export function XGPlot({ data }: XGPlotProps) {
         </YAxis>
         <ZAxis range={[60, 60]} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
         
         {/* Reference line for xG = Goals (perfect prediction) */}
         <ReferenceLine 
@@ -99,11 +97,9 @@ export function XGPlot({ data }: XGPlotProps) {
         />
         
         <Scatter 
-          name="Teams" 
           data={data}
           shape="circle"
-          fill="#777777" // Set a default fill color
-          // Use a data formatter to set individual point colors
+          fill="#777777"
           dataKey="teamId"
         />
       </ScatterChart>

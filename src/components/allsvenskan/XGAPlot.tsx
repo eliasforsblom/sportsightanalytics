@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
   Label,
   ReferenceLine,
-  Legend,
   ZAxis
 } from 'recharts';
 
@@ -73,7 +72,6 @@ export function XGAPlot({ data }: XGAPlotProps) {
         </YAxis>
         <ZAxis range={[60, 60]} />
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
         
         {/* Reference line for xGA = Goals Conceded (perfect prediction) */}
         <ReferenceLine 
