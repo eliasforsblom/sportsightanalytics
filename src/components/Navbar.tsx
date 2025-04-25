@@ -22,6 +22,7 @@ export const Navbar = () => {
     { href: "/", label: "Home" },
     { href: "/research", label: "Research" },
     { href: "/inflation-calculator", label: "Inflation Calculator" },
+    { href: "/allsvenskan-xg", label: "Allsvenskan xG" },
     { href: "/about", label: "About" },
   ];
 

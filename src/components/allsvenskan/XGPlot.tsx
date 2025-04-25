@@ -1,0 +1,107 @@
+
+import { 
+  ScatterChart, 
+  Scatter, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Label,
+  ReferenceLine,
+  Legend,
+  ZAxis
+} from 'recharts';
+
+interface TeamData {
+  team: string;
+  teamId: string;
+  xG: number;
+  goalsScored: number;
+}
+
+interface XGPlotProps {
+  data: TeamData[];
+}
+
+// Custom tooltip component
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border rounded-md shadow-md">
+        <p className="font-bold">{payload[0].payload.team}</p>
+        <p className="text-sm">xG: {payload[0].payload.xG.toFixed(2)}</p>
+        <p className="text-sm">Goals: {payload[0].payload.goalsScored}</p>
+        <p className="text-sm text-muted-foreground">
+          {payload[0].payload.goalsScored > payload[0].payload.xG 
+            ? "Overperforming xG" 
+            : "Underperforming xG"}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+export function XGPlot({ data }: XGPlotProps) {
+  // Calculate domain bounds with some padding
+  const xMax = Math.max(...data.map(d => d.xG)) * 1.1;
+  const yMax = Math.max(...data.map(d => d.goalsScored)) * 1.1;
+  
+  // Team colors for dots (sample colors)
+  const TEAM_COLORS = {
+    AIK: "#000000",
+    DIF: "#1B4F9A",
+    MFF: "#0097CE",
+    GÖTEBORG: "#0053A0",
+    HAMMARBY: "#1B783A",
+    default: "#777777"
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <ScatterChart
+        margin={{ top: 20, right: 30, bottom: 50, left: 30 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+        <XAxis 
+          type="number" 
+          dataKey="xG"
+          domain={[0, xMax]} 
+          name="Expected Goals (xG)"
+          tickFormatter={(value) => value.toFixed(1)}
+        >
+          <Label value="Expected Goals (xG)" position="bottom" dy={15} />
+        </XAxis>
+        <YAxis 
+          type="number" 
+          dataKey="goalsScored" 
+          name="Goals Scored"
+          domain={[0, yMax]}
+        >
+          <Label value="Goals Scored" position="left" angle={-90} dx={-15} />
+        </YAxis>
+        <ZAxis range={[60, 60]} />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend />
+        
+        {/* Reference line for xG = Goals (perfect prediction) */}
+        <ReferenceLine 
+          stroke="#777" 
+          strokeDasharray="3 3" 
+          segment={[{ x: 0, y: 0 }, { x: xMax, y: xMax }]} 
+        />
+        
+        <Scatter 
+          name="Teams" 
+          data={data} 
+          shape="circle"
+          fill={(entry) => {
+            const teamKey = entry.team as keyof typeof TEAM_COLORS;
+            return TEAM_COLORS[teamKey] || TEAM_COLORS.default;
+          }}
+        />
+      </ScatterChart>
+    </ResponsiveContainer>
+  );
+}

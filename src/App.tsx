@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
@@ -7,6 +8,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminPosts from "./pages/AdminPosts";
 import InflationCalculator from "./pages/InflationCalculator";
 import SportsDashboard from "./pages/SportsDashboard";
+import AllsvenskanXG from "./pages/AllsvenskanXG";
 import { Toaster } from "./components/ui/sonner";
 import { useTrackPageview } from "@/hooks/use-track-pageview";
 import "./App.css";
@@ -27,6 +29,7 @@ function AppContent() {
         <Route path="/admin/posts" element={<AdminPosts />} />
         <Route path="/inflation-calculator" element={<InflationCalculator />} />
         <Route path="/sports-dashboard" element={<SportsDashboard />} />
+        <Route path="/allsvenskan-xg" element={<AllsvenskanXG />} />
       </Routes>
       <Toaster />
     </>
