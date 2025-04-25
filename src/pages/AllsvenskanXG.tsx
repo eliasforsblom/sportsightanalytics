@@ -48,16 +48,16 @@ export default function AllsvenskanXG() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-8">
+            <div className="h-[500px] mb-8">
+              <XGPlot data={aggregatedData} />
+            </div>
+            
+            <div>
               <FixtureSlider 
                 value={currentFixture} 
                 onChange={setCurrentFixture}
                 max={30}
               />
-            </div>
-            
-            <div className="h-[500px]">
-              <XGPlot data={aggregatedData} />
             </div>
           </CardContent>
         </Card>
