@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function XGAPlot({ data }: XGAPlotProps) {
   // Calculate domain bounds with some padding
   const xMax = Math.max(...data.map(d => d.xGA)) * 1.1;
-  const yMax = Math.max(...data.map(d => d.goalsConceded)) * 1.1;
+  const yMax = Math.ceil(Math.max(...data.map(d => d.goalsConceded)) * 1.1);
   
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -67,6 +67,8 @@ export function XGAPlot({ data }: XGAPlotProps) {
           dataKey="goalsConceded" 
           name="Goals Conceded"
           domain={[0, yMax]}
+          allowDecimals={false}
+          tickCount={yMax > 10 ? 10 : yMax + 1}
         >
           <Label value="Goals Conceded" position="left" angle={-90} dx={-15} />
         </YAxis>

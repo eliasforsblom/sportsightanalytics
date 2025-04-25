@@ -36,32 +36,50 @@ export default function AllsvenskanXG() {
     }));
 
   // Aggregate data for xG plot
-  const aggregatedXgData = xgFixtureData.reduce((acc, curr) => {
-    const existingTeam = acc.find(item => item.teamId === curr.teamId);
-    if (existingTeam) {
-      existingTeam.xG += curr.xG;
-      existingTeam.goalsScored += curr.goalsScored;
-      existingTeam.xGA += curr.xGA;
-      existingTeam.goalsConceded += curr.goalsConceded;
-    } else {
-      acc.push({...curr});
+  const aggregatedXgData = teams.map(team => {
+    const teamFixtures = xgFixtureData.filter(fixture => fixture.teamId === team.id);
+    
+    if (teamFixtures.length === 0) {
+      // If no fixtures for this team, return default values
+      return {
+        team: team.name,
+        teamId: team.id,
+        xG: 0,
+        goalsScored: 0
+      };
     }
-    return acc;
-  }, [] as Array<{team: string, teamId: string, xG: number, goalsScored: number, xGA: number, goalsConceded: number}>);
+    
+    // Sum up xG and goalsScored for this team
+    return {
+      team: team.name,
+      teamId: team.id,
+      xG: teamFixtures.reduce((sum, fixture) => sum + fixture.xG, 0),
+      goalsScored: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsScored, 0)
+    };
+  });
   
   // Aggregate data for xGA plot
-  const aggregatedXgaData = xgaFixtureData.reduce((acc, curr) => {
-    const existingTeam = acc.find(item => item.teamId === curr.teamId);
-    if (existingTeam) {
-      existingTeam.xG += curr.xG;
-      existingTeam.goalsScored += curr.goalsScored;
-      existingTeam.xGA += curr.xGA;
-      existingTeam.goalsConceded += curr.goalsConceded;
-    } else {
-      acc.push({...curr});
+  const aggregatedXgaData = teams.map(team => {
+    const teamFixtures = xgaFixtureData.filter(fixture => fixture.teamId === team.id);
+    
+    if (teamFixtures.length === 0) {
+      // If no fixtures for this team, return default values
+      return {
+        team: team.name,
+        teamId: team.id,
+        xGA: 0,
+        goalsConceded: 0
+      };
     }
-    return acc;
-  }, [] as Array<{team: string, teamId: string, xG: number, goalsScored: number, xGA: number, goalsConceded: number}>);
+    
+    // Sum up xGA and goalsConceded for this team
+    return {
+      team: team.name,
+      teamId: team.id,
+      xGA: teamFixtures.reduce((sum, fixture) => sum + fixture.xGA, 0),
+      goalsConceded: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsConceded, 0)
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

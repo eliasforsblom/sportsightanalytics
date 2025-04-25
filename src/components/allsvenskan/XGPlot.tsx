@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function XGPlot({ data }: XGPlotProps) {
   // Calculate domain bounds with some padding
   const xMax = Math.max(...data.map(d => d.xG)) * 1.1;
-  const yMax = Math.max(...data.map(d => d.goalsScored)) * 1.1;
+  const yMax = Math.ceil(Math.max(...data.map(d => d.goalsScored)) * 1.1);
   
   // Team colors for dots (sample colors)
   const TEAM_COLORS: Record<string, string> = {
@@ -83,6 +83,8 @@ export function XGPlot({ data }: XGPlotProps) {
           dataKey="goalsScored" 
           name="Goals Scored"
           domain={[0, yMax]}
+          allowDecimals={false}
+          tickCount={yMax > 10 ? 10 : yMax + 1}
         >
           <Label value="Goals Scored" position="left" angle={-90} dx={-15} />
         </YAxis>
