@@ -8,11 +8,12 @@ import { FixtureSlider } from "@/components/allsvenskan/FixtureSlider";
 import { fixtures, teams } from "@/data/allsvenskan-data";
 
 export default function AllsvenskanXG() {
-  const [currentFixture, setCurrentFixture] = useState(1);
+  const [xgFixture, setXgFixture] = useState(1);
+  const [xgaFixture, setXgaFixture] = useState(1);
   
-  // Filter data for the selected fixture
-  const fixtureData = fixtures
-    .filter(fixture => fixture.fixtureNumber <= currentFixture)
+  // Filter data for the xG plot
+  const xgFixtureData = fixtures
+    .filter(fixture => fixture.fixtureNumber <= xgFixture)
     .map(fixture => ({
       team: teams.find(t => t.id === fixture.teamId)?.name || "Unknown",
       teamId: fixture.teamId,
@@ -22,8 +23,34 @@ export default function AllsvenskanXG() {
       goalsConceded: fixture.goalsConceded,
     }));
 
-  // Aggregate data by team (sum xG and goals)
-  const aggregatedData = fixtureData.reduce((acc, curr) => {
+  // Filter data for the xGA plot
+  const xgaFixtureData = fixtures
+    .filter(fixture => fixture.fixtureNumber <= xgaFixture)
+    .map(fixture => ({
+      team: teams.find(t => t.id === fixture.teamId)?.name || "Unknown",
+      teamId: fixture.teamId,
+      xG: fixture.xG,
+      goalsScored: fixture.goalsScored,
+      xGA: fixture.xGA,
+      goalsConceded: fixture.goalsConceded,
+    }));
+
+  // Aggregate data for xG plot
+  const aggregatedXgData = xgFixtureData.reduce((acc, curr) => {
+    const existingTeam = acc.find(item => item.teamId === curr.teamId);
+    if (existingTeam) {
+      existingTeam.xG += curr.xG;
+      existingTeam.goalsScored += curr.goalsScored;
+      existingTeam.xGA += curr.xGA;
+      existingTeam.goalsConceded += curr.goalsConceded;
+    } else {
+      acc.push({...curr});
+    }
+    return acc;
+  }, [] as Array<{team: string, teamId: string, xG: number, goalsScored: number, xGA: number, goalsConceded: number}>);
+  
+  // Aggregate data for xGA plot
+  const aggregatedXgaData = xgaFixtureData.reduce((acc, curr) => {
     const existingTeam = acc.find(item => item.teamId === curr.teamId);
     if (existingTeam) {
       existingTeam.xG += curr.xG;
@@ -44,43 +71,53 @@ export default function AllsvenskanXG() {
         <h1 className="text-3xl font-bold mb-8">Allsvenskan xG Analysis</h1>
         
         <div className="space-y-8">
-          {/* First widget - xG vs Goals Scored */}
+          {/* First widget - xG vs Goals Scored with its own slider */}
           <Card className="bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>xG vs. Goals Scored</span>
                 <span className="text-sm font-normal text-muted-foreground">
-                  Fixture: {currentFixture} of 30
+                  Fixture: {xgFixture} of 30
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[500px] mb-8">
-                <XGPlot data={aggregatedData} />
+                <XGPlot data={aggregatedXgData} />
+              </div>
+              
+              <div className="mt-6">
+                <FixtureSlider 
+                  value={xgFixture} 
+                  onChange={setXgFixture}
+                  max={30}
+                />
               </div>
             </CardContent>
           </Card>
           
-          {/* Second widget - xGA vs Goals Conceded */}
+          {/* Second widget - xGA vs Goals Conceded with its own slider */}
           <Card className="bg-white shadow-sm">
             <CardHeader>
-              <CardTitle>xGA vs. Goals Conceded</CardTitle>
+              <CardTitle className="flex justify-between items-center">
+                <span>xGA vs. Goals Conceded</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  Fixture: {xgaFixture} of 30
+                </span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[500px] mb-8">
-                <XGAPlot data={aggregatedData} />
+                <XGAPlot data={aggregatedXgaData} />
               </div>
-            </CardContent>
-          </Card>
-          
-          {/* Single slider that controls both charts */}
-          <Card className="bg-white shadow-sm">
-            <CardContent className="py-6">
-              <FixtureSlider 
-                value={currentFixture} 
-                onChange={setCurrentFixture}
-                max={30}
-              />
+              
+              <div className="mt-6">
+                <FixtureSlider 
+                  value={xgaFixture} 
+                  onChange={setXgaFixture}
+                  max={30}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
