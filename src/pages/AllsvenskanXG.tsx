@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { XGPlot } from "@/components/allsvenskan/XGPlot";
 import { XGAPlot } from "@/components/allsvenskan/XGAPlot";
 import { FixtureSlider } from "@/components/allsvenskan/FixtureSlider";
-import { fixtures, teams } from "@/data/allsvenskan-data";
+import { fixtures, teams, Team } from "@/data/allsvenskan-data";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Construction } from "lucide-react";
