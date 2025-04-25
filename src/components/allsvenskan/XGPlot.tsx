@@ -17,6 +17,7 @@ interface TeamData {
   teamId: string;
   xG: number;
   goalsScored: number;
+  imageUrl?: string;
 }
 
 interface XGPlotProps {
@@ -42,27 +43,41 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
+// Custom render for dots using team logos
+const renderDot = (props: any) => {
+  const { cx, cy, payload } = props;
+  
+  // If we have an imageUrl, render an image
+  if (payload.imageUrl) {
+    return (
+      <image 
+        x={cx - 15} 
+        y={cy - 15} 
+        width={30} 
+        height={30} 
+        xlinkHref={payload.imageUrl} 
+        style={{ clipPath: 'circle(15px at center)' }}
+      />
+    );
+  }
+  
+  // Fallback to a circle if no image is available
+  return (
+    <circle 
+      cx={cx} 
+      cy={cy} 
+      r={10} 
+      fill="#777777" 
+      stroke="none" 
+    />
+  );
+};
+
 export function XGPlot({ data }: XGPlotProps) {
   // Calculate domain bounds with some padding
   const xMax = Math.max(...data.map(d => d.xG)) * 1.1;
   const yMax = Math.ceil(Math.max(...data.map(d => d.goalsScored)) * 1.1);
   
-  // Team colors for dots (sample colors)
-  const TEAM_COLORS: Record<string, string> = {
-    AIK: "#000000",
-    DIF: "#1B4F9A",
-    MFF: "#0097CE",
-    GÖTEBORG: "#0053A0",
-    HAMMARBY: "#1B783A",
-    default: "#777777"
-  };
-
-  // Function to get the team color
-  const getTeamColor = (entry: TeamData) => {
-    const teamKey = entry.team as string;
-    return TEAM_COLORS[teamKey] || TEAM_COLORS.default;
-  };
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ScatterChart
@@ -100,7 +115,7 @@ export function XGPlot({ data }: XGPlotProps) {
         
         <Scatter 
           data={data}
-          shape="circle"
+          shape={renderDot}
           fill="#777777"
           dataKey="teamId"
         />

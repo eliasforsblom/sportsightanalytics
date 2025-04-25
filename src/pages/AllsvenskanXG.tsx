@@ -1,21 +1,49 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { XGPlot } from "@/components/allsvenskan/XGPlot";
 import { XGAPlot } from "@/components/allsvenskan/XGAPlot";
 import { FixtureSlider } from "@/components/allsvenskan/FixtureSlider";
 import { fixtures, teams } from "@/data/allsvenskan-data";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AllsvenskanXG() {
   const [xgFixture, setXgFixture] = useState(1);
   const [xgaFixture, setXgaFixture] = useState(1);
+  const [teamsData, setTeamsData] = useState(teams);
+  
+  // Fetch teams data from Supabase on component mount
+  useEffect(() => {
+    const fetchTeamsData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('teams')
+          .select('*');
+        
+        if (error) {
+          console.error('Error fetching teams:', error);
+          return;
+        }
+        
+        if (data) {
+          // If we have data from Supabase, use it instead of the local data
+          // This assumes the Supabase table structure matches our local data
+          setTeamsData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching teams data:', error);
+      }
+    };
+    
+    fetchTeamsData();
+  }, []);
   
   // Filter data for the xG plot
   const xgFixtureData = fixtures
     .filter(fixture => fixture.fixtureNumber <= xgFixture)
     .map(fixture => ({
-      team: teams.find(t => t.id === fixture.teamId)?.name || "Unknown",
+      team: teamsData.find(t => t.id === fixture.teamId)?.name || "Unknown",
       teamId: fixture.teamId,
       xG: fixture.xG,
       goalsScored: fixture.goalsScored,
@@ -27,7 +55,7 @@ export default function AllsvenskanXG() {
   const xgaFixtureData = fixtures
     .filter(fixture => fixture.fixtureNumber <= xgaFixture)
     .map(fixture => ({
-      team: teams.find(t => t.id === fixture.teamId)?.name || "Unknown",
+      team: teamsData.find(t => t.id === fixture.teamId)?.name || "Unknown",
       teamId: fixture.teamId,
       xG: fixture.xG,
       goalsScored: fixture.goalsScored,
@@ -36,8 +64,11 @@ export default function AllsvenskanXG() {
     }));
 
   // Aggregate data for xG plot
-  const aggregatedXgData = teams.map(team => {
+  const aggregatedXgData = teamsData.map(team => {
     const teamFixtures = xgFixtureData.filter(fixture => fixture.teamId === team.id);
+    
+    // Find the team data in Supabase data if available
+    const teamData = teamsData.find(t => t.id === team.id);
     
     if (teamFixtures.length === 0) {
       // If no fixtures for this team, return default values
@@ -45,7 +76,8 @@ export default function AllsvenskanXG() {
         team: team.name,
         teamId: team.id,
         xG: 0,
-        goalsScored: 0
+        goalsScored: 0,
+        imageUrl: teamData?.logo_url // Add the logo URL if available
       };
     }
     
@@ -54,13 +86,17 @@ export default function AllsvenskanXG() {
       team: team.name,
       teamId: team.id,
       xG: teamFixtures.reduce((sum, fixture) => sum + fixture.xG, 0),
-      goalsScored: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsScored, 0)
+      goalsScored: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsScored, 0),
+      imageUrl: teamData?.logo_url // Add the logo URL if available
     };
   });
   
   // Aggregate data for xGA plot
-  const aggregatedXgaData = teams.map(team => {
+  const aggregatedXgaData = teamsData.map(team => {
     const teamFixtures = xgaFixtureData.filter(fixture => fixture.teamId === team.id);
+    
+    // Find the team data in Supabase data if available
+    const teamData = teamsData.find(t => t.id === team.id);
     
     if (teamFixtures.length === 0) {
       // If no fixtures for this team, return default values
@@ -68,7 +104,8 @@ export default function AllsvenskanXG() {
         team: team.name,
         teamId: team.id,
         xGA: 0,
-        goalsConceded: 0
+        goalsConceded: 0,
+        imageUrl: teamData?.logo_url // Add the logo URL if available
       };
     }
     
@@ -77,7 +114,8 @@ export default function AllsvenskanXG() {
       team: team.name,
       teamId: team.id,
       xGA: teamFixtures.reduce((sum, fixture) => sum + fixture.xGA, 0),
-      goalsConceded: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsConceded, 0)
+      goalsConceded: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsConceded, 0),
+      imageUrl: teamData?.logo_url // Add the logo URL if available
     };
   });
 

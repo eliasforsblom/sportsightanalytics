@@ -17,6 +17,7 @@ interface TeamData {
   teamId: string;
   xGA: number;
   goalsConceded: number;
+  imageUrl?: string;
 }
 
 interface XGAPlotProps {
@@ -40,6 +41,36 @@ const CustomTooltip = ({ active, payload }: any) => {
     );
   }
   return null;
+};
+
+// Custom render for dots using team logos
+const renderDot = (props: any) => {
+  const { cx, cy, payload } = props;
+  
+  // If we have an imageUrl, render an image
+  if (payload.imageUrl) {
+    return (
+      <image 
+        x={cx - 15} 
+        y={cy - 15} 
+        width={30} 
+        height={30} 
+        xlinkHref={payload.imageUrl} 
+        style={{ clipPath: 'circle(15px at center)' }}
+      />
+    );
+  }
+  
+  // Fallback to a circle if no image is available
+  return (
+    <circle 
+      cx={cx} 
+      cy={cy} 
+      r={10} 
+      fill="#777777" 
+      stroke="none" 
+    />
+  );
 };
 
 export function XGAPlot({ data }: XGAPlotProps) {
@@ -85,8 +116,7 @@ export function XGAPlot({ data }: XGAPlotProps) {
         <Scatter 
           name="Teams" 
           data={data}
-          shape="circle"
-          fill="#777777"
+          shape={renderDot}
           dataKey="teamId"
         />
       </ScatterChart>
