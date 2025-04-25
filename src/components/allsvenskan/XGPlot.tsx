@@ -99,7 +99,7 @@ export function XGPlot({ data }: XGPlotProps) {
           name="Goals Scored"
           domain={[0, yMax]}
           allowDecimals={false}
-          tickCount={yMax > 10 ? 10 : yMax + 1}
+          tickCount={yMax > 10 ? 11 : yMax + 1}
         >
           <Label value="Goals Scored" position="left" angle={-90} dx={-15} />
         </YAxis>

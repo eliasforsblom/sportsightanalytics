@@ -7,11 +7,20 @@ import { XGAPlot } from "@/components/allsvenskan/XGAPlot";
 import { FixtureSlider } from "@/components/allsvenskan/FixtureSlider";
 import { fixtures, teams } from "@/data/allsvenskan-data";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Construction } from "lucide-react";
+
+// Define the extended Team type that includes Supabase fields
+interface TeamWithSupabase extends Team {
+  created_at?: string;
+  logo_url?: string;
+}
 
 export default function AllsvenskanXG() {
   const [xgFixture, setXgFixture] = useState(1);
   const [xgaFixture, setXgaFixture] = useState(1);
-  const [teamsData, setTeamsData] = useState(teams);
+  const [teamsData, setTeamsData] = useState<TeamWithSupabase[]>(teams as TeamWithSupabase[]);
+  const [showConstruction, setShowConstruction] = useState(true);
   
   // Fetch teams data from Supabase on component mount
   useEffect(() => {
@@ -27,9 +36,20 @@ export default function AllsvenskanXG() {
         }
         
         if (data) {
-          // If we have data from Supabase, use it instead of the local data
-          // This assumes the Supabase table structure matches our local data
-          setTeamsData(data);
+          // Merge Supabase data with local team data to ensure all required fields are present
+          const mergedData = teams.map(team => {
+            const supabaseTeam = data.find(t => t.id === team.id);
+            return { 
+              ...team, 
+              ...supabaseTeam,
+              // Ensure the required fields are preserved
+              name: supabaseTeam?.name || team.name,
+              shortName: team.shortName,
+              color: team.color
+            };
+          });
+          
+          setTeamsData(mergedData);
         }
       } catch (error) {
         console.error('Error fetching teams data:', error);
@@ -67,9 +87,6 @@ export default function AllsvenskanXG() {
   const aggregatedXgData = teamsData.map(team => {
     const teamFixtures = xgFixtureData.filter(fixture => fixture.teamId === team.id);
     
-    // Find the team data in Supabase data if available
-    const teamData = teamsData.find(t => t.id === team.id);
-    
     if (teamFixtures.length === 0) {
       // If no fixtures for this team, return default values
       return {
@@ -77,7 +94,7 @@ export default function AllsvenskanXG() {
         teamId: team.id,
         xG: 0,
         goalsScored: 0,
-        imageUrl: teamData?.logo_url // Add the logo URL if available
+        imageUrl: team.logo_url // Use the logo_url from Supabase if available
       };
     }
     
@@ -87,16 +104,13 @@ export default function AllsvenskanXG() {
       teamId: team.id,
       xG: teamFixtures.reduce((sum, fixture) => sum + fixture.xG, 0),
       goalsScored: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsScored, 0),
-      imageUrl: teamData?.logo_url // Add the logo URL if available
+      imageUrl: team.logo_url // Use the logo_url from Supabase if available
     };
   });
   
   // Aggregate data for xGA plot
   const aggregatedXgaData = teamsData.map(team => {
     const teamFixtures = xgaFixtureData.filter(fixture => fixture.teamId === team.id);
-    
-    // Find the team data in Supabase data if available
-    const teamData = teamsData.find(t => t.id === team.id);
     
     if (teamFixtures.length === 0) {
       // If no fixtures for this team, return default values
@@ -105,7 +119,7 @@ export default function AllsvenskanXG() {
         teamId: team.id,
         xGA: 0,
         goalsConceded: 0,
-        imageUrl: teamData?.logo_url // Add the logo URL if available
+        imageUrl: team.logo_url // Use the logo_url from Supabase if available
       };
     }
     
@@ -115,7 +129,7 @@ export default function AllsvenskanXG() {
       teamId: team.id,
       xGA: teamFixtures.reduce((sum, fixture) => sum + fixture.xGA, 0),
       goalsConceded: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsConceded, 0),
-      imageUrl: teamData?.logo_url // Add the logo URL if available
+      imageUrl: team.logo_url // Use the logo_url from Supabase if available
     };
   });
 
@@ -125,6 +139,22 @@ export default function AllsvenskanXG() {
       
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Allsvenskan xG Analysis</h1>
+        
+        {showConstruction && (
+          <Alert className="mb-6 border-yellow-500 bg-yellow-50">
+            <Construction className="h-5 w-5 text-yellow-600" />
+            <AlertTitle className="text-yellow-700">Under Construction</AlertTitle>
+            <AlertDescription className="text-yellow-600">
+              This page is currently under development. Some features may not work as expected.
+            </AlertDescription>
+            <button 
+              onClick={() => setShowConstruction(false)}
+              className="absolute top-4 right-4 text-yellow-700 hover:text-yellow-900"
+            >
+              ×
+            </button>
+          </Alert>
+        )}
         
         <div className="space-y-8">
           {/* First widget - xG vs Goals Scored with its own slider */}

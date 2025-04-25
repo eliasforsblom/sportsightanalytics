@@ -99,7 +99,7 @@ export function XGAPlot({ data }: XGAPlotProps) {
           name="Goals Conceded"
           domain={[0, yMax]}
           allowDecimals={false}
-          tickCount={yMax > 10 ? 10 : yMax + 1}
+          tickCount={yMax > 10 ? 11 : yMax + 1}
         >
           <Label value="Goals Conceded" position="left" angle={-90} dx={-15} />
         </YAxis>
@@ -114,7 +114,6 @@ export function XGAPlot({ data }: XGAPlotProps) {
         />
         
         <Scatter 
-          name="Teams" 
           data={data}
           shape={renderDot}
           dataKey="teamId"
