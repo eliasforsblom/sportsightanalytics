@@ -76,15 +76,15 @@ export interface PostTranslation {
 }
 
 /** Returns the translated fields for a post, or null when viewing in English. */
-export const usePostTranslation = (id: string | undefined, withContent = false) => {
+export const usePostTranslation = (id: string | undefined) => {
   const language = useLanguage((state) => state.language);
 
   return useQuery({
-    queryKey: ["post-translation", id, language, withContent],
+    queryKey: ["post-translation", id, language],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("post_translations")
-        .select(withContent ? "title, excerpt, content" : "title, excerpt")
+        .select("title, excerpt, content")
         .eq("post_id", id!)
         .eq("language", language)
         .maybeSingle();
