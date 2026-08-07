@@ -1,54 +1,68 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Navbar } from "@/components/Navbar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
-const useTeamStats = () => {
-  return useQuery({
+interface TeamStat {
+  name: string;
+  points: number;
+  weightedPoints: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  matches: number;
+  goalDifference: number;
+}
+
+const useTeamStats = () =>
+  useQuery({
     queryKey: ["teamStats"],
     queryFn: async () => {
-      const { data: fixtures, error: fixturesError } = await supabase
+      const { data: fixtures, error } = await supabase
         .from("Fixtures")
-        .select('*')
-        .order('Date', { ascending: true });
+        .select("*")
+        .order("Date", { ascending: true });
 
-      if (fixturesError) throw fixturesError;
+      if (error) throw error;
 
-      // Process fixtures to calculate team statistics
-      const teamStats = new Map();
+      const teamStats = new Map<string, Omit<TeamStat, "name" | "goalDifference">>();
 
-      fixtures.forEach((fixture) => {
-        // Only process Team1 statistics
-        if (fixture.Team1) {
-          if (!teamStats.has(fixture.Team1)) {
-            teamStats.set(fixture.Team1, {
-              points: 0,
-              weightedPoints: 0,
-              goalsFor: 0,
-              goalsAgainst: 0,
-              matches: 0
-            });
-          }
+      (fixtures ?? []).forEach((fixture) => {
+        if (!fixture.Team1) return;
 
-          const team1Stats = teamStats.get(fixture.Team1);
-          
-          // Only count matches where we have goals recorded
-          if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
-            // Convert goals to numbers before adding
-            team1Stats.goalsFor += Number(fixture.Goal1);
-            team1Stats.goalsAgainst += Number(fixture.Goal2);
-            team1Stats.matches += 1;
-          }
+        if (!teamStats.has(fixture.Team1)) {
+          teamStats.set(fixture.Team1, {
+            points: 0,
+            weightedPoints: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            matches: 0,
+          });
+        }
 
-          // Add points if available and valid
-          if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
-            team1Stats.points += parseFloat(fixture.Points);
-          }
+        const stats = teamStats.get(fixture.Team1)!;
 
-          // Add weighted points if available and valid
-          if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
-            team1Stats.weightedPoints += parseFloat(fixture.Points_weight);
-          }
+        if (fixture.Goal1 !== null && fixture.Goal2 !== null) {
+          stats.goalsFor += Number(fixture.Goal1);
+          stats.goalsAgainst += Number(fixture.Goal2);
+          stats.matches += 1;
+        }
+
+        if (fixture.Points && !isNaN(parseFloat(fixture.Points))) {
+          stats.points += parseFloat(fixture.Points);
+        }
+
+        if (fixture.Points_weight && !isNaN(parseFloat(fixture.Points_weight))) {
+          stats.weightedPoints += parseFloat(fixture.Points_weight);
         }
       });
 
@@ -56,119 +70,143 @@ const useTeamStats = () => {
         teamStats: Array.from(teamStats.entries()).map(([name, stats]) => ({
           name,
           ...stats,
-          goalDifference: stats.goalsFor - stats.goalsAgainst
-        })),
-        fixtures
+          goalDifference: stats.goalsFor - stats.goalsAgainst,
+        })) as TeamStat[],
+        fixtures: fixtures ?? [],
       };
-    }
+    },
   });
-};
 
 const SportsDashboard = () => {
   const { data, isLoading } = useTeamStats();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container mx-auto py-8 px-4">
-          <h1 className="text-3xl font-bold mb-8">Loading...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  const { teamStats, fixtures } = data;
-
-  // Sort teams by weighted points
-  const standings = [...teamStats]
-    .sort((a, b) => b.weightedPoints - a.weightedPoints);
+  const standings = [...(data?.teamStats ?? [])].sort(
+    (a, b) => b.weightedPoints - a.weightedPoints
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-8">League Dashboard</h1>
+    <>
+      <Seo
+        title="League Dashboard — SportSight Analytics"
+        description="Weighted points standings and full fixture results from our league performance model."
+        canonicalPath="/sports-dashboard"
+      />
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>League Table</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Position</th>
-                    <th className="text-left py-2">Team</th>
-                    <th className="text-center py-2">Played</th>
-                    <th className="text-center py-2">GF</th>
-                    <th className="text-center py-2">GA</th>
-                    <th className="text-center py-2">GD</th>
-                    <th className="text-center py-2">Points</th>
-                    <th className="text-center py-2">Weighted Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {standings.map((team, index) => (
-                    <tr key={team.name} className="border-b">
-                      <td className="py-2">{index + 1}</td>
-                      <td className="py-2">{team.name}</td>
-                      <td className="text-center py-2">{team.matches}</td>
-                      <td className="text-center py-2">{team.goalsFor}</td>
-                      <td className="text-center py-2">{team.goalsAgainst}</td>
-                      <td className="text-center py-2">{team.goalDifference}</td>
-                      <td className="text-center py-2">{Math.round(team.points)}</td>
-                      <td className="text-center py-2 font-bold">{team.weightedPoints.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="container py-14 md:py-20">
+        <div className="mb-10 max-w-2xl">
+          <p className="eyebrow mb-4">Live model</p>
+          <h1 className="text-4xl font-bold md:text-5xl">League Dashboard</h1>
+          <p className="mt-4 text-muted-foreground">
+            Standings ranked by weighted points — a performance-adjusted view of the table
+            alongside raw goals and results.
+          </p>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Match Results & Fixtures</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {fixtures.map((fixture, index) => (
-                <div 
-                  key={index} 
-                  className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <span className="font-semibold">{fixture.Team1}</span>
-                    </div>
-                    <div className="px-4 font-bold">
-                      {fixture.Goal1 !== null && fixture.Goal2 !== null ? (
-                        `${fixture.Goal1} - ${fixture.Goal2}`
-                      ) : (
-                        <span className="text-muted-foreground">Upcoming</span>
-                      )}
-                    </div>
-                    <div className="flex-1 text-right">
-                      <span className="font-semibold">{fixture.Team2}</span>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground text-center mt-2">
-                    {fixture.Date}
-                    {fixture.Points && (
-                      <span className="ml-2">
-                        (Points: {fixture.Points}, Weighted: {fixture.Points_weight})
-                      </span>
-                    )}
-                  </div>
+        {isLoading ? (
+          <div className="space-y-6">
+            <Skeleton className="h-80 w-full rounded-2xl" />
+            <Skeleton className="h-96 w-full rounded-2xl" />
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <Card className="surface-card border-0">
+              <CardHeader>
+                <CardTitle>League table</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="text-center">P</TableHead>
+                        <TableHead className="text-center">GF</TableHead>
+                        <TableHead className="text-center">GA</TableHead>
+                        <TableHead className="text-center">GD</TableHead>
+                        <TableHead className="text-center">Pts</TableHead>
+                        <TableHead className="text-right">Weighted</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {standings.map((team, index) => (
+                        <TableRow key={team.name}>
+                          <TableCell className="font-display text-muted-foreground">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell className="font-medium">{team.name}</TableCell>
+                          <TableCell className="text-center">{team.matches}</TableCell>
+                          <TableCell className="text-center">{team.goalsFor}</TableCell>
+                          <TableCell className="text-center">{team.goalsAgainst}</TableCell>
+                          <TableCell
+                            className={cn(
+                              "text-center",
+                              team.goalDifference > 0 && "text-primary",
+                              team.goalDifference < 0 && "text-destructive"
+                            )}
+                          >
+                            {team.goalDifference > 0 ? "+" : ""}
+                            {team.goalDifference}
+                          </TableCell>
+                          <TableCell className="text-center">{Math.round(team.points)}</TableCell>
+                          <TableCell className="text-right font-display font-bold text-primary">
+                            {team.weightedPoints.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+
+            <Card className="surface-card border-0">
+              <CardHeader>
+                <CardTitle>Match results &amp; fixtures</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {(data?.fixtures ?? []).map((fixture, index) => {
+                    const played = fixture.Goal1 !== null && fixture.Goal2 !== null;
+                    return (
+                      <div
+                        key={index}
+                        className="rounded-xl border border-border/70 bg-background/40 p-4 transition-colors hover:border-primary/40"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="flex-1 text-sm font-medium">{fixture.Team1}</span>
+                          <span
+                            className={cn(
+                              "rounded-md px-3 py-1 font-display text-sm font-bold",
+                              played
+                                ? "bg-secondary text-secondary-foreground"
+                                : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {played ? `${fixture.Goal1} – ${fixture.Goal2}` : "Upcoming"}
+                          </span>
+                          <span className="flex-1 text-right text-sm font-medium">
+                            {fixture.Team2}
+                          </span>
+                        </div>
+                        <div className="mt-2 text-center text-xs text-muted-foreground">
+                          {fixture.Date}
+                          {fixture.Points && (
+                            <span className="ml-2">
+                              (Points: {fixture.Points}, Weighted: {fixture.Points_weight})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
