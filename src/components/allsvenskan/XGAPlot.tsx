@@ -28,7 +28,7 @@ interface XGAPlotProps {
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border rounded-md shadow-md">
+      <div className="rounded-lg border border-border bg-popover p-3 shadow-elevated">
         <p className="font-bold">{payload[0].payload.team}</p>
         <p className="text-sm">xGA: {payload[0].payload.xGA.toFixed(2)}</p>
         <p className="text-sm">Conceded: {payload[0].payload.goalsConceded}</p>
@@ -67,7 +67,7 @@ const renderDot = (props: any) => {
       cx={cx} 
       cy={cy} 
       r={10} 
-      fill="#777777" 
+      fill="hsl(var(--primary))" 
       stroke="none" 
     />
   );
@@ -83,7 +83,7 @@ export function XGAPlot({ data }: XGAPlotProps) {
       <ScatterChart
         margin={{ top: 20, right: 30, bottom: 50, left: 30 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis 
           type="number" 
           dataKey="xGA"
@@ -108,7 +108,7 @@ export function XGAPlot({ data }: XGAPlotProps) {
         
         {/* Reference line for xGA = Goals Conceded (perfect prediction) */}
         <ReferenceLine 
-          stroke="#777" 
+          stroke="hsl(var(--muted-foreground))" 
           strokeDasharray="3 3" 
           segment={[{ x: 0, y: 0 }, { x: xMax, y: xMax }]} 
         />

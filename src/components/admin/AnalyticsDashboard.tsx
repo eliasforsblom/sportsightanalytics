@@ -126,17 +126,17 @@ export function AnalyticsDashboard() {
               >
                 <CartesianGrid 
                   strokeDasharray="3 3" 
-                  stroke="#E5E7EB" 
+                  stroke="hsl(var(--border))" 
                   vertical={false}
                 />
                 <XAxis 
                   dataKey="visit_date" 
                   tickFormatter={(value) => format(new Date(value), 'MMM d')}
-                  stroke="#8E9196"
+                  stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
                 <YAxis 
-                  stroke="#8E9196"
+                  stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   label={{ value: 'Visitors', angle: -90, position: 'insideLeft' }}
                 />
@@ -144,7 +144,7 @@ export function AnalyticsDashboard() {
                 <Bar
                   dataKey="visitor_count"
                   name="Visitors"
-                  fill="var(--color-views)"
+                  fill="hsl(var(--primary))"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={50}
                 />
