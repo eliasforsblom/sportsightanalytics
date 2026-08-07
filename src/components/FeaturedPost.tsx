@@ -29,6 +29,7 @@ export const FeaturedPost = ({
         alt={title}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
       />
+      <div className="absolute inset-0 bg-background/40" />
       <div className="absolute inset-0 bg-gradient-veil" />
 
       <div className="absolute inset-x-0 bottom-0 px-6 pb-20 pt-24 md:px-12 md:pb-24">

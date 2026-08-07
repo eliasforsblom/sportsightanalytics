@@ -74,6 +74,7 @@ const PostDetail = ({ id }: { id: string }) => {
       <article>
         <header className="relative h-[56vh] min-h-[380px] w-full overflow-hidden">
           <img src={post.image_url} alt={title} className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-background/40" />
           <div className="absolute inset-0 bg-gradient-veil" />
           <div className="absolute inset-x-0 bottom-0">
             <div className="container pb-12">
