@@ -1,99 +1,75 @@
-import { useState } from "react";
-import { Navbar } from "@/components/Navbar";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+
+const BASE_YEAR = "2025";
+
+const useSeasonData = () =>
+  useQuery({
+    queryKey: ["season-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("season_data")
+        .select("*")
+        .order("season", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
 const InflationCalculator = () => {
-  const [amount, setAmount] = useState<string>("");
-  const [year, setYear] = useState<string>("");
+  const [amount, setAmount] = useState("");
+  const [year, setYear] = useState("");
   const [result, setResult] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const { data: seasonData, error: seasonDataError } = useQuery({
-    queryKey: ['season-data'],
-    queryFn: async () => {
-      console.log('Fetching season data...');
-      const { data, error } = await supabase
-        .from('season_data')
-        .select('*')
-        .order('season', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching season data:', error);
-        throw error;
-      }
-      
-      console.log('Season data fetched:', data);
-      return data;
-    }
-  });
+  const { data: seasonData, error: seasonDataError } = useSeasonData();
 
-  if (seasonDataError) {
-    console.error('Season data error:', seasonDataError);
+  useEffect(() => {
+    if (!seasonDataError) return;
+    console.error("Season data error:", seasonDataError);
     toast({
       title: "Error loading data",
       description: "There was a problem loading the calculator data. Please try again later.",
       variant: "destructive",
     });
-  }
+  }, [seasonDataError, toast]);
 
-  const currentYear = 2025;
-  const years = Array.from(
-    { length: currentYear - 2001 + 1 }, 
-    (_, i) => currentYear - i
-  );
+  const years = useMemo(() => {
+    const currentYear = Number(BASE_YEAR);
+    return Array.from({ length: currentYear - 2001 + 1 }, (_, i) => currentYear - i);
+  }, []);
 
   const calculateInflatedValue = (originalAmount: number, originalYear: string) => {
-    try {
-      console.log('Starting calculation with:', { originalAmount, originalYear, seasonData });
-      
-      if (!seasonData || !Array.isArray(seasonData)) {
-        console.error('Season data is not available or not an array:', seasonData);
-        return null;
-      }
+    if (!Array.isArray(seasonData)) return null;
 
-      const originalYearData = seasonData.find(d => d.season === originalYear);
-      const currentYearData = seasonData.find(d => d.season === '2025');
+    const originalYearData = seasonData.find((d) => d.season === originalYear);
+    const currentYearData = seasonData.find((d) => d.season === BASE_YEAR);
 
-      console.log('Original year data:', originalYearData);
-      console.log('Current year data:', currentYearData);
+    if (!originalYearData?.cpi || !currentYearData?.cpi) return null;
 
-      if (!originalYearData || !currentYearData) {
-        console.error('Missing year data for calculation:', { originalYearData, currentYearData });
-        return null;
-      }
-
-      if (!originalYearData.cpi || !currentYearData.cpi) {
-        console.error('Missing CPI values:', { originalYearCPI: originalYearData.cpi, currentYearCPI: currentYearData.cpi });
-        return null;
-      }
-
-      const inflationFactor = currentYearData.cpi / originalYearData.cpi;
-      console.log('Inflation factor:', inflationFactor);
-      
-      const result = originalAmount * inflationFactor;
-      console.log('Calculated result:', result);
-      
-      return result;
-    } catch (error) {
-      console.error('Error in calculation:', error);
-      return null;
-    }
+    return originalAmount * (currentYearData.cpi / originalYearData.cpi);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Form submitted with:', { amount, year });
 
     if (!amount || !year) {
-      console.log('Missing required fields:', { amount, year });
       toast({
-        title: "Missing Information",
+        title: "Missing information",
         description: "Please enter both an amount and select a year.",
         variant: "destructive",
       });
@@ -101,105 +77,122 @@ const InflationCalculator = () => {
     }
 
     const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount)) {
-      console.log('Invalid amount:', amount);
+    if (Number.isNaN(parsedAmount)) {
       toast({
-        title: "Invalid Amount",
+        title: "Invalid amount",
         description: "Please enter a valid number for the amount.",
         variant: "destructive",
       });
       return;
     }
 
-    console.log('Calculating with amount:', parsedAmount, 'and year:', year);
     const inflatedValue = calculateInflatedValue(parsedAmount, year);
-    
     if (inflatedValue === null) {
       toast({
-        title: "Calculation Error",
+        title: "Calculation error",
         description: "Unable to calculate the inflation adjusted value. Please try again.",
         variant: "destructive",
       });
       return;
     }
-    
+
     setResult(inflatedValue);
   };
 
+  const multiplier =
+    result !== null && parseFloat(amount) > 0 ? result / parseFloat(amount) : null;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-black mb-4">
-          Football Inflation Calculator
-        </h1>
-        
-        <div className="mb-8 prose max-w-none">
-          <p className="text-sm md:text-base">
-            This calculator helps you understand how historical football transfer fees compare to today's market.
-            By accounting for football market inflation, it converts past transfer amounts into their equivalent
-            value in today's (2025) market. This gives you a better perspective on how significant certain
-            transfers were relative to their time period.
+    <>
+      <Seo
+        title="Football Inflation Calculator — SportSight Analytics"
+        description="Convert historic football transfer fees into today's market value using football-specific market inflation."
+        canonicalPath="/inflation-calculator"
+      />
+
+      <div className="container py-14 md:py-20">
+        <div className="mb-12 max-w-2xl">
+          <p className="eyebrow mb-4">Tool</p>
+          <h1 className="text-4xl font-bold leading-[1.08] md:text-5xl">
+            Football Inflation Calculator
+          </h1>
+          <p className="mt-5 leading-relaxed text-muted-foreground">
+            Historic transfer fees don't compare cleanly across eras. This calculator applies
+            football market inflation to convert a past fee into its equivalent value in today's
+            ({BASE_YEAR}) market.
           </p>
         </div>
 
-        <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-4 md:p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="amount" className="text-sm md:text-base">Transfer Amount (€)</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="Enter amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                className="text-base md:text-lg p-2 md:p-3"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="year" className="text-sm md:text-base">Transfer Year</Label>
-              <Select value={year} onValueChange={setYear}>
-                <SelectTrigger id="year" className="text-base md:text-lg p-2 md:p-3">
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {years.map((y) => (
-                    <SelectItem 
-                      key={y} 
-                      value={y.toString()} 
-                      className="hover:bg-gray-100 text-base md:text-lg p-2 md:p-3"
-                    >
-                      {y}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
+          <div className="surface-card p-7">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="amount">Transfer amount (€)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  placeholder="e.g. 35000000"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className="h-12 text-base"
+                />
+              </div>
 
-            <Button 
-              type="submit" 
-              className="w-full text-base md:text-lg py-2 md:py-3"
-            >
-              Calculate
-            </Button>
-          </form>
+              <div className="space-y-2">
+                <Label htmlFor="year">Transfer year</Label>
+                <Select value={year} onValueChange={setYear}>
+                  <SelectTrigger id="year" className="h-12 text-base">
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {years.map((y) => (
+                      <SelectItem key={y} value={y.toString()}>
+                        {y}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {result !== null && (
-            <div className="mt-6 p-4 bg-accent rounded-md">
-              <p className="text-xs md:text-sm text-gray-600">Inflation Adjusted Value:</p>
-              <p className="text-lg md:text-xl font-bold">
-                {new Intl.NumberFormat('de-DE', {
-                  style: 'currency',
-                  currency: 'EUR',
-                }).format(result)}
-              </p>
-            </div>
-          )}
+              <Button type="submit" size="lg" className="w-full rounded-full">
+                Calculate
+              </Button>
+            </form>
+          </div>
+
+          <div className="surface-card flex flex-col justify-center p-8">
+            {result !== null ? (
+              <div className="animate-fade-up">
+                <p className="eyebrow mb-4">Value in {BASE_YEAR}</p>
+                <p className="text-4xl font-bold text-gradient md:text-6xl">
+                  {new Intl.NumberFormat("de-DE", {
+                    style: "currency",
+                    currency: "EUR",
+                    maximumFractionDigits: 0,
+                  }).format(result)}
+                </p>
+                {multiplier && (
+                  <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primary">
+                    <TrendingUp className="h-4 w-4" />
+                    {multiplier.toFixed(2)}× the original {year} fee
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <TrendingUp className="mx-auto mb-4 h-8 w-8 text-primary/60" />
+                <p className="text-sm">
+                  Enter a fee and a year to see what that transfer would cost in today's market.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
