@@ -81,13 +81,15 @@ const PostDetail = ({ id }: { id: string }) => {
               <div className="mx-auto max-w-3xl">
                 <Link
                   to="/research"
-                  className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+                  className="mb-5 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
                   <ArrowLeft className="h-4 w-4" /> All research
                 </Link>
-                <Badge className="mb-4 border border-primary/40 bg-primary/10 text-primary">
-                  {post.category}
-                </Badge>
+                <div className="mb-4">
+                  <Badge className="border border-primary/40 bg-primary/10 text-primary">
+                    {post.category}
+                  </Badge>
+                </div>
                 <h1 className="mb-4 text-3xl font-bold leading-[1.08] md:text-5xl">{title}</h1>
                 <p className="mb-4 text-lg text-foreground/75">{excerpt}</p>
                 <div className="flex items-center gap-4 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
