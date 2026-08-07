@@ -1,9 +1,8 @@
-
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useLocation } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -12,130 +11,120 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguage } from "@/hooks/use-language";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { href: "/", label: "Home", end: true },
+  { href: "/research", label: "Research" },
+  { href: "/inflation-calculator", label: "Inflation Calculator" },
+  { href: "/allsvenskan-xg", label: "Allsvenskan xG" },
+  { href: "/about", label: "About" },
+];
+
+const FLAGS = {
+  en: { src: "/lovable-uploads/d8ee7063-fc30-48d7-a757-86f114f48f7b.png", alt: "UK flag", label: "English" },
+  sv: { src: "/lovable-uploads/ca0d8cb8-3ebc-497e-9fff-918686219f7e.png", alt: "Swedish flag", label: "Svenska" },
+} as const;
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
-  const location = useLocation();
-
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/research", label: "Research" },
-    { href: "/inflation-calculator", label: "Inflation Calculator" },
-    { href: "/allsvenskan-xg", label: "Allsvenskan xG" },
-    { href: "/about", label: "About" },
-  ];
-
-  const isActive = (path: string) => {
-    if (path === "/" && location.pathname === "/") return true;
-    if (path !== "/" && location.pathname.startsWith(path)) return true;
-    return false;
-  };
-
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-  };
+  const active = FLAGS[language as keyof typeof FLAGS] ?? FLAGS.en;
 
   return (
-    <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-10">
-            <a href="/" className="flex items-center transition-transform hover:scale-105 duration-200">
-              <img 
-                src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png" 
-                alt="SportSight Analytics" 
-                className="h-8 md:h-10 w-auto"
-              />
-            </a>
-            <div className="hidden md:flex space-x-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className={`font-medium transition-all duration-200 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-primary after:transition-all after:duration-200 ${
-                    isActive(link.href)
-                      ? "text-primary after:w-full"
-                      : "text-gray-600 hover:text-primary after:w-0 hover:after:w-full"
-                  }`}
-                >
-                  {link.label}
-                </a>
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl">
+      <div className="container flex h-16 items-center justify-between gap-6 md:h-[4.5rem]">
+        <div className="flex items-center gap-10">
+          <Link to="/" className="flex items-center transition-opacity hover:opacity-80">
+            <img
+              src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png"
+              alt="SportSight Analytics"
+              className="h-8 w-auto brightness-0 invert md:h-9"
+            />
+          </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.href}
+                to={link.href}
+                end={link.end}
+                className={({ isActive }) =>
+                  cn(
+                    "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-secondary text-secondary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger
+              className="h-9 w-[132px] rounded-full border-border/80 bg-card/60 text-sm"
+              aria-label="Select language"
+            >
+              <SelectValue>
+                <span className="flex items-center gap-2">
+                  <img src={active.src} alt={active.alt} className="h-3.5 w-5 rounded-[2px] object-cover" />
+                  {active.label}
+                </span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(FLAGS) as Array<keyof typeof FLAGS>).map((code) => (
+                <SelectItem key={code} value={code}>
+                  <span className="flex items-center gap-2">
+                    <img
+                      src={FLAGS[code].src}
+                      alt={FLAGS[code].alt}
+                      className="h-3.5 w-5 rounded-[2px] object-cover"
+                    />
+                    {FLAGS[code].label}
+                  </span>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
 
-          <div className="flex items-center gap-4">
-            <div className="relative z-50">
-              <Select value={language} onValueChange={handleLanguageChange}>
-                <SelectTrigger className="w-[140px] bg-white border-gray-200">
-                  <SelectValue>
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={language === 'en' 
-                          ? "/lovable-uploads/d8ee7063-fc30-48d7-a757-86f114f48f7b.png"
-                          : "/lovable-uploads/ca0d8cb8-3ebc-497e-9fff-918686219f7e.png"
-                        }
-                        alt={language === 'en' ? "UK Flag" : "Swedish Flag"}
-                        className="h-4 w-6 object-cover"
-                      />
-                      {language === "en" ? "English" : "Svenska"}
-                    </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-white shadow-lg border-gray-200">
-                  <SelectItem value="en" className="hover:bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src="/lovable-uploads/d8ee7063-fc30-48d7-a757-86f114f48f7b.png"
-                        alt="UK Flag"
-                        className="h-4 w-6 object-cover"
-                      />
-                      English
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="sv" className="hover:bg-gray-50">
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src="/lovable-uploads/ca0d8cb8-3ebc-497e-9fff-918686219f7e.png"
-                        alt="Swedish Flag"
-                        className="h-4 w-6 object-cover"
-                      />
-                      Svenska
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="hover:bg-gray-100 transition-colors duration-200">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[240px] sm:w-[300px]">
-                <div className="flex flex-col space-y-4 mt-8">
-                  {navLinks.map((link) => (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      className={`text-lg font-medium transition-all duration-200 ${
-                        isActive(link.href)
-                          ? "text-primary"
-                          : "text-gray-600 hover:text-primary hover:translate-x-1"
-                      }`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] border-border/70 bg-card">
+              <SheetTitle className="eyebrow">Navigate</SheetTitle>
+              <nav className="mt-8 flex flex-col gap-1" aria-label="Mobile">
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.href}
+                    to={link.href}
+                    end={link.end}
+                    onClick={() => setIsOpen(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        "rounded-xl px-4 py-3 text-base font-medium transition-colors",
+                        isActive
+                          ? "bg-secondary text-secondary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-    </nav>
+    </header>
   );
 };

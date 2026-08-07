@@ -1,260 +1,195 @@
-import { Navbar } from "@/components/Navbar";
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import { ArrowLeft, Eye, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Seo } from "@/components/Seo";
 import { PostCard } from "@/components/PostCard";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet";
-import { useLanguage } from "@/hooks/use-language";
+import { usePost, usePosts, usePostTranslation } from "@/hooks/use-posts";
+import { formatDate } from "@/lib/date-utils";
 
-const Research = () => {
-  const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const categoryFilter = searchParams.get('category');
-  const { language } = useLanguage();
+const GridSkeleton = () => (
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <Skeleton key={i} className="h-[420px] rounded-2xl" />
+    ))}
+  </div>
+);
 
-  const { data: posts, isLoading, error } = useQuery({
-    queryKey: ['posts', categoryFilter],
-    queryFn: async () => {
-      let query = supabase
-        .from('posts')
-        .select('*')
-        .eq('draft', false)
-        .order('created_at', { ascending: false });
-      
-      if (categoryFilter) {
-        query = query.eq('category', categoryFilter);
-      }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: translation } = useQuery({
-    queryKey: ['post-translation', id, language],
-    queryFn: async () => {
-      if (!id || language === 'en') return null;
-      
-      const { data, error } = await supabase
-        .from('post_translations')
-        .select('title, excerpt, content')
-        .eq('post_id', id)
-        .eq('language', language)
-        .single();
-      
-      if (error) {
-        console.error('Translation fetch error:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    enabled: !!id && language !== 'en',
-    staleTime: 1000 * 60 * 5,
-  });
+const PostDetail = ({ id }: { id: string }) => {
+  const { data: post, isLoading, error } = usePost(id);
+  const { data: translation } = usePostTranslation(id);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <main className="container mx-auto px-4 py-12">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="bg-white rounded-lg shadow-sm h-96">
-                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-                  <div className="p-4">
-                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <main className="container mx-auto px-4 py-12">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Posts</h2>
-            <p className="text-gray-600">There was an error loading the posts. Please try again later.</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    
-    try {
-      const date = new Date(dateString);
-      
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return "";
-      }
-      
-      return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }).format(date);
-    } catch (e) {
-      console.error("Error formatting date:", e);
-      return "";
-    }
-  };
-
-  if (id && posts) {
-    const post = posts.find(post => post.id === id);
-    
-    if (!post) {
-      return (
-        <div className="min-h-screen bg-gray-50">
-          <Navbar />
-          <main className="container mx-auto px-4 py-12">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Post Not Found</h2>
-              <p className="text-gray-600 mb-8">The post you're looking for doesn't exist or has been removed.</p>
-              <a 
-                href="/research" 
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                View all research posts
-              </a>
-            </div>
-          </main>
+      <div className="container py-12">
+        <Skeleton className="mb-8 h-[45vh] w-full rounded-3xl" />
+        <div className="mx-auto max-w-3xl space-y-4">
+          <Skeleton className="h-6 w-2/3" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
-    const formattedDate = formatDate(post.created_at);
-
-    const title = translation?.title || post.title;
-    const excerpt = translation?.excerpt || post.excerpt;
-    const content = translation?.content || post.content;
-
+  if (error || !post) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Helmet>
-          <title>{title} - SportSight Analytics</title>
-          <meta name="description" content={excerpt} />
-          <meta property="og:title" content={title} />
-          <meta property="og:description" content={excerpt} />
-          <meta property="og:image" content={post.image_url} />
-          <meta property="og:type" content="article" />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={excerpt} />
-          <meta name="twitter:image" content={post.image_url} />
-        </Helmet>
-        
-        <Navbar />
-        
-        <article className="w-full">
-          <div className="w-full h-[60vh] relative mb-8">
-            <div className="absolute inset-0 bg-black/40 z-10" />
-            <img
-              src={post.image_url}
-              alt={title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent z-20" />
-            <div className="absolute bottom-0 left-0 right-0 max-w-3xl mx-auto px-4 pb-12 z-30">
-              <Badge 
-                variant="secondary" 
-                className="mb-4 bg-white/90 text-gray-800 hover:bg-white/100"
-              >
-                {post.category}
-              </Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                {title}
-              </h1>
-              <p className="text-lg text-gray-200 mb-4">
-                {excerpt}
-              </p>
-              <div className="text-sm text-gray-300">
-                {formattedDate}
-                {post.views && ` · ${post.views} views`}
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <p className="eyebrow mb-4">Not found</p>
+        <h1 className="mb-3 text-3xl font-bold">This analysis isn't available</h1>
+        <p className="mb-8 text-muted-foreground">
+          The post you're looking for doesn't exist or has been removed.
+        </p>
+        <Button asChild className="rounded-full">
+          <Link to="/research">View all research</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const title = translation?.title || post.title;
+  const excerpt = translation?.excerpt || post.excerpt;
+  const content = translation?.content || post.content;
+
+  return (
+    <>
+      <Seo
+        title={`${title} — SportSight Analytics`}
+        description={excerpt}
+        image={post.image_url}
+        type="article"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: title,
+          description: excerpt,
+          image: post.image_url,
+          datePublished: post.created_at,
+          articleSection: post.category,
+          author: { "@type": "Organization", name: "SportSight Analytics" },
+        }}
+      />
+
+      <article>
+        <header className="relative h-[56vh] min-h-[380px] w-full overflow-hidden">
+          <img src={post.image_url} alt={title} className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-background/40" />
+          <div className="absolute inset-0 bg-gradient-veil" />
+          <div className="absolute inset-x-0 bottom-0">
+            <div className="container pb-12">
+              <div className="mx-auto max-w-3xl">
+                <Link
+                  to="/research"
+                  className="mb-5 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <ArrowLeft className="h-4 w-4" /> All research
+                </Link>
+                <div className="mb-4">
+                  <Badge className="border border-primary/40 bg-primary/10 text-primary">
+                    {post.category}
+                  </Badge>
+                </div>
+                <h1 className="mb-4 text-3xl font-bold leading-[1.08] md:text-5xl">{title}</h1>
+                <p className="mb-4 text-lg text-foreground/75">{excerpt}</p>
+                <div className="flex items-center gap-4 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>{formatDate(post.created_at)}</span>
+                  {post.views ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Eye className="h-3.5 w-3.5" />
+                      {post.views} views
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
+        </header>
 
-          <div className="max-w-3xl mx-auto px-4 pb-16">
-            <div 
-              className="prose prose-lg max-w-none text-left prose-headings:font-bold prose-headings:text-gray-900 
-                prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-primary hover:prose-a:text-primary/80
-                prose-strong:text-gray-900 prose-code:text-gray-800 prose-code:bg-gray-100 
-                prose-pre:bg-gray-100 prose-img:rounded-lg prose-blockquote:border-l-primary
-                prose-blockquote:text-gray-700 prose-blockquote:italic"
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
-          </div>
-        </article>
-      </div>
-    );
-  }
+        <div className="container py-14">
+          <div
+            className="prose prose-lg mx-auto max-w-3xl text-left"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        </div>
+      </article>
+    </>
+  );
+};
+
+const Research = () => {
+  const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category");
+  const { data: posts, isLoading, error } = usePosts(categoryFilter);
+
+  if (id) return <PostDetail id={id} />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">
-            {categoryFilter ? `${categoryFilter} Research` : 'All Research'}
-          </h1>
+    <>
+      <Seo
+        title={
+          categoryFilter
+            ? `${categoryFilter} research — SportSight Analytics`
+            : "Research — SportSight Analytics"
+        }
+        description="Every SportSight study: transfer market inflation, expected goals models and league performance analysis."
+        canonicalPath="/research"
+      />
+
+      <div className="container py-14 md:py-20">
+        <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow mb-3">Archive</p>
+            <h1 className="text-4xl font-bold md:text-5xl">
+              {categoryFilter ? `${categoryFilter} research` : "All research"}
+            </h1>
+          </div>
           {categoryFilter && (
-            <Badge 
-              variant="outline" 
-              className="cursor-pointer"
-              onClick={() => {
-                const url = new URL(window.location.href);
-                url.searchParams.delete('category');
-                window.history.pushState({}, '', url);
-                window.location.reload();
-              }}
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setSearchParams({}, { replace: true })}
             >
-              Clear Filter
-            </Badge>
+              <X className="mr-1 h-4 w-4" />
+              Clear filter
+            </Button>
           )}
         </div>
-        {posts && posts.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        {isLoading ? (
+          <GridSkeleton />
+        ) : error ? (
+          <div className="surface-card p-10 text-center">
+            <h2 className="mb-2 text-2xl font-bold">Couldn't load research</h2>
+            <p className="text-muted-foreground">Please try again in a moment.</p>
+          </div>
+        ) : posts && posts.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <PostCard 
+              <PostCard
                 key={post.id}
                 id={post.id}
                 title={post.title}
                 excerpt={post.excerpt}
-                date={formatDate(post.created_at || '')}
+                date={formatDate(post.created_at || "")}
                 category={post.category}
                 imageUrl={post.image_url}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">No Posts Found</h2>
-            <p className="text-gray-600">
-              {categoryFilter 
-                ? `No posts found in the ${categoryFilter} category.` 
-                : 'No posts have been published yet.'}
+          <div className="surface-card p-12 text-center">
+            <h2 className="mb-2 text-2xl font-bold">No posts found</h2>
+            <p className="text-muted-foreground">
+              {categoryFilter
+                ? `Nothing published in the ${categoryFilter} category yet.`
+                : "No posts have been published yet."}
             </p>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

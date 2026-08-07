@@ -1,23 +1,26 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+type Language = "en" | "sv";
+
 type LanguageStore = {
-  language: string;
+  language: Language;
   setLanguage: (language: string) => void;
 };
 
+/**
+ * Language preference is persisted and reactive — components re-render and
+ * react-query refetches translations via language-keyed query keys.
+ */
 export const useLanguage = create<LanguageStore>()(
   persist(
     (set) => ({
       language: "en",
       setLanguage: (language: string) => {
-        set({ language });
-        // Force a page reload to ensure all components update
-        window.location.reload();
+        set({ language: language === "sv" ? "sv" : "en" });
+        document.documentElement.lang = language === "sv" ? "sv" : "en";
       },
     }),
-    {
-      name: "language-storage",
-    }
+    { name: "language-storage" }
   )
 );

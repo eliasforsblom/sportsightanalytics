@@ -1,10 +1,7 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/hooks/use-language";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowUpRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { usePostTranslation } from "@/hooks/use-posts";
 
 interface PostCardProps {
   id: string;
@@ -15,72 +12,54 @@ interface PostCardProps {
   imageUrl: string;
 }
 
-export const PostCard = ({ id, title: defaultTitle, excerpt: defaultExcerpt, date, category, imageUrl }: PostCardProps) => {
-  const { language } = useLanguage();
-
-  const { data: translation } = useQuery({
-    queryKey: ['post-translation', id, language],
-    queryFn: async () => {
-      if (language === 'en') return null;
-      
-      const { data, error } = await supabase
-        .from('post_translations')
-        .select('title, excerpt')
-        .eq('post_id', id)
-        .eq('language', language)
-        .single();
-      
-      if (error) {
-        console.error('Translation fetch error:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
+export const PostCard = ({
+  id,
+  title: defaultTitle,
+  excerpt: defaultExcerpt,
+  date,
+  category,
+  imageUrl,
+}: PostCardProps) => {
+  const { data: translation } = usePostTranslation(id);
 
   const title = translation?.title || defaultTitle;
   const excerpt = translation?.excerpt || defaultExcerpt;
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 h-full border-gray-200 hover:border-gray-300 hover:shadow-lg hover:-translate-y-1">
-      <div className="aspect-video relative overflow-hidden">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-glow">
+      <div className="relative aspect-[16/10] overflow-hidden">
         <img
           src={imageUrl}
           alt={title}
-          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent opacity-80" />
+        <Link
+          to={`/research?category=${encodeURIComponent(category)}`}
+          className="absolute left-4 top-4 z-10"
+        >
+          <Badge className="border border-primary/30 bg-background/80 text-primary backdrop-blur-md hover:bg-background">
+            {category}
+          </Badge>
+        </Link>
       </div>
-      <CardHeader className="p-5 md:p-6 pb-0">
-        <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-          <Link 
-            to={`/research?category=${encodeURIComponent(category)}`}
-            className="inline-block"
-          >
-            <Badge 
-              variant="secondary" 
-              className="text-xs md:text-sm hover:bg-secondary/80 transition-colors duration-200"
-            >
-              {category}
-            </Badge>
-          </Link>
-          <span className="text-xs md:text-sm text-gray-500 font-medium">{date}</span>
-        </div>
-        <Link to={`/research/${id}`}>
-          <CardTitle className="text-lg md:text-xl group-hover:text-primary transition-colors duration-200 line-clamp-2">
+
+      <div className="flex flex-1 flex-col p-6">
+        <span className="mb-3 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          {date}
+        </span>
+        <h3 className="mb-3 text-xl font-bold leading-snug transition-colors group-hover:text-primary">
+          <Link to={`/research/${id}`} className="after:absolute after:inset-0">
             {title}
-          </CardTitle>
-        </Link>
-      </CardHeader>
-      <CardContent className="p-5 md:p-6 pt-3">
-        <Link to={`/research/${id}`}>
-          <p className="text-sm md:text-base text-gray-600 line-clamp-2 md:line-clamp-3 leading-relaxed">
-            {excerpt}
-          </p>
-        </Link>
-      </CardContent>
-    </Card>
+          </Link>
+        </h3>
+        <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">{excerpt}</p>
+        <span className="mt-5 inline-flex items-center gap-1.5 font-display text-sm font-semibold text-primary">
+          Read analysis
+          <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </span>
+      </div>
+    </article>
   );
 };
