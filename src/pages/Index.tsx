@@ -1,178 +1,205 @@
-import { Navbar } from "@/components/Navbar";
-import { PostCard } from "@/components/PostCard";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight, BarChart3, Calculator, LineChart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Seo } from "@/components/Seo";
+import { PostCard } from "@/components/PostCard";
+import { FeaturedPost } from "@/components/FeaturedPost";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
-import { FeaturedPost } from "@/components/FeaturedPost";
-import { useState, useEffect } from "react";
-import type { CarouselApi } from "@/components/ui/carousel";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useHighlightedPosts, useLatestPosts } from "@/hooks/use-posts";
+import { formatDate } from "@/lib/date-utils";
+
+const tools = [
+  {
+    href: "/inflation-calculator",
+    icon: Calculator,
+    title: "Inflation Calculator",
+    description: "Convert any historic transfer fee into today's market value.",
+  },
+  {
+    href: "/allsvenskan-xg",
+    icon: LineChart,
+    title: "Allsvenskan xG",
+    description: "Expected goals versus reality, fixture by fixture.",
+  },
+  {
+    href: "/sports-dashboard",
+    icon: BarChart3,
+    title: "League Dashboard",
+    description: "Weighted points tables and full fixture results.",
+  },
+];
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
 
-  const { data: highlightedPosts = [], isLoading: isLoadingHighlighted } = useQuery({
-    queryKey: ['highlighted-posts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('highlighted', true)
-        .is('draft', false)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: latestPosts = [], isLoading: isLoadingLatest } = useQuery({
-    queryKey: ['latest-posts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .is('draft', false)
-        .order('created_at', { ascending: false })
-        .limit(3);
-      
-      if (error) throw error;
-      return data;
-    }
-  });
+  const { data: highlightedPosts = [], isLoading: isLoadingHighlighted } = useHighlightedPosts();
+  const { data: latestPosts = [], isLoading: isLoadingLatest } = useLatestPosts(6);
 
   useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    api.on("select", () => {
-      setCurrentSlide(api.selectedScrollSnap());
-    });
+    if (!api) return;
+    const onSelect = () => setCurrentSlide(api.selectedScrollSnap());
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
   }, [api]);
 
-  if (isLoadingHighlighted || isLoadingLatest) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-          <div className="text-gray-400">Loading content...</div>
-        </div>
-      </div>
-    );
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    
-    try {
-      const date = new Date(dateString);
-      
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return "";
-      }
-      
-      return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }).format(date);
-    } catch (e) {
-      console.error("Error formatting date:", e);
-      return "";
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Navbar />
-      
-      {highlightedPosts.length > 0 && (
-        <div className="container mx-auto px-4 py-8">
-          <Carousel 
-            className="w-full relative rounded-xl overflow-hidden shadow-2xl" 
-            opts={{
-              align: "start",
-              loop: true
-            }}
-            setApi={setApi}
-          >
-            <CarouselContent>
-              {highlightedPosts.map((post) => (
-                <CarouselItem key={post.id}>
-                  <FeaturedPost 
-                    id={post.id}
-                    title={post.title}
-                    excerpt={post.excerpt}
-                    category={post.category}
-                    imageUrl={post.image_url}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 z-10">
-              <CarouselPrevious className="relative left-0 translate-y-0 h-8 w-8 md:h-9 md:w-9 rounded-full border-none bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white shadow-lg" />
-              <div className="flex gap-1.5 md:gap-2 backdrop-blur-sm bg-black/10 px-4 py-2 rounded-full">
-                {highlightedPosts.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => api?.scrollTo(index)}
-                    className={`h-1.5 md:h-2 rounded-full transition-all duration-300 ${
-                      currentSlide === index ? "bg-white w-4 md:w-6" : "bg-white/50 w-1.5 md:w-2 hover:bg-white/70"
-                    }`}
-                  />
-                ))}
-              </div>
-              <CarouselNext className="relative right-0 translate-y-0 h-8 w-8 md:h-9 md:w-9 rounded-full border-none bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors text-white shadow-lg" />
+    <>
+      <Seo
+        title="SportSight Analytics — Football Data Research & Tools"
+        description="Data-driven football research: transfer market inflation, Allsvenskan xG models and league analytics, explained clearly."
+        canonicalPath="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "SportSight Analytics",
+          url: "https://sportsightanalytics.lovable.app/",
+          sameAs: [
+            "https://x.com/sportsight_",
+            "https://www.instagram.com/sportsightanalytics",
+          ],
+        }}
+      />
+
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border/60">
+        <div className="pointer-events-none absolute inset-0 grid-noise opacity-60" />
+        <div className="container relative py-20 md:py-28">
+          <div className="max-w-3xl animate-fade-up">
+            <p className="eyebrow mb-5">Independent football data research</p>
+            <h1 className="text-4xl font-bold leading-[1.04] md:text-6xl lg:text-7xl">
+              The game, <span className="text-gradient">read through numbers.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+              We build models and tools that make football analytics legible — transfer market
+              inflation, expected goals and league performance, without the jargon.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="rounded-full">
+                <Link to="/research">
+                  Browse research
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-full">
+                <Link to="/inflation-calculator">Try the calculator</Link>
+              </Button>
             </div>
-          </Carousel>
+          </div>
+
+          <div className="mt-16 grid gap-4 sm:grid-cols-3">
+            {tools.map((tool) => (
+              <Link
+                key={tool.href}
+                to={tool.href}
+                className="group rounded-2xl border border-border/70 bg-card/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-glow"
+              >
+                <tool.icon className="mb-4 h-6 w-6 text-primary" />
+                <h2 className="mb-1.5 font-display text-base font-semibold">{tool.title}</h2>
+                <p className="text-sm leading-relaxed text-muted-foreground">{tool.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-      )}
-      
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
-            Latest Research
-          </h1>
-          <p className="text-gray-600 leading-relaxed">
-            Explore our latest insights and analysis on football transfer market trends and historical data.
-          </p>
+      </section>
+
+      {/* Highlighted carousel */}
+      {isLoadingHighlighted ? (
+        <div className="container py-12">
+          <Skeleton className="h-[420px] w-full rounded-3xl md:h-[520px]" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {latestPosts.map((post) => (
-            <div key={post.id} className="transform hover:-translate-y-1 transition-all duration-300">
-              <PostCard 
-                id={post.id}
-                title={post.title}
-                excerpt={post.excerpt}
-                date={formatDate(post.created_at || '')}
-                category={post.category}
-                imageUrl={post.image_url}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="mt-12 text-center">
-          <Link to="/research">
-            <Button 
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-semibold"
+      ) : (
+        highlightedPosts.length > 0 && (
+          <section className="container py-12 md:py-16" aria-label="Featured research">
+            <Carousel
+              className="relative w-full overflow-hidden rounded-3xl border border-border/70 shadow-elevated"
+              opts={{ align: "start", loop: true }}
+              setApi={setApi}
             >
-              View More Research
-            </Button>
-          </Link>
+              <CarouselContent className="ml-0">
+                {highlightedPosts.map((post) => (
+                  <CarouselItem key={post.id} className="pl-0">
+                    <FeaturedPost
+                      id={post.id}
+                      title={post.title}
+                      excerpt={post.excerpt}
+                      category={post.category}
+                      imageUrl={post.image_url}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+
+              {highlightedPosts.length > 1 && (
+                <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3">
+                  <CarouselPrevious className="relative left-0 h-9 w-9 translate-y-0 rounded-full border-border/70 bg-background/70 backdrop-blur-md" />
+                  <div className="flex gap-2 rounded-full bg-background/60 px-4 py-2.5 backdrop-blur-md">
+                    {highlightedPosts.map((post, index) => (
+                      <button
+                        key={post.id}
+                        onClick={() => api?.scrollTo(index)}
+                        aria-label={`Go to slide ${index + 1}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          currentSlide === index
+                            ? "w-6 bg-primary"
+                            : "w-1.5 bg-foreground/30 hover:bg-foreground/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <CarouselNext className="relative right-0 h-9 w-9 translate-y-0 rounded-full border-border/70 bg-background/70 backdrop-blur-md" />
+                </div>
+              )}
+            </Carousel>
+          </section>
+        )
+      )}
+
+      {/* Latest research grid */}
+      <section className="container py-12 md:py-16">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow mb-3">Latest</p>
+            <h2 className="text-3xl font-bold md:text-4xl">Recent research</h2>
+          </div>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link to="/research">
+              View all
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
-      </main>
-    </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoadingLatest
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-[420px] rounded-2xl" />
+              ))
+            : latestPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  id={post.id}
+                  title={post.title}
+                  excerpt={post.excerpt}
+                  date={formatDate(post.created_at || "")}
+                  category={post.category}
+                  imageUrl={post.image_url}
+                />
+              ))}
+        </div>
+      </section>
+    </>
   );
 };
 

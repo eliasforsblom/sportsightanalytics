@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/hooks/use-language";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowRight } from "lucide-react";
+import { usePostTranslation } from "@/hooks/use-posts";
 
 interface FeaturedPostProps {
   id: string;
@@ -11,61 +10,48 @@ interface FeaturedPostProps {
   imageUrl: string;
 }
 
-export const FeaturedPost = ({ id, title: defaultTitle, excerpt: defaultExcerpt, category, imageUrl }: FeaturedPostProps) => {
-  const { language } = useLanguage();
-
-  const { data: translation } = useQuery({
-    queryKey: ['post-translation', id, language],
-    queryFn: async () => {
-      if (language === 'en') return null;
-      
-      const { data, error } = await supabase
-        .from('post_translations')
-        .select('title, excerpt')
-        .eq('post_id', id)
-        .eq('language', language)
-        .single();
-      
-      if (error) {
-        console.error('Translation fetch error:', error);
-        return null;
-      }
-      
-      return data;
-    },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  });
+export const FeaturedPost = ({
+  id,
+  title: defaultTitle,
+  excerpt: defaultExcerpt,
+  category,
+  imageUrl,
+}: FeaturedPostProps) => {
+  const { data: translation } = usePostTranslation(id);
 
   const title = translation?.title || defaultTitle;
   const excerpt = translation?.excerpt || defaultExcerpt;
 
   return (
-    <div className="block relative w-full h-[400px] md:h-[500px] lg:h-[600px] group">
-      <div className="absolute inset-0">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-        <div className="absolute bottom-0 left-0 right-0 pb-8 pt-16 px-8 md:pb-10 md:pt-20 md:px-10 lg:pb-12 lg:pt-24 lg:px-12 transform transition-all duration-300 group-hover:translate-y-[-8px]">
-          <div className="max-w-3xl mx-auto">
-            <Link
-              to={`/research?category=${category}`}
-              className="inline-block px-4 py-1.5 mb-4 text-sm bg-white/95 text-gray-900 rounded-full hover:bg-white transition-colors duration-200 font-medium"
-            >
-              {category}
-            </Link>
-            <Link to={`/research/${id}`}>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 group-hover:underline decoration-2 underline-offset-4 leading-tight">
-                {title}
-              </h2>
-              <p className="text-white/90 text-base md:text-lg lg:text-xl leading-relaxed">
-                {excerpt}
-              </p>
-            </Link>
-          </div>
+    <div className="group relative h-[420px] w-full overflow-hidden md:h-[520px] lg:h-[580px]">
+      <img
+        src={imageUrl}
+        alt={title}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-veil" />
+
+      <div className="absolute inset-x-0 bottom-0 px-6 pb-20 pt-24 md:px-12 md:pb-24">
+        <div className="mx-auto max-w-4xl">
+          <Link
+            to={`/research?category=${encodeURIComponent(category)}`}
+            className="mb-5 inline-flex rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary backdrop-blur-md transition-colors hover:bg-primary/20"
+          >
+            {category}
+          </Link>
+          <h2 className="mb-4 max-w-3xl text-3xl font-bold leading-[1.08] md:text-5xl">
+            <Link to={`/research/${id}`}>{title}</Link>
+          </h2>
+          <p className="mb-6 max-w-2xl text-base leading-relaxed text-foreground/75 md:text-lg">
+            {excerpt}
+          </p>
+          <Link
+            to={`/research/${id}`}
+            className="inline-flex items-center gap-2 font-display text-sm font-semibold text-primary"
+          >
+            Read the full analysis
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </div>
