@@ -1,213 +1,151 @@
-
 import { useState, useEffect } from "react";
+import { Construction } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Navbar } from "@/components/Navbar";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Seo } from "@/components/Seo";
 import { XGPlot } from "@/components/allsvenskan/XGPlot";
 import { XGAPlot } from "@/components/allsvenskan/XGAPlot";
 import { FixtureSlider } from "@/components/allsvenskan/FixtureSlider";
 import { fixtures, teams, Team } from "@/data/allsvenskan-data";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Construction } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-// Define the extended Team type that includes Supabase fields
 interface TeamWithSupabase extends Team {
   created_at?: string;
   logo_url?: string;
 }
 
+const MAX_FIXTURE = 30;
+
+const useTeams = () =>
+  useQuery({
+    queryKey: ["allsvenskan-teams"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("teams").select("*");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
 export default function AllsvenskanXG() {
   const [xgFixture, setXgFixture] = useState(1);
   const [xgaFixture, setXgaFixture] = useState(1);
-  const [teamsData, setTeamsData] = useState<TeamWithSupabase[]>(teams as TeamWithSupabase[]);
   const [showConstruction, setShowConstruction] = useState(true);
-  
-  // Fetch teams data from Supabase on component mount
+  const [teamsData, setTeamsData] = useState<TeamWithSupabase[]>(teams as TeamWithSupabase[]);
+
+  const { data: remoteTeams } = useTeams();
+
   useEffect(() => {
-    const fetchTeamsData = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('teams')
-          .select('*');
-        
-        if (error) {
-          console.error('Error fetching teams:', error);
-          return;
-        }
-        
-        if (data) {
-          // Merge Supabase data with local team data to ensure all required fields are present
-          const mergedData = teams.map(team => {
-            const supabaseTeam = data.find(t => t.id === team.id);
-            return { 
-              ...team, 
-              ...supabaseTeam,
-              // Ensure the required fields are preserved
-              name: supabaseTeam?.name || team.name,
-              shortName: team.shortName,
-              color: team.color
-            };
-          });
-          
-          setTeamsData(mergedData);
-        }
-      } catch (error) {
-        console.error('Error fetching teams data:', error);
-      }
-    };
-    
-    fetchTeamsData();
-  }, []);
-  
-  // Filter data for the xG plot
-  const xgFixtureData = fixtures
-    .filter(fixture => fixture.fixtureNumber <= xgFixture)
-    .map(fixture => ({
-      team: teamsData.find(t => t.id === fixture.teamId)?.name || "Unknown",
-      teamId: fixture.teamId,
-      xG: fixture.xG,
-      goalsScored: fixture.goalsScored,
-      xGA: fixture.xGA,
-      goalsConceded: fixture.goalsConceded,
-    }));
+    if (!remoteTeams) return;
+    setTeamsData(
+      teams.map((team) => {
+        const supabaseTeam = remoteTeams.find((t) => t.id === team.id);
+        return {
+          ...team,
+          ...supabaseTeam,
+          name: supabaseTeam?.name || team.name,
+          shortName: team.shortName,
+          color: team.color,
+        };
+      })
+    );
+  }, [remoteTeams]);
 
-  // Filter data for the xGA plot
-  const xgaFixtureData = fixtures
-    .filter(fixture => fixture.fixtureNumber <= xgaFixture)
-    .map(fixture => ({
-      team: teamsData.find(t => t.id === fixture.teamId)?.name || "Unknown",
-      teamId: fixture.teamId,
-      xG: fixture.xG,
-      goalsScored: fixture.goalsScored,
-      xGA: fixture.xGA,
-      goalsConceded: fixture.goalsConceded,
-    }));
+  const aggregate = (upTo: number) =>
+    teamsData.map((team) => {
+      const teamFixtures = fixtures.filter(
+        (fixture) => fixture.fixtureNumber <= upTo && fixture.teamId === team.id
+      );
 
-  // Aggregate data for xG plot
-  const aggregatedXgData = teamsData.map(team => {
-    const teamFixtures = xgFixtureData.filter(fixture => fixture.teamId === team.id);
-    
-    if (teamFixtures.length === 0) {
-      // If no fixtures for this team, return default values
       return {
         team: team.name,
         teamId: team.id,
-        xG: 0,
-        goalsScored: 0,
-        imageUrl: team.logo_url // Use the logo_url from Supabase if available
+        xG: teamFixtures.reduce((sum, f) => sum + f.xG, 0),
+        goalsScored: teamFixtures.reduce((sum, f) => sum + f.goalsScored, 0),
+        xGA: teamFixtures.reduce((sum, f) => sum + f.xGA, 0),
+        goalsConceded: teamFixtures.reduce((sum, f) => sum + f.goalsConceded, 0),
+        imageUrl: team.logo_url,
       };
-    }
-    
-    // Sum up xG and goalsScored for this team
-    return {
-      team: team.name,
-      teamId: team.id,
-      xG: teamFixtures.reduce((sum, fixture) => sum + fixture.xG, 0),
-      goalsScored: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsScored, 0),
-      imageUrl: team.logo_url // Use the logo_url from Supabase if available
-    };
-  });
-  
-  // Aggregate data for xGA plot
-  const aggregatedXgaData = teamsData.map(team => {
-    const teamFixtures = xgaFixtureData.filter(fixture => fixture.teamId === team.id);
-    
-    if (teamFixtures.length === 0) {
-      // If no fixtures for this team, return default values
-      return {
-        team: team.name,
-        teamId: team.id,
-        xGA: 0,
-        goalsConceded: 0,
-        imageUrl: team.logo_url // Use the logo_url from Supabase if available
-      };
-    }
-    
-    // Sum up xGA and goalsConceded for this team
-    return {
-      team: team.name,
-      teamId: team.id,
-      xGA: teamFixtures.reduce((sum, fixture) => sum + fixture.xGA, 0),
-      goalsConceded: teamFixtures.reduce((sum, fixture) => sum + fixture.goalsConceded, 0),
-      imageUrl: team.logo_url // Use the logo_url from Supabase if available
-    };
-  });
+    });
+
+  const aggregatedXgData = aggregate(xgFixture);
+  const aggregatedXgaData = aggregate(xgaFixture);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Allsvenskan xG Analysis</h1>
-        
+    <>
+      <Seo
+        title="Allsvenskan xG Analysis — SportSight Analytics"
+        description="Expected goals versus actual output across the Allsvenskan season, matchweek by matchweek."
+        canonicalPath="/allsvenskan-xg"
+      />
+
+      <div className="container py-14 md:py-20">
+        <div className="mb-10 max-w-2xl">
+          <p className="eyebrow mb-4">Allsvenskan</p>
+          <h1 className="text-4xl font-bold md:text-5xl">xG Analysis</h1>
+          <p className="mt-4 text-muted-foreground">
+            Compare expected goals with what actually hit the net — and expected goals against with
+            what teams actually conceded. Drag the matchweek slider to move through the season.
+          </p>
+        </div>
+
         {showConstruction && (
-          <Alert className="mb-6 border-yellow-500 bg-yellow-50">
-            <Construction className="h-5 w-5 text-yellow-600" />
-            <AlertTitle className="text-yellow-700">Under Construction</AlertTitle>
-            <AlertDescription className="text-yellow-600">
-              This page is currently under development. Some features may not work as expected.
+          <Alert className="relative mb-8 border-primary/40 bg-primary/10">
+            <Construction className="h-5 w-5 text-primary" />
+            <AlertTitle className="text-primary">Under construction</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
+              This page is still in development — some features may not work as expected.
             </AlertDescription>
-            <button 
+            <button
               onClick={() => setShowConstruction(false)}
-              className="absolute top-4 right-4 text-yellow-700 hover:text-yellow-900"
+              aria-label="Dismiss notice"
+              className="absolute right-4 top-4 text-muted-foreground transition-colors hover:text-foreground"
             >
               ×
             </button>
           </Alert>
         )}
-        
+
         <div className="space-y-8">
-          {/* First widget - xG vs Goals Scored with its own slider */}
-          <Card className="bg-white shadow-sm">
+          <Card className="surface-card border-0">
             <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>xG vs. Goals Scored</span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  Fixture: {xgFixture} of 30
+              <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+                <span>xG vs. goals scored</span>
+                <span className="font-display text-xs uppercase tracking-[0.18em] text-primary">
+                  Matchweek {xgFixture} / {MAX_FIXTURE}
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[500px] mb-8">
+              <div className="h-[480px]">
                 <XGPlot data={aggregatedXgData} />
               </div>
-              
-              <div className="mt-6">
-                <FixtureSlider 
-                  value={xgFixture} 
-                  onChange={setXgFixture}
-                  max={30}
-                />
+              <div className="mt-8">
+                <FixtureSlider value={xgFixture} onChange={setXgFixture} max={MAX_FIXTURE} />
               </div>
             </CardContent>
           </Card>
-          
-          {/* Second widget - xGA vs Goals Conceded with its own slider */}
-          <Card className="bg-white shadow-sm">
+
+          <Card className="surface-card border-0">
             <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>xGA vs. Goals Conceded</span>
-                <span className="text-sm font-normal text-muted-foreground">
-                  Fixture: {xgaFixture} of 30
+              <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+                <span>xGA vs. goals conceded</span>
+                <span className="font-display text-xs uppercase tracking-[0.18em] text-primary">
+                  Matchweek {xgaFixture} / {MAX_FIXTURE}
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[500px] mb-8">
+              <div className="h-[480px]">
                 <XGAPlot data={aggregatedXgaData} />
               </div>
-              
-              <div className="mt-6">
-                <FixtureSlider 
-                  value={xgaFixture} 
-                  onChange={setXgaFixture}
-                  max={30}
-                />
+              <div className="mt-8">
+                <FixtureSlider value={xgaFixture} onChange={setXgaFixture} max={MAX_FIXTURE} />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
+    </>
   );
 }
