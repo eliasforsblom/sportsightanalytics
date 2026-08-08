@@ -72,27 +72,11 @@ const Index = () => {
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full">
-                <Link to="/inflation-calculator">Try the calculator</Link>
-              </Button>
             </div>
-          </div>
-
-          <div className="mt-16 grid gap-4 sm:grid-cols-3">
-            {tools.map((tool) => (
-              <Link
-                key={tool.href}
-                to={tool.href}
-                className="group rounded-2xl border border-border/70 bg-card/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-glow"
-              >
-                <tool.icon className="mb-4 h-6 w-6 text-primary" />
-                <h2 className="mb-1.5 font-display text-base font-semibold">{tool.title}</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{tool.description}</p>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
+
 
       {/* Highlighted carousel */}
       {isLoadingHighlighted ? (
