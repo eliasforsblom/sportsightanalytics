@@ -106,6 +106,8 @@ export default function AllsvenskanXG() {
           </Alert>
         )}
 
+        <h2 className="mb-6 text-2xl font-bold md:text-3xl">Expected goals charts</h2>
+
         <div className="space-y-8">
           <Card className="surface-card border-0">
             <CardHeader>

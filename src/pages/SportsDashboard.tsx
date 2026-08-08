@@ -109,6 +109,8 @@ const SportsDashboard = () => {
           </div>
         ) : (
           <div className="space-y-8">
+            <h2 className="text-2xl font-bold md:text-3xl">Standings &amp; results</h2>
+
             <Card className="surface-card border-0">
               <CardHeader>
                 <CardTitle>League table</CardTitle>
