@@ -21,6 +21,7 @@ export function FixtureSlider({ value, onChange, max }: FixtureSliderProps) {
       </div>
       
       <Slider
+        aria-label="Matchweek selector"
         defaultValue={[value]}
         max={max}
         min={1}
