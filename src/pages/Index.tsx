@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BarChart3, Calculator, LineChart } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Seo } from "@/components/Seo";
@@ -17,26 +17,6 @@ import {
 import { useHighlightedPosts, useLatestPosts } from "@/hooks/use-posts";
 import { formatDate } from "@/lib/date-utils";
 
-const tools = [
-  {
-    href: "/inflation-calculator",
-    icon: Calculator,
-    title: "Inflation Calculator",
-    description: "Convert any historic transfer fee into today's market value.",
-  },
-  {
-    href: "/allsvenskan-xg",
-    icon: LineChart,
-    title: "Allsvenskan xG",
-    description: "Expected goals versus reality, fixture by fixture.",
-  },
-  {
-    href: "/sports-dashboard",
-    icon: BarChart3,
-    title: "League Dashboard",
-    description: "Weighted points tables and full fixture results.",
-  },
-];
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -92,27 +72,11 @@ const Index = () => {
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full">
-                <Link to="/inflation-calculator">Try the calculator</Link>
-              </Button>
             </div>
-          </div>
-
-          <div className="mt-16 grid gap-4 sm:grid-cols-3">
-            {tools.map((tool) => (
-              <Link
-                key={tool.href}
-                to={tool.href}
-                className="group rounded-2xl border border-border/70 bg-card/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-glow"
-              >
-                <tool.icon className="mb-4 h-6 w-6 text-primary" />
-                <h2 className="mb-1.5 font-display text-base font-semibold">{tool.title}</h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">{tool.description}</p>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
+
 
       {/* Highlighted carousel */}
       {isLoadingHighlighted ? (
