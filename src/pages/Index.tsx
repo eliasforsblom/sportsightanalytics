@@ -17,26 +17,6 @@ import {
 import { useHighlightedPosts, useLatestPosts } from "@/hooks/use-posts";
 import { formatDate } from "@/lib/date-utils";
 
-const tools = [
-  {
-    href: "/inflation-calculator",
-    icon: Calculator,
-    title: "Inflation Calculator",
-    description: "Convert any historic transfer fee into today's market value.",
-  },
-  {
-    href: "/allsvenskan-xg",
-    icon: LineChart,
-    title: "Allsvenskan xG",
-    description: "Expected goals versus reality, fixture by fixture.",
-  },
-  {
-    href: "/sports-dashboard",
-    icon: BarChart3,
-    title: "League Dashboard",
-    description: "Weighted points tables and full fixture results.",
-  },
-];
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
