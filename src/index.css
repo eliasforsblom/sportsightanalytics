@@ -4,66 +4,65 @@
 
 @layer base {
   :root {
-    /* Base surfaces — deep pitch-navy */
-    --background: 209 53% 8%;
-    --foreground: 160 20% 96%;
+    /* Cloud White — light editorial surfaces */
+    --background: 210 33% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 208 44% 12%;
-    --card-foreground: 160 20% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 208 48% 10%;
-    --popover-foreground: 160 20% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Neon mint */
-    --primary: 165 66% 51%;
-    --primary-foreground: 209 60% 7%;
-    --primary-glow: 150 100% 73%;
+    /* Signal blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 213 94% 68%;
 
-    /* Deep pitch green */
-    --secondary: 155 44% 18%;
-    --secondary-foreground: 150 60% 88%;
+    --secondary: 210 30% 94%;
+    --secondary-foreground: 222 40% 18%;
 
-    --muted: 208 32% 16%;
-    --muted-foreground: 195 14% 64%;
+    --muted: 210 29% 93%;
+    --muted-foreground: 215 20% 55%;
 
-    --accent: 155 44% 20%;
-    --accent-foreground: 150 90% 82%;
+    --accent: 214 95% 96%;
+    --accent-foreground: 217 75% 38%;
 
-    --destructive: 358 72% 55%;
+    --destructive: 358 72% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 203 26% 20%;
-    --input: 203 26% 20%;
-    --ring: 165 66% 51%;
+    --border: 213 30% 92%;
+    --input: 213 30% 90%;
+    --ring: 217 91% 60%;
 
-    --radius: 0.875rem;
+    --radius: 1rem;
+
+    /* Text that always sits on top of imagery */
+    --on-media: 0 0% 100%;
+    --on-media-muted: 210 20% 88%;
 
     /* Composites */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-surface: linear-gradient(180deg, hsl(208 44% 12%), hsl(209 53% 9%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 33% 98%));
     --gradient-veil: linear-gradient(
       to top,
-      hsl(209 60% 5% / 0.96) 0%,
-      hsl(209 60% 5% / 0.72) 40%,
-      hsl(209 60% 5% / 0.1) 100%
+      hsl(222 47% 8% / 0.86) 0%,
+      hsl(222 47% 8% / 0.55) 45%,
+      hsl(222 47% 8% / 0.05) 100%
     );
-    --shadow-elevated: 0 24px 60px -24px hsl(209 70% 3% / 0.9);
-    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 18px 50px -22px hsl(var(--primary) / 0.55);
+    --shadow-elevated: 0 24px 60px -34px hsl(215 40% 30% / 0.28);
+    --shadow-soft: 0 1px 2px hsl(215 30% 40% / 0.05), 0 12px 30px -20px hsl(215 40% 30% / 0.22);
+    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.22), 0 18px 40px -26px hsl(var(--primary) / 0.45);
     --transition-smooth: 320ms cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sidebar-background: 208 48% 10%;
-    --sidebar-foreground: 160 15% 88%;
-    --sidebar-primary: 165 66% 51%;
-    --sidebar-primary-foreground: 209 60% 7%;
-    --sidebar-accent: 208 32% 16%;
-    --sidebar-accent-foreground: 150 60% 88%;
-    --sidebar-border: 203 26% 20%;
-    --sidebar-ring: 165 66% 51%;
-  }
-
-  /* Single-theme app: the dark palette is the palette. */
-  .dark {
-    color-scheme: dark;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 40% 20%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 29% 95%;
+    --sidebar-accent-foreground: 222 40% 18%;
+    --sidebar-border: 213 30% 92%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -79,10 +78,6 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    background-image:
-      radial-gradient(70rem 40rem at 12% -12%, hsl(var(--primary) / 0.1), transparent 60%),
-      radial-gradient(56rem 34rem at 92% 4%, hsl(155 60% 30% / 0.16), transparent 62%);
-    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5 {
@@ -90,14 +85,14 @@
   }
 
   ::selection {
-    background: hsl(var(--primary) / 0.28);
+    background: hsl(var(--primary) / 0.16);
   }
 }
 
 @layer components {
   .surface-card {
-    @apply rounded-2xl border border-border/70 bg-card/70 backdrop-blur-xl;
-    box-shadow: var(--shadow-elevated);
+    @apply rounded-2xl border border-border bg-card;
+    box-shadow: var(--shadow-soft);
   }
 
   .text-gradient {
@@ -108,14 +103,18 @@
   }
 
   .eyebrow {
-    @apply font-display text-xs uppercase tracking-[0.22em] text-primary;
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground;
+  }
+
+  .rule {
+    @apply border-b border-border;
   }
 
   .grid-noise {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.5) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.5) 1px, transparent 1px);
-    background-size: 56px 56px;
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 64px 64px;
     mask-image: radial-gradient(60% 60% at 50% 30%, #000 0%, transparent 100%);
   }
 }
