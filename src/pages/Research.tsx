@@ -37,7 +37,7 @@ const PostDetail = ({ id }: { id: string }) => {
     return (
       <div className="container flex min-h-[60vh] flex-col items-center justify-center text-center">
         <p className="eyebrow mb-4">Not found</p>
-        <h1 className="mb-3 text-3xl font-bold">This analysis isn't available</h1>
+        <h1 className="mb-3 text-3xl ">This analysis isn't available</h1>
         <p className="mb-8 text-muted-foreground">
           The post you're looking for doesn't exist or has been removed.
         </p>
@@ -90,7 +90,7 @@ const PostDetail = ({ id }: { id: string }) => {
                     {post.category}
                   </Badge>
                 </div>
-                <h1 className="mb-4 text-3xl font-bold leading-[1.08] md:text-5xl">{title}</h1>
+                <h1 className="mb-4 text-3xl leading-[1.08] md:text-5xl">{title}</h1>
                 <p className="mb-4 text-lg text-foreground/75">{excerpt}</p>
                 <div className="flex items-center gap-4 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   <span>{formatDate(post.created_at)}</span>
@@ -141,7 +141,7 @@ const Research = () => {
         <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="eyebrow mb-3">Archive</p>
-            <h1 className="text-4xl font-bold md:text-5xl">
+            <h1 className="text-4xl md:text-5xl">
               {categoryFilter ? `${categoryFilter} research` : "All research"}
             </h1>
           </div>
@@ -161,7 +161,7 @@ const Research = () => {
           <GridSkeleton />
         ) : error ? (
           <div className="surface-card p-10 text-center">
-            <h2 className="mb-2 text-2xl font-bold">Couldn't load research</h2>
+            <h2 className="mb-2 text-2xl ">Couldn't load research</h2>
             <p className="text-muted-foreground">Please try again in a moment.</p>
           </div>
         ) : posts && posts.length > 0 ? (
@@ -180,7 +180,7 @@ const Research = () => {
           </div>
         ) : (
           <div className="surface-card p-12 text-center">
-            <h2 className="mb-2 text-2xl font-bold">No posts found</h2>
+            <h2 className="mb-2 text-2xl ">No posts found</h2>
             <p className="text-muted-foreground">
               {categoryFilter
                 ? `Nothing published in the ${categoryFilter} category yet.`

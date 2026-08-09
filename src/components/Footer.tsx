@@ -20,7 +20,7 @@ const navGroups = [
 ];
 
 export const Footer = () => (
-  <footer className="mt-24 border-t border-border/70 bg-card/40 backdrop-blur-sm">
+  <footer className="mt-24 border-t border-border bg-card">
     <div className="container py-14">
       <div className="grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
@@ -28,10 +28,11 @@ export const Footer = () => (
             <img
               src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png"
               alt="SportSight Analytics"
-              className="h-9 w-auto brightness-0 invert"
+              className="h-9 w-auto brightness-0"
               loading="lazy"
             />
           </Link>
+
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
             Football, read through data. Transfer market inflation, expected goals and league
             models — built by a group of friends who like the numbers as much as the game.
@@ -42,7 +43,7 @@ export const Footer = () => (
               target="_blank"
               rel="noreferrer noopener"
               aria-label="SportSight on X"
-              className="rounded-full border border-border/80 p-2.5 text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary"
+              className="rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <Twitter className="h-4 w-4" />
             </a>
@@ -51,10 +52,11 @@ export const Footer = () => (
               target="_blank"
               rel="noreferrer noopener"
               aria-label="SportSight on Instagram"
-              className="rounded-full border border-border/80 p-2.5 text-muted-foreground transition-colors hover:border-primary/60 hover:text-primary"
+              className="rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <Instagram className="h-4 w-4" />
             </a>
+
           </div>
         </div>
 

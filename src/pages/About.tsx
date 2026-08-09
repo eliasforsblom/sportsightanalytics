@@ -30,7 +30,7 @@ const About = () => (
       <div className="container relative py-20 md:py-28">
         <div className="max-w-3xl">
           <p className="eyebrow mb-5">About us</p>
-          <h1 className="text-4xl font-bold leading-[1.06] md:text-6xl">
+          <h1 className="text-4xl leading-[1.06] md:text-6xl">
             A hobby project with a <span className="text-gradient">serious data habit.</span>
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
@@ -50,7 +50,7 @@ const About = () => (
             <span className="font-display text-sm text-primary">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <h2 className="mb-2 mt-3 text-xl font-bold">{item.title}</h2>
+            <h2 className="mb-2 mt-3 text-xl ">{item.title}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
           </div>
         ))}
@@ -58,7 +58,7 @@ const About = () => (
 
       <div className="surface-card mt-14 flex flex-col items-start gap-6 p-8 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Follow the research</h2>
+          <h2 className="text-2xl ">Follow the research</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             New studies, charts and model updates land on our socials first.
           </p>

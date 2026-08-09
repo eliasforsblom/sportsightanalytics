@@ -123,7 +123,7 @@ export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostLis
                   className="w-full h-64 object-cover rounded-lg"
                 />
               )}
-              <h1 className="text-3xl font-bold">{previewPost.title}</h1>
+              <h1 className="text-3xl ">{previewPost.title}</h1>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <span>{new Date(previewPost.created_at).toLocaleDateString()}</span>
                 <span>{previewPost.category}</span>

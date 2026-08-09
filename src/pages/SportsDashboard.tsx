@@ -95,7 +95,7 @@ const SportsDashboard = () => {
       <div className="container py-14 md:py-20">
         <div className="mb-10 max-w-2xl">
           <p className="eyebrow mb-4">Live model</p>
-          <h1 className="text-4xl font-bold md:text-5xl">League Dashboard</h1>
+          <h1 className="text-4xl md:text-5xl">League Dashboard</h1>
           <p className="mt-4 text-muted-foreground">
             Standings ranked by weighted points — a performance-adjusted view of the table
             alongside raw goals and results.
@@ -109,7 +109,7 @@ const SportsDashboard = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold md:text-3xl">Standings &amp; results</h2>
+            <h2 className="text-2xl md:text-3xl">Standings &amp; results</h2>
 
             <Card className="surface-card border-0">
               <CardHeader>

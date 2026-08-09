@@ -113,7 +113,7 @@ const InflationCalculator = () => {
       <div className="container py-14 md:py-20">
         <div className="mb-12 max-w-2xl">
           <p className="eyebrow mb-4">Tool</p>
-          <h1 className="text-4xl font-bold leading-[1.08] md:text-5xl">
+          <h1 className="text-4xl leading-[1.08] md:text-5xl">
             Football Inflation Calculator
           </h1>
           <p className="mt-5 leading-relaxed text-muted-foreground">

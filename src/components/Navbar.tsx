@@ -31,18 +31,18 @@ export const Navbar = () => {
   const active = FLAGS[language as keyof typeof FLAGS] ?? FLAGS.en;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-      <div className="container flex h-16 items-center justify-between gap-6 md:h-[4.5rem]">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+      <div className="container flex h-16 items-center justify-between gap-6 md:h-20">
         <div className="flex items-center gap-10">
-          <Link to="/" className="flex items-center transition-opacity hover:opacity-80">
+          <Link to="/" className="flex items-center transition-opacity hover:opacity-70">
             <img
               src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png"
               alt="SportSight Analytics"
-              className="h-8 w-auto brightness-0 invert md:h-9"
+              className="h-8 w-auto brightness-0 md:h-9"
             />
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
+          <nav className="hidden items-center gap-8 lg:flex" aria-label="Main">
             {navLinks.map((link) => (
               <NavLink
                 key={link.href}
@@ -50,10 +50,10 @@ export const Navbar = () => {
                 end={link.end}
                 className={({ isActive }) =>
                   cn(
-                    "rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+                    "text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   )
                 }
               >
@@ -63,10 +63,11 @@ export const Navbar = () => {
           </nav>
         </div>
 
+
         <div className="flex items-center gap-2">
           <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger
-              className="h-9 w-[132px] rounded-full border-border/80 bg-card/60 text-sm"
+              className="h-9 w-[132px] rounded-full border-border bg-card text-sm"
               aria-label="Select language"
             >
               <SelectValue>
@@ -98,7 +99,7 @@ export const Navbar = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] border-border/70 bg-card">
+            <SheetContent side="right" className="w-[280px] border-border bg-card">
               <SheetTitle className="eyebrow">Navigate</SheetTitle>
               <nav className="mt-8 flex flex-col gap-1" aria-label="Mobile">
                 {navLinks.map((link) => (

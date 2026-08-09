@@ -82,7 +82,7 @@ export default function AllsvenskanXG() {
       <div className="container py-14 md:py-20">
         <div className="mb-10 max-w-2xl">
           <p className="eyebrow mb-4">Allsvenskan</p>
-          <h1 className="text-4xl font-bold md:text-5xl">xG Analysis</h1>
+          <h1 className="text-4xl md:text-5xl">xG Analysis</h1>
           <p className="mt-4 text-muted-foreground">
             Compare expected goals with what actually hit the net — and expected goals against with
             what teams actually conceded. Drag the matchweek slider to move through the season.
@@ -106,7 +106,7 @@ export default function AllsvenskanXG() {
           </Alert>
         )}
 
-        <h2 className="mb-6 text-2xl font-bold md:text-3xl">Expected goals charts</h2>
+        <h2 className="mb-6 text-2xl md:text-3xl">Expected goals charts</h2>
 
         <div className="space-y-8">
           <Card className="surface-card border-0">
