@@ -56,6 +56,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "on-media": {
+          DEFAULT: "hsl(var(--on-media))",
+          muted: "hsl(var(--on-media-muted))",
+        },
+
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -74,8 +79,10 @@ export default {
       },
       boxShadow: {
         elevated: "var(--shadow-elevated)",
+        soft: "var(--shadow-soft)",
         glow: "var(--shadow-glow)",
       },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 4px)",
@@ -110,11 +117,12 @@ export default {
           css: {
             maxWidth: "none",
             color: "hsl(var(--foreground) / 0.86)",
-            fontFamily: "DM Sans, system-ui, sans-serif",
+            fontFamily: "Work Sans, system-ui, sans-serif",
             "h1, h2, h3, h4": {
               color: "hsl(var(--foreground))",
-              fontFamily: "Space Grotesk, system-ui, sans-serif",
-              letterSpacing: "-0.02em",
+              fontFamily: "Instrument Serif, Georgia, serif",
+              fontWeight: "400",
+              letterSpacing: "-0.01em",
             },
             a: {
               color: "hsl(var(--primary))",
@@ -122,6 +130,7 @@ export default {
               "&:hover": { color: "hsl(var(--primary-glow))" },
             },
             strong: { color: "hsl(var(--foreground))" },
+
             blockquote: {
               color: "hsl(var(--muted-foreground))",
               borderLeftColor: "hsl(var(--primary))",
