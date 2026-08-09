@@ -38,7 +38,7 @@ export const Navbar = () => {
             <img
               src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png"
               alt="SportSight Analytics"
-              className="h-8 w-auto md:h-9"
+              className="h-8 w-auto brightness-0 md:h-9"
             />
           </Link>
 

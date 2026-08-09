@@ -28,7 +28,7 @@ export const Footer = () => (
             <img
               src="/lovable-uploads/c029bee2-578d-4822-a0d2-4a13ae023b3d.png"
               alt="SportSight Analytics"
-              className="h-9 w-auto"
+              className="h-9 w-auto brightness-0"
               loading="lazy"
             />
           </Link>
