@@ -119,6 +119,36 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          path: string
+          referrer: string | null
+          session_id: string
+          visit_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          path: string
+          referrer?: string | null
+          session_id: string
+          visit_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          path?: string
+          referrer?: string | null
+          session_id?: string
+          visit_date?: string
+        }
+        Relationships: []
+      }
       post_translations: {
         Row: {
           content: string
