@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,102 +9,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Seo } from "@/components/Seo";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
-const BASE_YEAR = "2025";
-
-const useSeasonData = () =>
-  useQuery({
-    queryKey: ["season-data"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("season_data")
-        .select("*")
-        .order("season", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+import {
+  DATA,
+  SEASONS_NEWEST_FIRST,
+  convertFee,
+  percentileLabel,
+} from "@/lib/transfer-inflation";
 
 const InflationCalculator = () => {
   const [amount, setAmount] = useState("");
-  const [year, setYear] = useState("");
-  const [result, setResult] = useState<number | null>(null);
-  const { toast } = useToast();
+  const [season, setSeason] = useState("10/11");
+  const [methodOpen, setMethodOpen] = useState(false);
 
-  const { data: seasonData, error: seasonDataError } = useSeasonData();
-
-  useEffect(() => {
-    if (!seasonDataError) return;
-    console.error("Season data error:", seasonDataError);
-    toast({
-      title: "Error loading data",
-      description: "There was a problem loading the calculator data. Please try again later.",
-      variant: "destructive",
-    });
-  }, [seasonDataError, toast]);
-
-  const years = useMemo(() => {
-    const currentYear = Number(BASE_YEAR);
-    return Array.from({ length: currentYear - 2001 + 1 }, (_, i) => currentYear - i);
-  }, []);
-
-  const calculateInflatedValue = (originalAmount: number, originalYear: string) => {
-    if (!Array.isArray(seasonData)) return null;
-
-    const originalYearData = seasonData.find((d) => d.season === originalYear);
-    const currentYearData = seasonData.find((d) => d.season === BASE_YEAR);
-
-    if (!originalYearData?.cpi || !currentYearData?.cpi) return null;
-
-    return originalAmount * (currentYearData.cpi / originalYearData.cpi);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!amount || !year) {
-      toast({
-        title: "Missing information",
-        description: "Please enter both an amount and select a year.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const parsedAmount = parseFloat(amount);
-    if (Number.isNaN(parsedAmount)) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid number for the amount.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const inflatedValue = calculateInflatedValue(parsedAmount, year);
-    if (inflatedValue === null) {
-      toast({
-        title: "Calculation error",
-        description: "Unable to calculate the inflation adjusted value. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setResult(inflatedValue);
-  };
-
-  const multiplier =
-    result !== null && parseFloat(amount) > 0 ? result / parseFloat(amount) : null;
+  const conversion = useMemo(
+    () => convertFee(parseFloat(amount), season),
+    [amount, season]
+  );
 
   return (
     <>
       <Seo
         title="Football Inflation Calculator — SportSight Analytics"
-        description="Convert historic football transfer fees into today's market value using football-specific market inflation."
+        description="Convert historic football transfer fees into today's market value using percentile-based market position rather than a single inflation rate."
         canonicalPath="/inflation-calculator"
       />
 
@@ -117,79 +47,103 @@ const InflationCalculator = () => {
             Football Inflation Calculator
           </h1>
           <p className="mt-5 leading-relaxed text-muted-foreground">
-            Historic transfer fees don't compare cleanly across eras. This calculator applies
-            football market inflation to convert a past fee into its equivalent value in today's
-            ({BASE_YEAR}) market.
+            Historic transfer fees don't compare cleanly across eras. This calculator finds
+            where a fee sat in its own season's market and matches it to the equivalent
+            position in {DATA.latest_season}.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
-          <div className="surface-card p-7">
-            <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="max-w-2xl">
+          <div className="surface-card p-7 md:p-9">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="amount">Transfer amount (€)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  placeholder="e.g. 35000000"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  className="h-12 text-base"
-                />
+                <Label htmlFor="amount">Transfer fee</Label>
+                <div className="relative">
+                  <Input
+                    id="amount"
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    min="0"
+                    placeholder="e.g. 8.7"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="h-12 pr-14 text-base"
+                  />
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    €M
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="year">Transfer year</Label>
-                <Select value={year} onValueChange={setYear}>
-                  <SelectTrigger id="year" className="h-12 text-base">
-                    <SelectValue placeholder="Select year" />
+                <Label htmlFor="season">Season</Label>
+                <Select value={season} onValueChange={setSeason}>
+                  <SelectTrigger id="season" className="h-12 text-base">
+                    <SelectValue placeholder="Select season" />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
-                    {years.map((y) => (
-                      <SelectItem key={y} value={y.toString()}>
-                        {y}
+                    {SEASONS_NEWEST_FIRST.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <Button type="submit" size="lg" className="w-full rounded-full">
-                Calculate
-              </Button>
-            </form>
-          </div>
-
-          <div className="surface-card flex flex-col justify-center p-8">
-            {result !== null ? (
-              <div className="animate-fade-up">
-                <p className="eyebrow mb-4">Value in {BASE_YEAR}</p>
-                <p className="text-4xl font-bold text-gradient md:text-6xl">
-                  {new Intl.NumberFormat("de-DE", {
-                    style: "currency",
-                    currency: "EUR",
-                    maximumFractionDigits: 0,
-                  }).format(result)}
+            {conversion && (
+              <div className="mt-8 animate-fade-up border-t border-border pt-8">
+                <p className="text-4xl font-bold text-gradient md:text-5xl">
+                  €{conversion.result.toFixed(1)} M
+                  <span className="text-2xl md:text-3xl"> in {DATA.latest_season} money</span>
                 </p>
-                {multiplier && (
-                  <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primary">
-                    <TrendingUp className="h-4 w-4" />
-                    {multiplier.toFixed(2)}× the original {year} fee
-                  </p>
+                <p className="mt-4 text-sm text-foreground/80">
+                  {percentileLabel(conversion)}
+                </p>
+                {conversion.contextLines.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {conversion.contextLines.map((line) => (
+                      <p key={line} className="text-sm leading-relaxed text-muted-foreground">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 )}
-              </div>
-            ) : (
-              <div className="text-center text-muted-foreground">
-                <TrendingUp className="mx-auto mb-4 h-8 w-8 text-primary/60" />
-                <p className="text-sm">
-                  Enter a fee and a year to see what that transfer would cost in today's market.
-                </p>
               </div>
             )}
           </div>
+
+          <Collapsible open={methodOpen} onOpenChange={setMethodOpen} className="mt-6">
+            <CollapsibleTrigger className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${methodOpen ? "rotate-180" : ""}`}
+              />
+              Methodology
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground">
+              <p>
+                Fees are compared by market position rather than by a single inflation rate. A
+                transfer is located within the distribution of all fees paid in its own season
+                across the top divisions of England, Spain, Germany, Italy, France and the
+                Netherlands, then matched to the equivalent position in 2025/26. Loans, free
+                transfers and undisclosed fees are excluded.
+              </p>
+              <p>
+                This matters because the transfer market has not inflated evenly. Between
+                2000/01 and 2025/26 the middle of the market rose about 2.6 times while the
+                lower end rose about 3.3 times, so no single multiplier is accurate across the
+                whole range.
+              </p>
+              <p>
+                Conversions near the middle of the market are the most reliable, carrying
+                roughly ±15%. Very large fees are converted using how the top of the market
+                moved and carry roughly ±30%, because only a few dozen transfers of that size
+                happen in any season. Figures are best read as indicative rather than precise.
+              </p>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
     </>
