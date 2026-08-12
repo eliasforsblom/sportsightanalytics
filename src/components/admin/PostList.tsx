@@ -1,10 +1,23 @@
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash, Star, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash, Star, Eye, EyeOff, Search, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/date-utils";
 
 interface Post {
   id: string;
@@ -16,6 +29,7 @@ interface Post {
   highlighted: boolean;
   created_at: string;
   draft: boolean;
+  translations?: { sv: { title: string; excerpt: string; content: string } };
 }
 
 interface PostListProps {
@@ -23,120 +37,130 @@ interface PostListProps {
   onEdit: (post: Post) => void;
   onDelete: (id: string) => void;
   onToggleHighlight: (id: string, highlighted: boolean) => void;
+  onToggleDraft?: (id: string, draft: boolean) => void;
 }
 
-export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight }: PostListProps) => {
-  const [showDrafts, setShowDrafts] = useState(true);
-  const [previewPost, setPreviewPost] = useState<Post | null>(null);
-  
-  const filteredPosts = showDrafts ? posts : posts.filter(post => !post.draft);
+type Filter = "all" | "published" | "draft";
+
+export const PostList = ({ posts, onEdit, onDelete, onToggleHighlight, onToggleDraft }: PostListProps) => {
+  const [filter, setFilter] = useState<Filter>("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return posts.filter((post) => {
+      if (filter === "published" && post.draft) return false;
+      if (filter === "draft" && !post.draft) return false;
+      if (!term) return true;
+      return (
+        post.title.toLowerCase().includes(term) ||
+        post.category.toLowerCase().includes(term) ||
+        post.excerpt.toLowerCase().includes(term)
+      );
+    });
+  }, [posts, filter, search]);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end space-x-2 mb-4">
-        <span className="text-sm text-gray-600">Show drafts</span>
-        <Switch
-          checked={showDrafts}
-          onCheckedChange={setShowDrafts}
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+          <TabsList>
+            <TabsTrigger value="all">All ({posts.length})</TabsTrigger>
+            <TabsTrigger value="published">Published ({posts.filter((p) => !p.draft).length})</TabsTrigger>
+            <TabsTrigger value="draft">Drafts ({posts.filter((p) => p.draft).length})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search posts"
+            className="pl-9"
+          />
+        </div>
       </div>
 
-      {filteredPosts.map((post) => (
-        <Card key={post.id} className="p-6 transition-shadow hover:shadow-md">
-          <div className="flex justify-between items-start gap-6">
-            <div className="flex gap-6 flex-1 min-w-0">
+      {filtered.length === 0 && (
+        <Card className="p-10 text-center text-muted-foreground">No posts match this view.</Card>
+      )}
+
+      {filtered.map((post) => (
+        <Card key={post.id} className="p-5 transition-shadow hover:shadow-md">
+          <div className="flex flex-wrap items-start justify-between gap-5">
+            <div className="flex min-w-0 flex-1 gap-5">
               {post.image_url && (
-                <img 
-                  src={post.image_url} 
-                  alt={post.title}
-                  className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                <img
+                  src={post.image_url}
+                  alt=""
+                  className="h-24 w-32 flex-shrink-0 rounded-lg object-cover"
                 />
               )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-xl font-semibold text-gray-900 truncate">{post.title}</h2>
-                  {post.draft && (
-                    <Badge variant="secondary" className="ml-2">
-                      <EyeOff className="h-3 w-3 mr-1" />
-                      Draft
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <h3 className="truncate text-lg">{post.title}</h3>
+                  <Badge variant={post.draft ? "secondary" : "default"}>
+                    {post.draft ? <EyeOff className="mr-1 h-3 w-3" /> : <Eye className="mr-1 h-3 w-3" />}
+                    {post.draft ? "Draft" : "Published"}
+                  </Badge>
+                  {post.highlighted && (
+                    <Badge variant="outline" className="text-primary">
+                      <Star className="mr-1 h-3 w-3" /> Featured
                     </Badge>
                   )}
-                  {!post.draft && (
-                    <Badge variant="default" className="ml-2">
-                      <Eye className="h-3 w-3 mr-1" />
-                      Published
-                    </Badge>
-                  )}
+                  {post.translations?.sv?.title && <Badge variant="outline">SV</Badge>}
                 </div>
-                <p className="text-sm text-primary mb-1">{post.category}</p>
-                <p className="text-sm text-gray-500 mb-2">
-                  {new Date(post.created_at).toLocaleDateString()}
-                </p>
-                <p className="text-gray-600 line-clamp-2">{post.excerpt}</p>
+                <p className="mb-1 text-sm text-primary">{post.category}</p>
+                <p className="mb-2 text-sm text-muted-foreground">{formatDate(post.created_at)}</p>
+                <p className="line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
               </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
-              {post.draft && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setPreviewPost(post)}
-                >
-                  <Eye className="h-4 w-4" />
+
+            <div className="flex flex-shrink-0 flex-wrap gap-2">
+              {onToggleDraft && (
+                <Button variant="outline" size="sm" onClick={() => onToggleDraft(post.id, post.draft)}>
+                  {post.draft ? "Publish" : "Unpublish"}
                 </Button>
               )}
               <Button
                 variant="outline"
-                size="icon"
+                size="sm"
                 onClick={() => onToggleHighlight(post.id, post.highlighted)}
-                className={post.highlighted ? "text-yellow-500 hover:text-yellow-600" : ""}
+                title="Toggle featured"
               >
-                <Star className="h-4 w-4" />
+                <Star className={post.highlighted ? "h-4 w-4 fill-current text-primary" : "h-4 w-4"} />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onEdit(post)}
-              >
+              <Button variant="outline" size="sm" asChild title="View post">
+                <Link to={`/research/${post.id}`} target="_blank">
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onEdit(post)} title="Edit">
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onDelete(post.id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" title="Delete">
+                    <Trash className="h-4 w-4 text-destructive" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      "{post.title}" and its Swedish translation will be permanently removed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete(post.id)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </Card>
       ))}
-
-      <Dialog open={!!previewPost} onOpenChange={() => setPreviewPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {previewPost && (
-            <div className="space-y-6">
-              {previewPost.image_url && (
-                <img 
-                  src={previewPost.image_url} 
-                  alt={previewPost.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              )}
-              <h1 className="text-3xl ">{previewPost.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>{new Date(previewPost.created_at).toLocaleDateString()}</span>
-                <span>{previewPost.category}</span>
-              </div>
-              <p className="text-lg text-gray-600">{previewPost.excerpt}</p>
-              <div 
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: previewPost.content }}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
