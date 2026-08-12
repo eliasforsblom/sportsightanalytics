@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Seo } from "@/components/Seo";
 import { PostCard } from "@/components/PostCard";
+import { PostContent } from "@/components/PostContent";
 import { usePost, usePosts, usePostTranslation } from "@/hooks/use-posts";
 import { formatDate } from "@/lib/date-utils";
 
@@ -107,10 +108,7 @@ const PostDetail = ({ id }: { id: string }) => {
         </header>
 
         <div className="container py-14">
-          <div
-            className="prose prose-lg mx-auto max-w-3xl text-left"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          <PostContent content={content} className="mx-auto max-w-3xl" />
         </div>
       </article>
     </>

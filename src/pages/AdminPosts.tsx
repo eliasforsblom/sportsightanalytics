@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { PostForm } from "@/components/admin/PostForm";
+import { PostForm, type PostFormData } from "@/components/admin/PostForm";
 import { PostList } from "@/components/admin/PostList";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -97,7 +97,7 @@ const AdminPosts = () => {
     checkAdmin();
   }, [navigate]);
 
-  const handleSubmit = async (data: Post) => {
+  const handleSubmit = async (data: PostFormData) => {
     try {
       if (isEditing) {
         // Update main post
@@ -252,6 +252,22 @@ const AdminPosts = () => {
     fetchPosts();
   };
 
+  const toggleDraft = async (id: string, currentDraft: boolean) => {
+    const { error } = await supabase.from("posts").update({ draft: !currentDraft }).eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Error updating status",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({ title: `Post ${currentDraft ? "published" : "moved to drafts"}` });
+    fetchPosts();
+  };
+
   const handleCreateNew = () => {
     setIsEditing(null);
     setDialogOpen(true);
@@ -293,6 +309,7 @@ const AdminPosts = () => {
                     <DialogTitle>{isEditing ? "Edit Post" : "Create New Post"}</DialogTitle>
                   </DialogHeader>
                   <PostForm
+                    key={isEditing ?? "new"}
                     initialData={posts.find(post => post.id === isEditing)}
                     onSubmit={handleSubmit}
                     isEditing={!!isEditing}
@@ -307,6 +324,7 @@ const AdminPosts = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleHighlight={toggleHighlight}
+              onToggleDraft={toggleDraft}
             />
           </TabsContent>
           
