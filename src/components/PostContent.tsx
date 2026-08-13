@@ -38,14 +38,22 @@ export const PostContent = ({ content, className }: PostContentProps) => (
   <div
     className={cn(
       "prose prose-lg max-w-none text-left",
+      // Medium-like reading rhythm
+      "prose-p:my-6 prose-p:leading-[1.75] prose-p:text-[1.125rem]",
       "prose-headings:font-display prose-headings:font-normal",
-      "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
-      "prose-img:rounded-xl prose-img:border prose-img:border-border",
-      "prose-blockquote:border-l-primary prose-blockquote:not-italic",
+      "prose-h2:mt-14 prose-h2:mb-4 prose-h2:text-[2rem] prose-h2:leading-tight",
+      "prose-h3:mt-10 prose-h3:mb-3 prose-h3:text-2xl",
+      "prose-li:my-2 prose-li:leading-[1.75] prose-ul:my-6 prose-ol:my-6",
+      "prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:decoration-primary/30 hover:prose-a:decoration-primary",
+      "prose-img:my-10 prose-img:rounded-xl prose-img:border prose-img:border-border",
+      "prose-figure:my-10 prose-figcaption:mt-3 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground",
+      "prose-blockquote:my-8 prose-blockquote:border-l-2 prose-blockquote:border-l-primary prose-blockquote:pl-6 prose-blockquote:not-italic prose-blockquote:font-display prose-blockquote:text-xl",
+      "prose-hr:my-12",
       "prose-table:text-base",
       className
     )}
   >
+
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw, [rehypeSanitize, schema]]}
