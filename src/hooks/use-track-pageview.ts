@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { posthog } from "@/lib/posthog";
+
 
 const SESSION_KEY = "ss_session_id";
 
