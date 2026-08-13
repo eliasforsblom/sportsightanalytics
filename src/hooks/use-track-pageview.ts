@@ -31,6 +31,12 @@ export function useTrackPageview() {
     if (lastTracked.current === path) return;
     lastTracked.current = path;
 
+    if (posthog.__loaded) {
+      posthog.capture("$pageview", { path, $current_url: window.location.href });
+    }
+
+
+
     supabase.functions
       .invoke("track-pageview", {
         body: {
