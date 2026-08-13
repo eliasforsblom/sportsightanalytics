@@ -15,6 +15,7 @@ export function initPostHog() {
     capture_pageview: false,
     capture_pageleave: true,
     persistence: "localStorage+cookie",
+    defaults: "2026-05-30",
   });
   initialized = true;
 }
