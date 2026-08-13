@@ -73,27 +73,36 @@ const PostDetail = ({ id }: { id: string }) => {
       />
 
       <article>
-        <header className="relative h-[56vh] min-h-[380px] w-full overflow-hidden">
-          <img src={post.image_url} alt={title} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-background/40" />
+        <header className="relative flex h-[56vh] min-h-[420px] w-full items-end overflow-hidden">
+          <img
+            src={post.image_url}
+            alt={title}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          {/* Fixed dark scrim stack — guarantees legible text on any image */}
+          <div className="absolute inset-0 bg-[hsl(222_47%_8%/0.55)]" />
           <div className="absolute inset-0 bg-gradient-veil" />
-          <div className="absolute inset-x-0 bottom-0">
+          <div className="relative w-full">
             <div className="container pb-12">
               <div className="mx-auto max-w-3xl">
                 <Link
                   to="/research"
-                  className="mb-5 flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+                  className="mb-5 flex w-fit items-center gap-1.5 text-sm text-on-media-muted transition-colors hover:text-on-media"
                 >
                   <ArrowLeft className="h-4 w-4" /> All research
                 </Link>
                 <div className="mb-4">
-                  <Badge className="border border-primary/40 bg-primary/10 text-primary">
+                  <Badge className="border border-on-media/30 bg-on-media/15 text-on-media backdrop-blur-sm hover:bg-on-media/20">
                     {post.category}
                   </Badge>
                 </div>
-                <h1 className="mb-4 text-3xl leading-[1.08] md:text-5xl">{title}</h1>
-                <p className="mb-4 text-lg text-foreground/75">{excerpt}</p>
-                <div className="flex items-center gap-4 font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                <h1 className="mb-4 text-3xl leading-[1.08] text-on-media drop-shadow-[0_2px_18px_hsl(222_47%_8%/0.6)] md:text-5xl">
+                  {title}
+                </h1>
+                <p className="mb-4 max-w-2xl text-lg text-on-media-muted drop-shadow-[0_1px_10px_hsl(222_47%_8%/0.6)]">
+                  {excerpt}
+                </p>
+                <div className="flex items-center gap-4 font-display text-xs uppercase tracking-[0.18em] text-on-media-muted">
                   <span>{formatDate(post.created_at)}</span>
                   {post.views ? (
                     <span className="inline-flex items-center gap-1.5">
@@ -106,6 +115,7 @@ const PostDetail = ({ id }: { id: string }) => {
             </div>
           </div>
         </header>
+
 
         <div className="container py-14">
           <PostContent content={content} className="mx-auto max-w-3xl" />
