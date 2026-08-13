@@ -61,11 +61,7 @@ const Index = () => {
               <span className="italic">The game,</span>{" "}
               <span className="text-primary">read through numbers.</span>
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              We build models and tools that make football analytics legible — transfer market
-              inflation, expected goals and league performance, without the jargon.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-12 flex flex-wrap gap-3">
               <Button asChild size="lg" className="rounded-full px-8">
                 <Link to="/research">
                   Explore research
