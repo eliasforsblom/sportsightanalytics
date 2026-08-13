@@ -117,9 +117,10 @@ const PostDetail = ({ id }: { id: string }) => {
         </header>
 
 
-        <div className="container py-14">
-          <PostContent content={content} className="mx-auto max-w-3xl" />
+        <div className="container py-14 md:py-20">
+          <PostContent content={content} className="mx-auto max-w-[44rem]" />
         </div>
+
       </article>
     </>
   );
