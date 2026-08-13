@@ -116,25 +116,29 @@ export default {
         DEFAULT: {
           css: {
             maxWidth: "none",
-            color: "hsl(var(--foreground) / 0.86)",
+            color: "hsl(var(--foreground) / 0.88)",
             fontFamily: "Work Sans, system-ui, sans-serif",
+            lineHeight: "1.75",
             "h1, h2, h3, h4": {
               color: "hsl(var(--foreground))",
               fontFamily: "Instrument Serif, Georgia, serif",
               fontWeight: "400",
-              letterSpacing: "-0.01em",
+              letterSpacing: "-0.015em",
             },
+            "h2 + p, h3 + p": { marginTop: "0.75rem" },
             a: {
               color: "hsl(var(--primary))",
               textDecorationColor: "hsl(var(--primary) / 0.4)",
               "&:hover": { color: "hsl(var(--primary-glow))" },
             },
-            strong: { color: "hsl(var(--foreground))" },
+            strong: { color: "hsl(var(--foreground))", fontWeight: "600" },
 
             blockquote: {
-              color: "hsl(var(--muted-foreground))",
+              color: "hsl(var(--foreground) / 0.8)",
               borderLeftColor: "hsl(var(--primary))",
+              quotes: "none",
             },
+
             code: {
               color: "hsl(var(--primary-glow))",
               background: "hsl(var(--muted))",
